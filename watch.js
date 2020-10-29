@@ -84,15 +84,15 @@ r.connect(async function(err, result) {
                     // await postData('/passInfo', passInfo);
                 }
             }
-            else if(tx.TransactionType == 'TransferToken') {
-                let tokenId = tx.TokenID;
-                let tokenRes = await erc721.requestTokenInfo(r, tokenId, true);
-                let tokenInfo = JSON.parse(localUtils.ascii2str(tokenRes.TokenInfo.Memos[0].Memo.MemoData));
-                tokenInfo.tokenId = tokenId;
-                tokenInfo.addr = tokenRes.TokenInfo.TokenOwner;
-                console.log(tokenInfo);
-                await postData('/tokenInfo', tokenInfo);
-            }
+            // else if(tx.TransactionType == 'TransferToken') {
+            //     let tokenId = tx.TokenID;
+            //     let tokenRes = await erc721.requestTokenInfo(r, tokenId, true);
+            //     let tokenInfo = JSON.parse(localUtils.ascii2str(tokenRes.TokenInfo.Memos[0].Memo.MemoData));
+            //     tokenInfo.tokenId = tokenId;
+            //     tokenInfo.addr = tokenRes.TokenInfo.TokenOwner;
+            //     console.log(tokenInfo);
+            //     await postData('/tokenInfo', tokenInfo);
+            // }
         }
     });
 
