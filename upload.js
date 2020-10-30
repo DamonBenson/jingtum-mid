@@ -67,8 +67,6 @@ r.connect(async function(err, result) {
 
     await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, true);
 
-    //存入数据库{存证ID，存证交易哈希}
-
     r.disconnect();
 
 });

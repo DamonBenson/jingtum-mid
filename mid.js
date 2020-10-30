@@ -46,39 +46,28 @@ r.connect(async function(err, result) {
         });
         let txs = await Promise.all(txPromises);
 
-        //筛选存证、确权交易
+        //对应关系存入数据库
         for(let i = txs.length - 1; i >= 0; i--) {
             let tx = txs[i];
             if(tx.TransactionType == 'Payment') {
                 let memoStr = localUtils.ascii2str(tx.Memos[0].Memo.MemoData);
                 let flag = memoStr.slice(0,1);
                 if(flag == 0) {
-                    let memos = JSON.parse(memoStr.slice(2));
-                    let uploadTime = tx.date;
                     let addr = tx.Destination;
-                    let workInfoHash = memos.workInfoHash;
-                    delete memos.workHash;
-                    delete memos.workInfoHash;
-                    let workInfoJson = await ipfsUtils.get(workInfoHash);
-                    console.log(workInfoJson);
-                    let workInfo = JSON.parse(workInfoJson.toString());
-                    let uploadInfo = Object.assign(memos, workInfo);
-                    uploadInfo.uploadTime = uploadTime;
-                    uploadInfo.addr = addr;
-                    console.log(uploadInfo);
-                    // await postData('/uploadInfo', uploadInfo);
+                    let workId = memos.workId;
+                    let workTxHash = tx.hash;
+                    // 连接数据库，存入addr、id、hash
                 }
             }
-            // else if(tx.TransactionType == 'TransferToken') {
-            //     let tokenId = tx.TokenID;
-            //     let tokenRes = await erc721.requestTokenInfo(r, tokenId, true);
-            //     let tokenInfo = JSON.parse(localUtils.ascii2str(tokenRes.TokenInfo.Memos[0].Memo.MemoData));
-            //     tokenInfo.tokenId = tokenId;
-            //     tokenInfo.addr = tokenRes.TokenInfo.TokenOwner;
-            //     console.log(tokenInfo);
-            //     await postData('/tokenInfo', tokenInfo);
-            // }
         }
+
+        //从数据库中取出作品，发送确权请求给版权局
+        let authTxHashs = [];
+        let authReqPromises = authTxHashs.map(authTxHash => {
+            return postData('/authReq', authTxHash);
+        });
+        await Promise.all(authReqPromises);
+
     });
 
 })

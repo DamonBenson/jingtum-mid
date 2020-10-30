@@ -54,14 +54,28 @@ r.connect(async function(err, result) {
 
     /*----------发行通证----------*/
 
+    let workId = defaultWorkId;
     let authId = 'dci' + localUtils.formatStr(seq, 10);
     let state = 2;
     let approveArr = [];
+
+    let memos = authMemo.m1;
+    let certBuf = memos.cert;
+    let certHash = await ipfsUtils.add(certBuf);
+    delete memos.cert;
+    let authInfo = memos;
+    let authInfoBuf = Buffer.from(JSON.stringify(authInfo));
+    let authInfoHash = await ipfsUtils.add(authInfoBuf);
+
     let tokenInfo = {
+        workId: workId,
         authId: authId,
         state: state,
-        approveArr: approveArr
+        approveArr: approveArr,
+        authInfoHash: authInfoHash,
+        certHash: certHash
     }
+
     for(let i = 0; i < 1; i++) {
         let tokenId = sha256(authId + i).toString();
         tokenInfo.right = i;
@@ -69,34 +83,6 @@ r.connect(async function(err, result) {
         console.log(tokenMemos);
         await erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, 'test2', tokenId, tokenMemos, true);
     }
-
-    let memos = authMemo.m1;
-    let certBuf = memos.cert;
-    let certHash = await ipfsUtils.add(certBuf);
-    delete memos.cert;
-
-    //版权局发送确权作品ID，确权证书哈希，确权信息给平台
-
-    /*----------上传确权交易----------*/
-
-    accountInfo = await requestInfo.requestAccountInfo(a2, r, false);
-    seq = accountInfo.account_data.Sequence;
-
-    let workId = defaultWorkId;
-    let authInfo = memos;
-    let authInfoBuf = Buffer.from(JSON.stringify(authInfo));
-    let authInfoHash = await ipfsUtils.add(authInfoBuf);
-
-    let passInfo = {
-        authId: authId,
-        workId: workId,
-        authInfoHash: authInfoHash,
-        certHash: certHash,
-    }
-    let passMemos = "1_" + JSON.stringify(passInfo);
-    console.log(passMemos);
-
-    await tx.buildPaymentTx(a2, s2, r, seq++, a3, 0.000001, passMemos, true);
 
     //存入数据库{存证ID，确权ID，存证交易哈希，确权交易哈希}
 
