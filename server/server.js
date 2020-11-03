@@ -1,5 +1,5 @@
 import http from 'http';
-import router from './router.js';
+import router from '../utils/router.js';
 
 function handleHello(request, response) {
   // 设置响应头

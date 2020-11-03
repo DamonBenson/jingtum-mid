@@ -22,8 +22,8 @@ const Server = {
     s5: 'ws://39.107.113.240:6020',
 }
 
-const userMemo = {
-    m1: {
+const userMemo = [
+    {
         work: pic,
         workName: 'm1_',
         createdTime: 1579017600,
@@ -32,7 +32,7 @@ const userMemo = {
         workForm: 0,
         workField: 0
     },
-    m2: {
+    {
         work: pic,
         workName: 'm2_',
         createdTime: 1579017600,
@@ -41,7 +41,7 @@ const userMemo = {
         workForm: 1,
         workField: 1
     },
-    m3: {
+    {
         work: pic,
         workName: 'm3_',
         createdTime: 1579017600,
@@ -50,7 +50,7 @@ const userMemo = {
         workForm: 2,
         workField: 2
     },
-    m4: {
+    {
         work: pic,
         workName: 'm4_',
         createdTime: 1579017600,
@@ -59,33 +59,33 @@ const userMemo = {
         workForm: 3,
         workField: 3
     }
-}
+]
 
-const authMemo = {
-    m1: {
+const authMemo = [
+    {
         authCode: 0,
         authName: '天津版权局',
         certNum: 0,
         cert: pic
     },
-    m2: {
+    {
         authCode: 1,
         authName: '上海版权局',
         certNum: 0,
         cert: pic
     },
-    m3: {
+    {
         authCode: 2,
         authName: '北京版权保护中心',
         certNum: 0,
         cert: pic
     },
-    m4: {
+    {
         authCode: 3,
         authName: '国家版权局',
         certNum: 0,
         cert: pic
     }
-}
+]
 
 export {Account, Server, userMemo, authMemo};

@@ -75,6 +75,12 @@ r.connect(async function(err, result) {
             //     let tokenInfo = JSON.parse(localUtils.ascii2str(tokenRes.TokenInfo.Memos[0].Memo.MemoData));
             //     tokenInfo.tokenId = tokenId;
             //     tokenInfo.addr = tokenRes.TokenInfo.TokenOwner;
+            //     let authInfoHash = memos.authInfoHash;
+            //     delete memos.authInfoHash;
+            //     delete memos.certHash;
+            //     let authInfoJson = await ipfsUtils.get(authInfoHash);
+            //     let authInfo = JSON.parse(authInfoJson.toString());
+            //     Object.assign(tokenInfo, authInfo);
             //     console.log(tokenInfo);
             //     await postData('/tokenInfo', tokenInfo);
             // }

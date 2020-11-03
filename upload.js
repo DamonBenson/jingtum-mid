@@ -1,15 +1,25 @@
 import jlib from 'jingtum-lib';
+import ipfsAPI from 'ipfs-api';
+import mysql from 'mysql';
 import sha256 from 'crypto-js/sha256.js';
 
-import RequestInfo from './utils/requestInfo.js';
-import Tx from './utils/tx.js'
-import IPFSUtils from './utils/ipfsUtils.js';
+import * as requestInfo from './utils/jingtum/requestInfo.js';
+import * as tx from './utils/jingtum/tx.js'
+import * as ipfsUtils from './utils/ipfsUtils.js';
+import * as mysqlUtils from './utils/mysqlUtils.js';
+import * as localUtils from './utils/localUtils.js';
 
 import {Server, userMemo} from './utils/info.js';
 
-const requestInfo = new RequestInfo(); //区块链信息获取工具类
-const tx = new Tx();
-const ipfsUtils = new IPFSUtils();
+const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
+const c = mysql.createConnection({     
+    host: 'localhost',       
+    user: 'root',              
+    password: 'bykyl626',       
+    port: '3306',                   
+    database: 'jingtum-mid' 
+});
+c.connect();
 
 /*----------平台账号(账号1)----------*/
 
@@ -43,30 +53,40 @@ r.connect(async function(err, result) {
 
     /*----------上传存证交易----------*/
     
-    let memos = userMemo.m1;
-    memos.workName += seq;
+    while(true) {
 
-    let workBuf = memos.work;
-    let workHash = await ipfsUtils.add(workBuf);
-    delete memos.work;
-    let workInfo = memos;
-    let workInfoBuf = Buffer.from(JSON.stringify(workInfo));
-    let workInfoHash = await ipfsUtils.add(workInfoBuf);
+        let memos = userMemo[seq % 4];
+        memos.workName += seq;
+        let workBuf = memos.work;
+        let workHash = await ipfsUtils.add(ipfs, workBuf);
+        delete memos.work;
+        let workInfo = memos;
+        let workInfoBuf = Buffer.from(JSON.stringify(workInfo));
+        let workInfoHash = await ipfsUtils.add(ipfs, workInfoBuf);
 
-    let workId = sha256(a3 + memos.workName).toString();
-    let state = 1;
+        let workId = sha256(a3 + memos.workName).toString();
+        let state = 1;
 
-    let uploadInfo = {
-        workHash: workHash,
-        workInfoHash: workInfoHash,
-        workId: workId,
-        state: state
+        let uploadInfo = {
+            workHash: workHash,
+            workInfoHash: workInfoHash,
+            workId: workId,
+            state: state
+        }
+        let uploadMemos = "0_" + JSON.stringify(uploadInfo);
+        console.log(uploadMemos);
+
+        let uploadRes = await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, true);
+        let txHash = uploadRes.tx_json.hash;
+        let insertValues = {
+            work_id: workId,
+            addr: a3,
+            hash: txHash
+        }
+        await mysqlUtils.insert(c, 'work_info', insertValues);
+
+        await localUtils.sleep(5000);
+
     }
-    let uploadMemos = "0_" + JSON.stringify(uploadInfo);
-    console.log(uploadMemos);
-
-    await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, true);
-
-    r.disconnect();
 
 });
