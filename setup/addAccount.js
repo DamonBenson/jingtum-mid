@@ -1,11 +1,8 @@
 import jlib from 'jingtum-lib';
 
-import RequestInfo from '../utils/requestInfo.js';
-import Tx from '../utils/tx.js';
+import * as requestInfo from '../utils/jingtum/requestInfo.js';
+import * as tx from '../utils/jingtum/tx.js';
 import {Account, Server} from '../utils/info.js';
-
-const requestInfo = new RequestInfo();
-const tx = new Tx();
 
 const a1 = Account.rootAccount;
 const s1 = Account.rootSecret;

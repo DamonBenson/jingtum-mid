@@ -1,17 +1,14 @@
 import jlib from 'jingtum-lib';
 
-import RequestInfo from '../utils/requestInfo.js';
-import ERC721 from '../utils/erc721.js';
+import * as requestInfo from '../utils/jingtum/requestInfo.js';
+import * as erc721 from '../utils/jingtum/erc721.js';
 import {Account, Server} from '../utils/info.js';
-
-const requestInfo = new RequestInfo();
-const erc721 = new ERC721();
 
 const ar = Account.rootAccount;
 const sr = Account.rootSecret;
 const ag = Account.gateAccount;
 
-const tokenName = 'test2';
+const tokenName = 'test3';
 
 const Remote = jlib.Remote;
 const r = new Remote({server: Server.s4, local_sign: true});

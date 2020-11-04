@@ -36,7 +36,7 @@ r.connect(async function(err, result) {
         console.log('result: ', result);
     }
     
-    while(true) {
+    // while(true) {
         let uncheckRes = await mysqlUtils.select(c, ['work_id', 'addr', 'hash'], 'work_info', 'auth_id is Null');
         console.log(uncheckRes[0].work_id);
         let authReqPromises = uncheckRes.map(async uncheckInfo => {
@@ -51,13 +51,13 @@ r.connect(async function(err, result) {
             let authInfo = Object.assign(workInfo, txMemos);
             authInfo.addr = uncheckInfo.addr;
             console.log(authInfo);
-            // return postData('/authReq', authInfo);
+            return postData('/authReq', authInfo);
         });
-        // await Promise.all(authReqPromises);
+        await Promise.all(authReqPromises);
 
         await localUtils.sleep(5000);
 
-    }
+    // }
 
     /*----------获取序列号----------*/
 
