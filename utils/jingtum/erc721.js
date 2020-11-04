@@ -48,7 +48,6 @@ export function buildTransferTokenTx(s, r, seq, p, rcv, name, id, memos, showRes
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
-            console.log("in tx");
             if(err) {
                 console.log('err:',err);
                 reject('err');

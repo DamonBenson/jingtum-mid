@@ -1,5 +1,4 @@
 export function insert(c, table, valueObj) {
-    // c.connect();
     for(let k in valueObj) {
         if(typeof(valueObj[k]) == 'string') {
             valueObj[k] = "'" + valueObj[k] + "'";
@@ -19,13 +18,11 @@ export function insert(c, table, valueObj) {
             else if(result) {
                 resolve(result);
             }
-            // c.end();
         });
     });
 }
 
 export function select(c, cols, table, where) {
-    // c.connect();
     let colStr = cols.toString();
     let sql = 'SELECT ' + colStr + ' FROM ' + table + ' WHERE ' + where;
     return new Promise((resolve, reject) => {
@@ -37,7 +34,21 @@ export function select(c, cols, table, where) {
             else if(result) {
                 resolve(result);
             }
-            // c.end();
+        });
+    });
+}
+
+export function update(c, table, set, where) {
+    let sql = 'UPDATE ' + table + ' SET ' + set + ' WHERE ' + where;
+    return new Promise((resolve, reject) => {
+        c.query(sql, function(err, result) {
+            if(err) {
+                console.log('err:', err);
+                reject('err');
+            }
+            else if(result) {
+                resolve(result);
+            }
         });
     });
 }

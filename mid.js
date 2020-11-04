@@ -27,8 +27,7 @@ var r = new Remote({server: Server.s4, local_sign: true});
 
 r.connect(async function(err, result) {
 
-    /*---------链接状态----------*/
-
+    // 链接状态
     if(err) {
         return console.log('err: ', err);
     }
@@ -36,9 +35,14 @@ r.connect(async function(err, result) {
         console.log('result: ', result);
     }
     
-    // while(true) {
+    /*----------处理用户确权请求----------*/
+
+    while(true) {
+
+        // 从mysql查询未确权作品信息
         let uncheckRes = await mysqlUtils.select(c, ['work_id', 'addr', 'hash'], 'work_info', 'auth_id is Null');
-        console.log(uncheckRes[0].work_id);
+
+        // 整合作品信息，向authServer发送确权请求
         let authReqPromises = uncheckRes.map(async uncheckInfo => {
             let txHash = uncheckInfo.hash;
             let tx = await requestInfo.requestTx(r, txHash);
@@ -51,53 +55,28 @@ r.connect(async function(err, result) {
             let authInfo = Object.assign(workInfo, txMemos);
             authInfo.addr = uncheckInfo.addr;
             console.log(authInfo);
-            return postData('/authReq', authInfo);
+            return postData('http://127.0.0.1:9000/authReq', authInfo);
         });
-        await Promise.all(authReqPromises);
 
-        await localUtils.sleep(5000);
+        // 从authServer获取确权ID
+        let authRes = await Promise.all(authReqPromises);
+        let authIds = authRes.map(res => {
+            return res.body._readableState.buffer.head.data.toString();
+        });
+        console.log(authIds);
+        let workIds = uncheckRes.map(res => {
+            return res.work_id;
+        });
+        console.log(workIds);
 
-    // }
+        // 更新mysql中作品信息中的auth_id
+        let authPromises = workIds.map(async function(workId, index) {
+            return mysqlUtils.update(c, 'work_info', "auth_id = '" + authIds[index] + "'", "work_id = '" + workId + "'");
+        });
+        await Promise.all(authPromises);
 
-    /*----------获取序列号----------*/
+        await localUtils.sleep(10000);
 
-    // r.on('ledger_closed', async function(msg) {
-
-    //     console.log('on ledger_closed: ' + msg.ledger_index);
-
-    //     //获取所有交易哈希
-    //     let ledgerIndex = msg.ledger_index;
-    //     let ledger = await requestInfo.requestLedger(r, ledgerIndex, true, false);
-    //     let txHashs = ledger.transactions;
-
-    //     //获取所有交易信息
-    //     let txPromises = txHashs.map(txHash => {
-    //         return requestInfo.requestTx(r, txHash, false);
-    //     });
-    //     let txs = await Promise.all(txPromises);
-
-    //     //对应关系存入数据库
-    //     for(let i = txs.length - 1; i >= 0; i--) {
-    //         let tx = txs[i];
-    //         if(tx.TransactionType == 'Payment') {
-    //             let memoStr = localUtils.ascii2str(tx.Memos[0].Memo.MemoData);
-    //             let flag = memoStr.slice(0,1);
-    //             if(flag == 0) {
-    //                 let addr = tx.Destination;
-    //                 let workId = memos.workId;
-    //                 let workTxHash = tx.hash;
-    //                 // 连接数据库，存入addr、id、hash
-    //             }
-    //         }
-    //     }
-
-    //     //从数据库中取出作品，发送确权请求给版权局
-    //     let authTxHashs = [];
-    //     let authReqPromises = authTxHashs.map(authTxHash => {
-    //         return postData('/authReq', authTxHash);
-    //     });
-    //     await Promise.all(authReqPromises);
-
-    // });
+    }
 
 })

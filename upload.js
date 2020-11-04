@@ -37,8 +37,7 @@ const r = new Remote({server: Server.s4, local_sign: true});
 
 r.connect(async function(err, result) {
 
-    /*---------链接状态----------*/
-
+    // 链接状态
     if(err) {
         return console.log('err: ', err);
     }
@@ -46,15 +45,15 @@ r.connect(async function(err, result) {
         console.log('connect: ', result);
     }
 
-    /*----------获取序列号----------*/
-
+    // 获取序列号
     let accountInfo = await requestInfo.requestAccountInfo(a1, r, false);
     let seq = accountInfo.account_data.Sequence;
 
-    /*----------上传存证交易----------*/
+    /*----------处理用户存证请求----------*/
     
     while(true) {
 
+        // 作品及信息存入IPFS，获取hash标识
         let memos = userMemo[seq % 4];
         memos.workName += seq;
         let workBuf = memos.work;
@@ -64,9 +63,11 @@ r.connect(async function(err, result) {
         let workInfoBuf = Buffer.from(JSON.stringify(workInfo));
         let workInfoHash = await ipfsUtils.add(ipfs, workInfoBuf);
 
+        // 设置存证信息
         let workId = sha256(a3 + memos.workName).toString();
         let state = 1;
 
+        // 上传存证交易
         let uploadInfo = {
             workHash: workHash,
             workInfoHash: workInfoHash,
@@ -75,8 +76,9 @@ r.connect(async function(err, result) {
         }
         let uploadMemos = "0_" + JSON.stringify(uploadInfo);
         console.log(uploadMemos);
-
         let uploadRes = await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, true);
+
+        // 作品ID与对应哈希存入mysql
         let txHash = uploadRes.tx_json.hash;
         let insertValues = {
             work_id: workId,

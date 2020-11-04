@@ -13,13 +13,6 @@ import {Account, Server, authMemo} from './utils/info.js';
 
 const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
 
-const defaultWorkId = '0eef8c70bc73ba83ba83a54129e8282320c627aa2c2d89be750620e7bf6f0383';
-
-/*----------平台账号(账号2)----------*/
-
-const a2 = 'jUyKb7VbKdSgnD5BxYjBi6G1FxSu4na98w';
-const s2 = 'spo96hmfQQ5JWkStdL7xCeWoQBnzm';
-
 /*----------版权人账号(帐号3)----------*/
 
 const a3 = 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf';
@@ -36,8 +29,7 @@ const r = new Remote({server: Server.s4, local_sign: true});
 
 r.connect(async function(err, result) {
 
-    /*---------链接状态----------*/
-
+    // 链接状态
     if(err) {
         return console.log('err: ', err);
     }
@@ -45,11 +37,11 @@ r.connect(async function(err, result) {
         console.log('connect: ', result);
     }
 
-    /*----------获取序列号----------*/
-
+    // 获取序列号
     let accountInfo = await requestInfo.requestAccountInfo(ag, r, false);
     let seq = accountInfo.account_data.Sequence;
 
+    // 启动服务器
     http.createServer(function(request, response) {
         console.log(r);
         router.register(seq++, request, response, [
@@ -63,20 +55,23 @@ r.connect(async function(err, result) {
     
 });
 
+/*----------处理mid确权请求----------*/
+
 function handleAuth(seq, request, response) {
 
+    // 处理数据
     request.on('data', async function(chunk) {
 
-        //解析请求数据
+        // 解析请求数据
         let workInfo = JSON.parse(chunk.toString());
 
-        //设置通证信息
+        // 设置通证信息
         let workId = workInfo.workId;
         let authId = 'DCI' + localUtils.formatStr(seq, 10);
         let state = 2;
         let approveArr = [];
 
-        //确权信息存入IPFS，获取hash标识
+        // 确权信息存入IPFS，获取hash标识
         let memos = authMemo[seq % 4];
         let certBuf = memos.cert;
         let certHash = await ipfsUtils.add(ipfs, certBuf);
@@ -85,6 +80,7 @@ function handleAuth(seq, request, response) {
         let authInfoBuf = Buffer.from(JSON.stringify(authInfo));
         let authInfoHash = await ipfsUtils.add(ipfs, authInfoBuf);
 
+        // 发行通证
         let tokenInfo = {
             workId: workId,
             authId: authId,
@@ -93,19 +89,17 @@ function handleAuth(seq, request, response) {
             authInfoHash: authInfoHash,
             certHash: certHash
         }
-
-        for(let i = 0; i < 1; i++) {
-            console.log(r);
+        for(let i = 0; i < 17; i++) {
             let tokenId = sha256(authId + i).toString();
             tokenInfo.right = i;
             console.log(tokenInfo);
-            // await erc721.buildTransferTokenTx(sg, r, seq, ag, a3, 'test2', tokenId, tokenInfo, true);
-            await erc721.buildTransferTokenTx(sg, r, seq, ag, a3, 'test2', sha256(1).toString(), {a: 'a'}, true);
-            // await localUtils.sleep(1000);
-            console.log('erc721');
+            await erc721.buildTransferTokenTx(sg, r, seq, ag, a3, 'test2', tokenId, tokenInfo, false);
         }
 
-        //存入数据库{存证ID，确权ID，存证交易哈希，确权交易哈希}
+        // 返回确权ID给mid
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.end(authId);
+
     });
 
 }
