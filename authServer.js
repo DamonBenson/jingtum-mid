@@ -4,9 +4,9 @@ import sha256 from 'crypto-js/sha256.js';
 import http from 'http';
 
 import * as requestInfo from './utils/jingtum/requestInfo.js';
+import * as erc721 from './utils/jingtum/erc721.js';
 import * as ipfsUtils from './utils/ipfsUtils.js';
 import * as localUtils from './utils/localUtils.js';
-import * as erc721 from './utils/jingtum/erc721.js';
 import * as router from './utils/router.js';
 
 import {Account, Server, authMemo} from './utils/info.js';
@@ -25,7 +25,7 @@ const sg = Account.gateSecret;
 /*----------创建链接(server4)----------*/
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s4, local_sign: true});
+const r = new Remote({server: Server.s3, local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -39,12 +39,11 @@ r.connect(async function(err, result) {
 
     // 获取序列号
     let accountInfo = await requestInfo.requestAccountInfo(ag, r, false);
-    let seq = accountInfo.account_data.Sequence;
+    global.seq = accountInfo.account_data.Sequence;
 
     // 启动服务器
     http.createServer(function(request, response) {
-        console.log(r);
-        router.register(seq++, request, response, [
+        router.register(request, response, [
             {
                 'url': '/authReq',
                 'handler': handleAuth
@@ -57,7 +56,7 @@ r.connect(async function(err, result) {
 
 /*----------处理mid确权请求----------*/
 
-function handleAuth(seq, request, response) {
+function handleAuth(request, response) {
 
     // 处理数据
     request.on('data', async function(chunk) {
@@ -72,7 +71,7 @@ function handleAuth(seq, request, response) {
         let approveArr = [];
 
         // 确权信息存入IPFS，获取hash标识
-        let memos = authMemo[seq % 4];
+        let memos = Object.create(authMemo[seq % 4]);
         let certBuf = memos.cert;
         let certHash = await ipfsUtils.add(ipfs, certBuf);
         delete memos.cert;
@@ -92,9 +91,11 @@ function handleAuth(seq, request, response) {
         for(let i = 0; i < 17; i++) {
             let tokenId = sha256(authId + i).toString();
             tokenInfo.right = i;
-            console.log(tokenInfo);
-            await erc721.buildTransferTokenTx(sg, r, seq, ag, a3, 'test2', tokenId, tokenInfo, false);
+            let tokenMemos = localUtils.obj2memos(tokenInfo);
+            console.log('issue token:', workInfo.workName + '_' + i);
+            await erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, 'test2', tokenId, tokenMemos, false);
         }
+        console.log('issue ok:', authId);
 
         // 返回确权ID给mid
         response.writeHead(200, {'Content-Type': 'text/plain'});

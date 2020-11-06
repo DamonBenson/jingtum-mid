@@ -65,25 +65,25 @@ const authMemo = [
     {
         authCode: 0,
         authName: '天津版权局',
-        certNum: 0,
+        certNum: 'c0',
         cert: pic
     },
     {
         authCode: 1,
         authName: '上海版权局',
-        certNum: 0,
+        certNum: 'c1',
         cert: pic
     },
     {
         authCode: 2,
         authName: '北京版权保护中心',
-        certNum: 0,
+        certNum: 'c2',
         cert: pic
     },
     {
         authCode: 3,
         authName: '国家版权局',
-        certNum: 0,
+        certNum: 'c3',
         cert: pic
     }
 ]

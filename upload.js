@@ -17,7 +17,7 @@ const c = mysql.createConnection({
     user: 'root',              
     password: 'bykyl626',       
     port: '3306',                   
-    database: 'jingtum-mid' 
+    database: 'jingtum_mid' 
 });
 c.connect();
 
@@ -33,7 +33,7 @@ const a3 = 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf';
 /*----------创建链接(server4)----------*/
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s4, local_sign: true});
+const r = new Remote({server: Server.s1, local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -51,10 +51,13 @@ r.connect(async function(err, result) {
 
     /*----------处理用户存证请求----------*/
     
-    while(true) {
+    r.on('ledger_closed', async function(msg) {
+
+        console.log('on ledger_closed: ' + msg.ledger_index);
 
         // 作品及信息存入IPFS，获取hash标识
-        let memos = userMemo[seq % 4];
+        let memos = Object.create(userMemo[seq % 4]);
+        console.log(memos)
         memos.workName += seq;
         let workBuf = memos.work;
         let workHash = await ipfsUtils.add(ipfs, workBuf);
@@ -65,18 +68,16 @@ r.connect(async function(err, result) {
 
         // 设置存证信息
         let workId = sha256(a3 + memos.workName).toString();
-        let state = 1;
 
         // 上传存证交易
         let uploadInfo = {
             workHash: workHash,
             workInfoHash: workInfoHash,
-            workId: workId,
-            state: state
+            workId: workId
         }
         let uploadMemos = "0_" + JSON.stringify(uploadInfo);
-        console.log(uploadMemos);
-        let uploadRes = await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, true);
+        console.log('upload:', memos.workName);
+        let uploadRes = await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, false);
 
         // 作品ID与对应哈希存入mysql
         let txHash = uploadRes.tx_json.hash;
@@ -87,8 +88,8 @@ r.connect(async function(err, result) {
         }
         await mysqlUtils.insert(c, 'work_info', insertValues);
 
-        await localUtils.sleep(5000);
+        console.log('--------------------');
 
-    }
+    });
 
 });

@@ -1,3 +1,5 @@
+/*----------在table中插入列名和值为valueObj的数据----------*/
+
 export function insert(c, table, valueObj) {
     for(let k in valueObj) {
         if(typeof(valueObj[k]) == 'string') {
@@ -22,6 +24,8 @@ export function insert(c, table, valueObj) {
     });
 }
 
+/*----------选择table中符合where条件的cols列----------*/
+
 export function select(c, cols, table, where) {
     let colStr = cols.toString();
     let sql = 'SELECT ' + colStr + ' FROM ' + table + ' WHERE ' + where;
@@ -37,6 +41,8 @@ export function select(c, cols, table, where) {
         });
     });
 }
+
+/*----------将table中符合where的行按set更新----------*/
 
 export function update(c, table, set, where) {
     let sql = 'UPDATE ' + table + ' SET ' + set + ' WHERE ' + where;

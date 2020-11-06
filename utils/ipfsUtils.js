@@ -1,3 +1,5 @@
+/*----------向IPFS上传数据----------*/
+
 export function add(ipfs, buffer) {
     return new Promise((resolve, reject) => {
         try {
@@ -13,6 +15,8 @@ export function add(ipfs, buffer) {
         }
     });
 }
+
+/*----------从IPFS获取数据----------*/
 
 export function get(ipfs, hash) {
     return new Promise((resolve,reject) => {

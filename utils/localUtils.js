@@ -28,7 +28,7 @@ export function sleep(ms) {
 export function ascii2str(ascii) {
     let str = '';
     for(let i = ascii.length/2; i > 0; i--) {
-        str = String.fromCharCode(this.hex2int(ascii.substring(2 * i - 2, 2 * i))) + str;
+        str = String.fromCharCode(hex2int(ascii.substring(2 * i - 2, 2 * i))) + str;
     }
     return str;
 }
@@ -51,4 +51,32 @@ export function hex2int(hex) {
         acc = 16 * acc + c;
         return acc;
     }, 0);
+}
+
+/*----------对象转为ERC721Memos格式----------*/
+
+export function obj2memos(obj) {
+    let memos = [];
+    for(let k in obj) {
+        let memoObj = {
+            type: k,
+            data: obj[k].toString()
+        };
+        memos.push(memoObj);
+    }
+    return memos;
+}
+
+/*----------ERC721Memos格式转为对象----------*/
+
+export function memos2obj(arr) {
+    let obj = new Object();
+    for(let i = arr.length - 1; i >= 0; i--) {
+        let k = ascii2str(arr[i].Memo.MemoType);
+        let v = ascii2str(arr[i].Memo.MemoData);
+        obj[k] = v;
+    }
+    obj['right'] = Number(obj['right']);
+    obj['state'] = Number(obj['state']);
+    return obj;
 }

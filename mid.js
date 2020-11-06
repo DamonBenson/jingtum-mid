@@ -16,14 +16,14 @@ const c = mysql.createConnection({
     user: 'root',              
     password: 'bykyl626',       
     port: '3306',                   
-    database: 'jingtum-mid' 
+    database: 'jingtum_mid' 
 });
 c.connect();
 
 /*----------创建链接(服务器3)----------*/
 
 var Remote = jlib.Remote;
-var r = new Remote({server: Server.s4, local_sign: true});
+var r = new Remote({server: Server.s2, local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -37,7 +37,9 @@ r.connect(async function(err, result) {
     
     /*----------处理用户确权请求----------*/
 
-    while(true) {
+    r.on('ledger_closed', async function(msg) {
+
+        console.log('on ledger_closed: ' + msg.ledger_index);
 
         // 从mysql查询未确权作品信息
         let uncheckRes = await mysqlUtils.select(c, ['work_id', 'addr', 'hash'], 'work_info', 'auth_id is Null');
@@ -45,7 +47,7 @@ r.connect(async function(err, result) {
         // 整合作品信息，向authServer发送确权请求
         let authReqPromises = uncheckRes.map(async uncheckInfo => {
             let txHash = uncheckInfo.hash;
-            let tx = await requestInfo.requestTx(r, txHash);
+            let tx = await requestInfo.requestTx(r, txHash, false);
             let txMemoStr = localUtils.ascii2str(tx.Memos[0].Memo.MemoData);
             let txMemos = JSON.parse(txMemoStr.slice(2));
             let workInfoHash = txMemos.workInfoHash;
@@ -54,7 +56,7 @@ r.connect(async function(err, result) {
             let workInfo = JSON.parse(workInfoJson.toString());
             let authInfo = Object.assign(workInfo, txMemos);
             authInfo.addr = uncheckInfo.addr;
-            console.log(authInfo);
+            console.log('authReq:', workInfo.workName);
             return postData('http://127.0.0.1:9000/authReq', authInfo);
         });
 
@@ -63,11 +65,9 @@ r.connect(async function(err, result) {
         let authIds = authRes.map(res => {
             return res.body._readableState.buffer.head.data.toString();
         });
-        console.log(authIds);
         let workIds = uncheckRes.map(res => {
             return res.work_id;
         });
-        console.log(workIds);
 
         // 更新mysql中作品信息中的auth_id
         let authPromises = workIds.map(async function(workId, index) {
@@ -75,8 +75,8 @@ r.connect(async function(err, result) {
         });
         await Promise.all(authPromises);
 
-        await localUtils.sleep(10000);
+        console.log('--------------------');
 
-    }
+    });
 
-})
+});
