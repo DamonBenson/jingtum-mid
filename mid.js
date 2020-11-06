@@ -56,6 +56,7 @@ r.connect(async function(err, result) {
             let workInfo = JSON.parse(workInfoJson.toString());
             let authInfo = Object.assign(workInfo, txMemos);
             authInfo.addr = uncheckInfo.addr;
+            // console.log('authReq:', workInfo);
             console.log('authReq:', workInfo.workName);
             return postData('http://127.0.0.1:9000/authReq', authInfo);
         });

@@ -64,6 +64,7 @@ r.connect(async function(err, result) {
                     let uploadInfo = Object.assign(memos, workInfo);
                     uploadInfo.uploadTime = uploadTime;
                     uploadInfo.addr = addr;
+                    // console.log('on upload', uploadInfo);
                     console.log('on upload', uploadInfo.workName);
                     // await postData('http:127.0.0.1:8080/uploadInfo', uploadInfo);
                 }
@@ -80,6 +81,7 @@ r.connect(async function(err, result) {
                 let authInfoJson = await ipfsUtils.get(ipfs, authInfoHash);
                 let authInfo = JSON.parse(authInfoJson.toString());
                 Object.assign(tokenInfo, authInfo);
+                // console.log('on token:', tokenInfo);
                 console.log('on token:', tokenInfo.authId + '_' + tokenInfo.right);
                 // await postData('http:127.0.0.1:8080/tokenInfo', tokenInfo);
             }

@@ -71,7 +71,7 @@ function handleAuth(request, response) {
         let approveArr = [];
 
         // 确权信息存入IPFS，获取hash标识
-        let memos = Object.create(authMemo[seq % 4]);
+        let memos = {... authMemo[seq % 4]};
         let certBuf = memos.cert;
         let certHash = await ipfsUtils.add(ipfs, certBuf);
         delete memos.cert;
@@ -92,6 +92,7 @@ function handleAuth(request, response) {
             let tokenId = sha256(authId + i).toString();
             tokenInfo.right = i;
             let tokenMemos = localUtils.obj2memos(tokenInfo);
+            // console.log('issue token:', tokenInfo);
             console.log('issue token:', workInfo.workName + '_' + i);
             await erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, 'test2', tokenId, tokenMemos, false);
         }
@@ -100,6 +101,8 @@ function handleAuth(request, response) {
         // 返回确权ID给mid
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end(authId);
+
+        console.log('--------------------');
 
     });
 

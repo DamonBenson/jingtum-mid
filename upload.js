@@ -7,7 +7,6 @@ import * as requestInfo from './utils/jingtum/requestInfo.js';
 import * as tx from './utils/jingtum/tx.js'
 import * as ipfsUtils from './utils/ipfsUtils.js';
 import * as mysqlUtils from './utils/mysqlUtils.js';
-import * as localUtils from './utils/localUtils.js';
 
 import {Server, userMemo} from './utils/info.js';
 
@@ -56,8 +55,7 @@ r.connect(async function(err, result) {
         console.log('on ledger_closed: ' + msg.ledger_index);
 
         // 作品及信息存入IPFS，获取hash标识
-        let memos = Object.create(userMemo[seq % 4]);
-        console.log(memos)
+        let memos = {... userMemo[seq % 4]};
         memos.workName += seq;
         let workBuf = memos.work;
         let workHash = await ipfsUtils.add(ipfs, workBuf);
@@ -76,6 +74,7 @@ r.connect(async function(err, result) {
             workId: workId
         }
         let uploadMemos = "0_" + JSON.stringify(uploadInfo);
+        // console.log('upload:', uploadInfo);
         console.log('upload:', memos.workName);
         let uploadRes = await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, false);
 
