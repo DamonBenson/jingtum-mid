@@ -57,6 +57,17 @@ r.connect(async function(err, result) {
             let authInfo = Object.assign(workInfo, txMemos);
             authInfo.addr = uncheckInfo.addr;
             // console.log('authReq:', workInfo);
+            /* authReq: {
+                workName: 'm2_137',
+                createdTime: 1579017600,
+                publishedTime: 1579017600,
+                workType: 1,
+                workForm: 1,
+                workField: 1,
+                workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
+                workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',     
+                addr: 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf'
+            } */
             console.log('authReq:', workInfo.workName);
             return postData('http://127.0.0.1:9000/authReq', authInfo);
         });

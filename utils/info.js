@@ -63,25 +63,25 @@ const userMemo = [
 
 const authMemo = [
     {
-        authCode: 0,
+        authCode: 'a0',
         authName: '天津版权局',
         certNum: 'c0',
         cert: pic
     },
     {
-        authCode: 1,
+        authCode: 'a1',
         authName: '上海版权局',
         certNum: 'c1',
         cert: pic
     },
     {
-        authCode: 2,
+        authCode: 'a2',
         authName: '北京版权保护中心',
         certNum: 'c2',
         cert: pic
     },
     {
-        authCode: 3,
+        authCode: 'a3',
         authName: '国家版权局',
         certNum: 'c3',
         cert: pic

@@ -27,6 +27,9 @@ r.connect(async function(err, result) {
         console.log('result: ', result);
     }
 
+
+    let tokenTx = {};
+
     /*----------监听交易，推送数据----------*/
 
     r.on('ledger_closed', async function(msg) {
@@ -65,24 +68,74 @@ r.connect(async function(err, result) {
                     uploadInfo.uploadTime = uploadTime;
                     uploadInfo.addr = addr;
                     // console.log('on upload', uploadInfo);
+                    /* on upload {
+                        workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',
+                        workName: 'm2_137',
+                        createdTime: 1579017600,
+                        publishedTime: 1579017600,
+                        workType: 1,
+                        workForm: 1,
+                        workField: 1,
+                        uploadTime: 1604924000,
+                        addr: 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf'
+                    } */
                     console.log('on upload', uploadInfo.workName);
                     // await postData('http:127.0.0.1:8080/uploadInfo', uploadInfo);
                 }
             }
             // 通证发行交易
             else if(tx.TransactionType == 'TransferToken') {
+                // 获取通证信息
                 let tokenId = tx.TokenID;
+                let authTime = tx.date + 946684800;
                 let tokenRes = await erc721.requestTokenInfo(r, tokenId, false);
                 let tokenInfo = localUtils.memos2obj(tokenRes.TokenInfo.Memos);
-                tokenInfo.tokenId = tokenId;
-                tokenInfo.addr = tokenRes.TokenInfo.TokenOwner;
+                // 解析数据
                 let authInfoHash = tokenInfo.authInfoHash;
                 delete tokenInfo.authInfoHash;
                 let authInfoJson = await ipfsUtils.get(ipfs, authInfoHash);
                 let authInfo = JSON.parse(authInfoJson.toString());
-                Object.assign(tokenInfo, authInfo);
+                // 若未向后端发送过该作品的确权信息，则推送确权信息
+                if(!tokenTx[tokenInfo.workId]) {
+                    let authTxInfo = {...authInfo};
+                    authTxInfo.workId = tokenInfo.workId;
+                    authTxInfo.authId = tokenInfo.authId;
+                    authTxInfo.authTime = authTime;
+                    authTxInfo.certHash = tokenInfo.certHash;
+                    // console.log('on auth:', authTxInfo);
+                    /* on auth: {
+                        authCode: 'a1',
+                        authName: '上海版权局',
+                        certNum: 'c1',
+                        workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',
+                        authId: 'DCI0000001657',
+                        authTime: 1604924010,
+                        certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
+                    } */
+                    console.log('on token:', authTxInfo.authId);
+                    // await postData('http:127.0.0.1:8080/authInfo', authTxInfo);
+                    tokenTx[tokenInfo.workId] = 1;
+                }
+                else if(tokenTx[tokenInfo.workId] == 16) {
+                    delete tokenTx[tokenInfo.workId];
+                }
+                else {
+                    tokenTx[tokenInfo.workId]++;
+                }
+                delete tokenInfo.authId;
+                delete tokenInfo.certHash;
+                tokenInfo.tokenId = tokenId;
+                tokenInfo.addr = tokenRes.TokenInfo.TokenOwner;
                 // console.log('on token:', tokenInfo);
-                console.log('on token:', tokenInfo.authId + '_' + tokenInfo.right);
+                /* on token: {
+                    workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',     
+                    state: 2,
+                    right: 5,
+                    approveArr: '',
+                    tokenId: '51DFC1AA1594989DB27A1CFF1E180FEF355689341EDA11539810FFEBDE974781',    
+                    addr: 'jdNdAv5chV3iN44SrxzSbyxBTuSXJXEKq'
+                } */
+                console.log('on token:', tokenInfo.workId + '_' + tokenInfo.right);
                 // await postData('http:127.0.0.1:8080/tokenInfo', tokenInfo);
             }
         }

@@ -55,12 +55,21 @@ r.connect(async function(err, result) {
         console.log('on ledger_closed: ' + msg.ledger_index);
 
         // 作品及信息存入IPFS，获取hash标识
-        let memos = {... userMemo[seq % 4]};
+        let memos = {...userMemo[seq % 4]};
         memos.workName += seq;
         let workBuf = memos.work;
         let workHash = await ipfsUtils.add(ipfs, workBuf);
         delete memos.work;
         let workInfo = memos;
+        // console.log('workInfo:', workInfo);
+        /* workInfo: {
+            workName: 'm2_137',
+            createdTime: 1579017600,
+            publishedTime: 1579017600,
+            workType: 1,
+            workForm: 1,
+            workField: 1
+        } */
         let workInfoBuf = Buffer.from(JSON.stringify(workInfo));
         let workInfoHash = await ipfsUtils.add(ipfs, workInfoBuf);
 
@@ -75,6 +84,11 @@ r.connect(async function(err, result) {
         }
         let uploadMemos = "0_" + JSON.stringify(uploadInfo);
         // console.log('upload:', uploadInfo);
+        /* upload: {
+            workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
+            workInfoHash: 'QmR383PSpJFe9Z9cXM6xKFs2B7838K15HBWPAGtTR8uCVr',
+            workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4'      
+        } */
         console.log('upload:', memos.workName);
         let uploadRes = await tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, false);
 
