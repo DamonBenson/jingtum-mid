@@ -112,7 +112,7 @@ r.connect(async function(err, result) {
                         authTime: 1604924010,
                         certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
                     } */
-                    console.log('on token:', authTxInfo.authId);
+                    console.log('on auth:', authTxInfo.authId);
                     // await postData('http:127.0.0.1:8080/authInfo', authTxInfo);
                     tokenTx[tokenInfo.workId] = 1;
                 }

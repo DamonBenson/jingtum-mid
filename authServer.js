@@ -40,6 +40,7 @@ r.connect(async function(err, result) {
     // 获取序列号
     let accountInfo = await requestInfo.requestAccountInfo(ag, r, false);
     global.seq = accountInfo.account_data.Sequence;
+    global.dciFlag = seq;
 
     // 启动服务器
     http.createServer(function(request, response) {
@@ -66,7 +67,7 @@ function handleAuth(request, response) {
 
         // 设置通证信息
         let workId = workInfo.workId;
-        let authId = 'DCI' + localUtils.formatStr(seq, 10);
+        let authId = 'DCI' + localUtils.formatStr(dciFlag++, 10);
         let state = 2;
         let approveArr = [];
 
