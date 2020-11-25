@@ -10,6 +10,25 @@ export function randomString(len) {
     return result;
 }
 
+/*----------按prob概率分布从res中随机选择----------*/
+
+export function randomSelect(res, prob) {
+    var sum = 0;
+    let factor = 0;
+    let random = Math.random();
+    for(var i = prob.length - 1; i >= 0; i--) {
+        sum += prob[i];
+    };
+    random *= sum;
+    for(var i = prob.length - 1; i >= 0; i--) {
+        factor += prob[i];
+        if(random <= factor) {
+            return res[i];
+        }
+    }
+    return null;
+}
+
 /*----------补全数字长度----------*/
 
 export function formatStr(num, len) {

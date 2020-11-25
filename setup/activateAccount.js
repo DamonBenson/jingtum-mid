@@ -11,7 +11,7 @@ const ai = Account.issuerAccount;
 const ag = Account.gateAccount;
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s4, local_sign: true});
+const r = new Remote({server: Server.s2, local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -29,12 +29,9 @@ r.connect(async function(err, result) {
     let accountInfo = await requestInfo.requestAccountInfo(ar, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await tx.buildPaymentTx(ar, sr, r, seq, ac, 100000000, 'setup', true);
-    seq+=2;
-    await tx.buildPaymentTx(ar, sr, r, seq, ai, 100000000, 'setup', true);
-    seq+=2;
-    await tx.buildPaymentTx(ar, sr, r, seq, ag, 100000000, 'setup', true);
-    seq+=2;
+    await tx.buildPaymentTx(ar, sr, r, seq++, ac, 100000000, 'setup', true);
+    await tx.buildPaymentTx(ar, sr, r, seq++, ai, 100000000, 'setup', true);
+    await tx.buildPaymentTx(ar, sr, r, seq++, ag, 100000000, 'setup', true);
 
     r.disconnect();
 

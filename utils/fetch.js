@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-function postData(url, data) {
+export function postData(url, data) {
   return new Promise((resolve, reject) => {
     fetch(url, {
       method: 'POST',
@@ -15,8 +15,6 @@ function postData(url, data) {
     }).catch(err => {
       console.log(err);
       reject(err);
-    })
-  })
+    });
+  });
 }
-
-export {postData};

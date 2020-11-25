@@ -9,13 +9,13 @@ import * as ipfsUtils from './utils/ipfsUtils.js';
 import * as localUtils from './utils/localUtils.js';
 import * as router from './utils/router.js';
 
-import {Account, Server, authMemo} from './utils/info.js';
+import {Account, Server, authMemo, tokenName} from './utils/info.js';
 
 const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
 
 /*----------版权人账号(帐号3)----------*/
 
-const a3 = 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf';
+const a3 = Account.a3Account;
 
 /*----------版权局账号(银关账号)----------*/
 
@@ -25,7 +25,7 @@ const sg = Account.gateSecret;
 /*----------创建链接(server4)----------*/
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s3, local_sign: true});
+const r = new Remote({server: Server.s4, local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -72,12 +72,13 @@ function handleAuth(request, response) {
         let approveArr = [];
 
         // 确权信息存入IPFS，获取hash标识
-        let memos = {... authMemo[seq % 4]};
+        let randFlag = localUtils.randomSelect([0, 1, 2, 3], [0.1, 0.2, 0.3, 0.4]);
+        let memos = {... authMemo[randFlag]};
         let certBuf = memos.cert;
         let certHash = await ipfsUtils.add(ipfs, certBuf);
         delete memos.cert;
         let authInfo = memos;
-        // console.log('authInfo:', authInfo);
+        console.log('authInfo:', authInfo);
         /* authInfo: {
             authCode: 'a1',
             authName: '上海版权局',
@@ -94,12 +95,13 @@ function handleAuth(request, response) {
             approveArr: approveArr,
             authInfoHash: authInfoHash,
             certHash: certHash
-        }
-        for(let i = 0; i < 17; i++) {
-            let tokenId = sha256(authId + i).toString();
-            tokenInfo.right = i;
+        };
+        let rightArr = new Array(17).fill('').map((value, index) => index);
+        let tokenTransferPromises = rightArr.map(right => {
+            let tokenId = sha256(authId + right).toString();
+            tokenInfo.right = right;
             let tokenMemos = localUtils.obj2memos(tokenInfo);
-            // console.log('issue token:', tokenInfo);
+            console.log('issue token:', tokenInfo);
             /* issue token: {
                 workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',
                 authId: 'DCI0000001657',
@@ -109,9 +111,10 @@ function handleAuth(request, response) {
                 certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
                 right: 0
             } */
-            console.log('issue token:', workInfo.workName + '_' + i);
-            await erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, 'test2', tokenId, tokenMemos, false);
-        }
+            // console.log('issue token:', workInfo.workName + '_' + right);
+            return erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, tokenName, tokenId, tokenMemos, false);
+        });
+        await Promise.all(tokenTransferPromises);
         console.log('issue ok:', authId);
 
         // 返回确权ID给mid

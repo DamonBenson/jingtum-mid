@@ -4,13 +4,13 @@ import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as tx from '../utils/jingtum/tx.js';
 import {Account, Server} from '../utils/info.js';
 
-const a1 = Account.rootAccount;
-const s1 = Account.rootSecret;
+const ar = Account.rootAccount;
+const sr = Account.rootSecret;
 
-const addAmount = 1;
+const addAmount = 3;
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s4, local_sign: true});
+const r = new Remote({server: Server.s2, local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -35,12 +35,11 @@ r.connect(async function(err, result) {
 
     /*----------转账激活账号----------*/
 
-    let accountInfo = await requestInfo.requestAccountInfo(a1, r, true);
+    let accountInfo = await requestInfo.requestAccountInfo(ar, r, true);
     let seq = accountInfo.account_data.Sequence;
 
     let activatePromises = walletArr.map(w => {
-        let promise = tx.buildPaymentTx(a1, s1, r, seq, w.address, 100000000, 'setup', true);
-        seq += 2;
+        let promise = tx.buildPaymentTx(ar, sr, r, seq++, w.address, 100000000, 'setup', true);
         return promise;
     })
     await Promise.all(activatePromises);
