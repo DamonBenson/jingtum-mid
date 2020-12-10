@@ -94,6 +94,22 @@ const authMemo = [
     }
 ];
 
-const tokenName = 'test1'
+const tokenName = 'test2'
 
-export {Account, Server, userMemo, authMemo, tokenName};
+const ipfsConf = {
+    host: '39.102.93.47',
+    port: '5001',
+    protocol: 'http'
+}
+
+const mysqlConf = {
+    host: '39.102.93.47',       
+    user: 'root',              
+    password: 'bykyl626',       
+    port: '3306',                   
+    database: 'jingtum_mid'
+}
+
+const debugMode = false;
+
+export {Account, Server, userMemo, authMemo, tokenName, ipfsConf, mysqlConf, debugMode};

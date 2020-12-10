@@ -7,11 +7,11 @@ import * as ipfsUtils from './utils/ipfsUtils.js';
 import * as localUtils from './utils/localUtils.js';
 import * as fetch from './utils/fetch.js';
 
-import {Account, Server} from './utils/info.js';
+import {Account, Server, ipfsConf, debugMode} from './utils/info.js';
 
-const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
+const ipfs = ipfsAPI(ipfsConf);
 
-/*----------创建链接(服务器3)----------*/
+/*----------创建链接(server5)----------*/
 
 var Remote = jlib.Remote;
 var r = new Remote({server: Server.s5, local_sign: true});
@@ -68,7 +68,12 @@ r.connect(async function(err, result) {
             let uploadInfo = Object.assign(uploadMemosArr[index], workInfoArr[index]);
             uploadInfo.uploadTime = tx.date + 946684800;
             uploadInfo.addr = tx.Destination;
-            console.log('on upload', uploadInfo);
+            if(debugMode) {
+                console.log('on upload', uploadInfo);
+            }
+            else {
+                console.log('on upload', uploadInfo.workName);
+            }
             /* on upload {
                 workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',
                 workName: 'm2_137',
@@ -80,7 +85,6 @@ r.connect(async function(err, result) {
                 uploadTime: 1604924000,
                 addr: 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf'
             } */
-            // console.log('on upload', uploadInfo.workName);
             return fetch.postData('http://127.0.0.1:8080/uploadInfo', uploadInfo);
         });
         await Promise.all(postWorkInfoPromises);
@@ -106,7 +110,12 @@ r.connect(async function(err, result) {
                 authTxInfo.authTime = tokenTxs[index].date + 946684800;
                 authTxInfo.certHash = tokenInfoArr[index].certHash;
                 tokenTx[tokenInfoArr[index].workId] = 1;
-                console.log('on auth:', authTxInfo);
+                if(debugMode) {
+                    console.log('on auth:', authTxInfo);
+                }
+                else {
+                    console.log('on auth:', authTxInfo.authId);
+                }
                 /* on auth: {
                     authCode: 'a1',
                     authName: '上海版权局',
@@ -116,17 +125,18 @@ r.connect(async function(err, result) {
                     authTime: 1604924010,
                     certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
                 } */
-                // console.log('on auth:', authTxInfo.authId);
                 return fetch.postData('http://127.0.0.1:8080/authInfo', authTxInfo);
             }
 
             // 若已收到同一作品的17个通证，则删除记录
             else if(tokenTx[tokenInfoArr[index].workId] == 16) {
+                console.log('on 17 token.');
                 delete tokenTx[tokenInfoArr[index].workId];
             }
 
             // 若已推送过通证对应作品的确权信息，则不推送并记录
             else {
+                console.log('on 2-16 token.');
                 tokenTx[tokenInfoArr[index].workId]++;
             }
 
@@ -140,7 +150,12 @@ r.connect(async function(err, result) {
             delete tokenInfo.certHash;
             tokenInfo.tokenId = tokenTxs[index].TokenID;
             tokenInfo.addr = tokenInfoResArr[index].TokenInfo.TokenOwner;
-            console.log('on token:', tokenInfo);
+            if(debugMode) {
+                console.log('on token:', tokenInfo);
+            }
+            else {
+                console.log('on token:', tokenInfo.workId + '_' + tokenInfo.right);
+            }
             /* on token: {
                 workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',     
                 state: 2,
@@ -149,7 +164,6 @@ r.connect(async function(err, result) {
                 tokenId: '51DFC1AA1594989DB27A1CFF1E180FEF355689341EDA11539810FFEBDE974781',    
                 addr: 'jdNdAv5chV3iN44SrxzSbyxBTuSXJXEKq'
             } */
-            // console.log('on token:', tokenInfo.workId + '_' + tokenInfo.right);
             return fetch.postData('http://127.0.0.1:8080/tokenInfo', tokenInfo);
         });
         await Promise.all(postTokenInfoPromises);

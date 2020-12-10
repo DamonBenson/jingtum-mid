@@ -54,7 +54,8 @@ export function buildTransferTokenTx(s, r, seq, p, rcv, name, id, memos, showRes
             }
             else if(result){
                 if(showRes) {
-                    console.log('buildTransferTokenTx:', result);
+                    // console.log('buildTransferTokenTx:', result);
+                    console.log('buildTransferTokenTx:', result.engine_result + "_" + result.engine_result_message + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }

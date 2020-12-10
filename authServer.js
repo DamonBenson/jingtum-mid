@@ -9,9 +9,9 @@ import * as ipfsUtils from './utils/ipfsUtils.js';
 import * as localUtils from './utils/localUtils.js';
 import * as router from './utils/router.js';
 
-import {Account, Server, authMemo, tokenName} from './utils/info.js';
+import {Account, Server, authMemo, tokenName, ipfsConf, debugMode} from './utils/info.js';
 
-const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
+const ipfs = ipfsAPI(ipfsConf);
 
 /*----------版权人账号(帐号3)----------*/
 
@@ -78,7 +78,9 @@ function handleAuth(request, response) {
         let certHash = await ipfsUtils.add(ipfs, certBuf);
         delete memos.cert;
         let authInfo = memos;
-        console.log('authInfo:', authInfo);
+        if(debugMode) {
+            console.log('authInfo:', authInfo);
+        }
         /* authInfo: {
             authCode: 'a1',
             authName: '上海版权局',
@@ -101,7 +103,12 @@ function handleAuth(request, response) {
             let tokenId = sha256(authId + right).toString();
             tokenInfo.right = right;
             let tokenMemos = localUtils.obj2memos(tokenInfo);
-            console.log('issue token:', tokenInfo);
+            if(debugMode) {
+                console.log('issue token:', tokenInfo);
+            }
+            else {
+                console.log('issue token:', workInfo.workName + '_' + right);
+            }
             /* issue token: {
                 workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4',
                 authId: 'DCI0000001657',
@@ -111,8 +118,7 @@ function handleAuth(request, response) {
                 certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
                 right: 0
             } */
-            // console.log('issue token:', workInfo.workName + '_' + right);
-            return erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, tokenName, tokenId, tokenMemos, false);
+            return erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, tokenName, tokenId, tokenMemos, true);
         });
         await Promise.all(tokenTransferPromises);
         console.log('issue ok:', authId);

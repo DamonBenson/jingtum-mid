@@ -8,16 +8,10 @@ import * as mysqlUtils from './utils/mysqlUtils.js';
 import * as localUtils from './utils/localUtils.js';
 import * as fetch from './utils/fetch.js';
 
-import {Server} from './utils/info.js';
+import {Server, ipfsConf, mysqlConf, debugMode} from './utils/info.js';
 
-const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
-const c = mysql.createConnection({     
-    host: 'localhost',       
-    user: 'root',              
-    password: 'bykyl626',       
-    port: '3306',                   
-    database: 'jingtum_mid' 
-});
+const ipfs = ipfsAPI(ipfsConf);
+const c = mysql.createConnection(mysqlConf);
 c.connect();
 
 /*----------创建链接(服务器3)----------*/
@@ -60,7 +54,12 @@ r.connect(async function(err, result) {
             let authInfo = Object.assign(workInfoArr[index], txMemos);
             authInfo.addr = txArr[index].Destination;
             authInfo.uploadtime = txArr[index].date + 946684800; // 加一项上传时间
-            console.log('authReq:', authInfo);
+            if(debugMode) {
+                console.log('authReq:', authInfo);
+            }
+            else {
+                console.log('authReq:', authInfo.workName); 
+            }
             /* authReq: {
                 workName: 'm2_137',
                 createdTime: 1579017600,
@@ -73,7 +72,6 @@ r.connect(async function(err, result) {
                 addr: 'jK41GkWTjWz8Gd8wvBWt4XrxzbCfFaG2tf',
                 uploadtime: 1606288180
             } */
-            // console.log('authReq:', authInfo.workName);
             return fetch.postData('http://127.0.0.1:9000/authReq', authInfo);
         });
         let authRes = await Promise.all(authReqPromises);

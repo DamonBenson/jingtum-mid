@@ -9,16 +9,10 @@ import * as ipfsUtils from './utils/ipfsUtils.js';
 import * as mysqlUtils from './utils/mysqlUtils.js';
 import * as localUtils from './utils/localUtils.js';
 
-import {Account, Server, userMemo} from './utils/info.js';
+import {Account, Server, userMemo, ipfsConf, mysqlConf, debugMode} from './utils/info.js';
 
-const ipfs = ipfsAPI({host: '127.0.0.1', port: '5001', protocol: 'http'});
-const c = mysql.createConnection({     
-    host: 'localhost',       
-    user: 'root',              
-    password: 'bykyl626',       
-    port: '3306',                   
-    database: 'jingtum_mid' 
-});
+const ipfs = ipfsAPI(ipfsConf);
+const c = mysql.createConnection(mysqlConf);
 c.connect();
 
 // 每个帐本上传交易数
@@ -33,7 +27,7 @@ const s1 = Account.a1Secret;
 
 const a3 = Account.a3Account;
 
-/*----------创建链接(server1)----------*/
+/*----------创建链接(server2)----------*/
 
 const Remote = jlib.Remote;
 const r = new Remote({server: Server.s2, local_sign: true});
@@ -49,7 +43,7 @@ r.connect(async function(err, result) {
     }
 
     // 获取序列号
-    let accountInfo = await requestInfo.requestAccountInfo(a1, r, false);
+    let accountInfo = await requestInfo.requestAccountInfo(a1, r, true);
     let seq = accountInfo.account_data.Sequence;
 
     /*----------处理用户存证请求----------*/
@@ -76,7 +70,9 @@ r.connect(async function(err, result) {
             memos.workName += seqArr[index];
             delete memos.work;
             let workInfo = Buffer.from(JSON.stringify(memos));
-            console.log('workInfo:', memos);
+            if(debugMode) {
+                console.log('workInfo:', memos);
+            }
             /* workInfo: {
                 workName: 'm2_137',
                 createdTime: 1579017600,
@@ -98,14 +94,18 @@ r.connect(async function(err, result) {
                 workId: memos.workId
             };
             let uploadMemos = "0_" + JSON.stringify(uploadInfo);
-            console.log('upload:', uploadInfo);
+            if(debugMode) {
+                console.log('upload:', uploadInfo);
+            }
+            else {
+                console.log('upload:', memos.workName);
+            }
             /* upload: {
                 workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
                 workInfoHash: 'QmR383PSpJFe9Z9cXM6xKFs2B7838K15HBWPAGtTR8uCVr',
                 workId: 'f5cdb7f6f3750758b500bd0aa6049da7055dce74c1eb14a3cda5f0f4df260df4'      
             } */
-            // console.log('upload:', memos.workName);
-            return tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, false);
+            return tx.buildPaymentTx(a1, s1, r, seq++, a3, 0.000001, uploadMemos, true);
         });
         let uploadResArr = await Promise.all(uploadPromises);
 
