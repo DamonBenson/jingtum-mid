@@ -94,10 +94,10 @@ const authMemo = [
     }
 ];
 
-const tokenName = 'test2'
+const tokenName = 'test3'
 
 const ipfsConf = {
-    host: '39.102.93.47',
+    host: '127.0.0.1',
     port: '5001',
     protocol: 'http'
 }

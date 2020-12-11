@@ -98,8 +98,11 @@ function handleAuth(request, response) {
             authInfoHash: authInfoHash,
             certHash: certHash
         };
-        let rightArr = new Array(17).fill('').map((value, index) => index);
-        let tokenTransferPromises = rightArr.map(right => {
+
+        let tokenIssuePromises = [];
+        let tokenAuthPromises = [];
+        for(let i = 0; i < 17; i++) {
+            let right = i;
             let tokenId = sha256(authId + right).toString();
             tokenInfo.right = right;
             let tokenMemos = localUtils.obj2memos(tokenInfo);
@@ -118,9 +121,13 @@ function handleAuth(request, response) {
                 certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
                 right: 0
             } */
-            return erc721.buildTransferTokenTx(sg, r, seq++, ag, a3, tokenName, tokenId, tokenMemos, true);
-        });
-        await Promise.all(tokenTransferPromises);
+            tokenIssuePromises.push(erc721.buildIssueTokenTx(r, seq++, tokenName, tokenId, tokenMemos, true));
+            tokenAuthPromises.push(erc721.buildAuthTokenTx(r, seq++, a3, tokenName, tokenId, true)); //发行给用户还是银关？
+        }
+        await Promise.all(tokenIssuePromises);
+        await Promise.all(tokenAuthPromises);
+
+
         console.log('issue ok:', authId);
 
         // 返回确权ID给mid

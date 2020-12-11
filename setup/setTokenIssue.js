@@ -24,12 +24,12 @@ r.connect(async function(err, result) {
         console.log('connect: ', result);
     }
 
-    /*----------总账号设置银关账号发行权限----------*/
+    /*----------发币账号设置银关账号发行权限----------*/
 
     let accountInfo = await requestInfo.requestAccountInfo(ai, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await erc721.buildTokenIssueTx(ai, si, r, seq, ag, tokenName, 100000, true); //总帐号才有权限设置代币发行，发币账号没有权限
+    await erc721.buildTokenIssueReq(r, seq, tokenName, 100000, true);
 
     r.disconnect();
 
