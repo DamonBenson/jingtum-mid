@@ -2,16 +2,15 @@ import jlib from 'jingtum-lib';
 
 import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as erc721 from '../utils/jingtum/erc721.js';
-import {Account, Server} from '../utils/info.js';
+import {chains} from '../utils/info.js';
 
-const ai = Account.issuerAccount;
-const si = Account.issuerSecret;
-const ag = Account.gateAccount;
+const tokenChain = chains[1];
+const ai = tokenChain.account.issuer.address;
 
 const tokenName = 'test1';
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s2, local_sign: true});
+const r = new Remote({server: tokenChain.server[0], local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -29,7 +28,7 @@ r.connect(async function(err, result) {
     let accountInfo = await requestInfo.requestAccountInfo(ai, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await erc721.buildTokenIssueReq(r, seq, tokenName, 100000, true);
+    await erc721.buildTokenIssueReq(r, seq++, tokenName, 10000000, true);
 
     r.disconnect();
 

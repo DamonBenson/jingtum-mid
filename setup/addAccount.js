@@ -2,48 +2,48 @@ import jlib from 'jingtum-lib';
 
 import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as tx from '../utils/jingtum/tx.js';
-import {Account, Server} from '../utils/info.js';
 
-const ar = Account.rootAccount;
-const sr = Account.rootSecret;
+import {chains} from '../utils/info.js';
 
 const addAmount = 3;
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s2, local_sign: true});
 
-r.connect(async function(err, result) {
+for(let i = chains.length - 1; i >= 0; i--) {
 
-    /*---------链接状态----------*/
+    let chain = chains[i];
+    let ar = chain.account.root.address;
+    let sr = chain.account.root.secret;
 
-    if(err) {
-        return console.log('err: ', err);
-    }
-    else if(result) {
-        console.log('connect: ', result);
-    }
+    let r = new Remote({server: chain.server[0], local_sign: true});
+    r.connect(async function(err, result) {
 
-    /*----------生成账号----------*/
+        /*---------链接状态----------*/
+    
+        if(err) {
+            return console.log('err: ', err);
+        }
+        else if(result) {
+            console.log('connect: ', result);
+        }
+    
+        /*----------生成账号----------*/
 
-    let Wallet = jlib.Wallet;
-    let walletArr = [];
-    for(let i = 0; i < addAmount; i++) {
-        let w = Wallet.generate();
-        console.log(w);
-        walletArr.push(w);
-    }
+        let accountInfo = await requestInfo.requestAccountInfo(ar, r, true);
+        let seq = accountInfo.account_data.Sequence;
 
-    /*----------转账激活账号----------*/
+        let Wallet = jlib.Wallet;
 
-    let accountInfo = await requestInfo.requestAccountInfo(ar, r, true);
-    let seq = accountInfo.account_data.Sequence;
+        let activatePromises = new Array(addAmount);
+        for(let j = addAmount - 1; j >= 0; j--) {
+            let w = Wallet.generate();
+            console.log('chain' + i + ' account:', w);
+            activatePromises[j] = tx.buildPaymentTx(ar, sr, r, seq++, w.address, 100000000, 'setup', true);
+        }
+        await Promise.all(activatePromises);
 
-    let activatePromises = walletArr.map(w => {
-        let promise = tx.buildPaymentTx(ar, sr, r, seq++, w.address, 100000000, 'setup', true);
-        return promise;
-    })
-    await Promise.all(activatePromises);
+        r.disconnect();
+    
+    });
 
-    r.disconnect();
-
-});
+}

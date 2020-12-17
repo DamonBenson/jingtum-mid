@@ -1,3 +1,19 @@
+/*----------直接通过sql语句操作数据库----------*/
+
+export function sql(c, sql) {
+    return new Promise((resolve, reject) => {
+        c.query(sql, function(err, result) {
+            if(err) {
+                console.log('err:', err);
+                reject('err');
+            }
+            else if(result) {
+                resolve(result);
+            }
+        });
+    });
+}
+
 /*----------在table中插入列名和值为valueObj的数据----------*/
 
 export function insert(c, table, valueObj) {

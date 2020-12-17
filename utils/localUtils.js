@@ -1,3 +1,9 @@
+/*----------暂停----------*/
+
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /*----------生成随机len位字符串----------*/
 
 export function randomString(len) {
@@ -34,12 +40,6 @@ export function randomSelect(res, prob) {
 export function formatStr(num, len) {
     if(String(num).length > len) return num;
     return (Array(len).join(0) + num).slice(-len);
-}
-
-/*----------暂停----------*/
-
-export function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /*----------16进制ascii码转字符串----------*/
@@ -95,7 +95,38 @@ export function memos2obj(arr) {
         let v = ascii2str(arr[i].Memo.MemoData);
         obj[k] = v;
     }
-    obj['right'] = Number(obj['right']);
+    obj['rightType'] = Number(obj['rightType']);
     obj['state'] = Number(obj['state']);
     return obj;
+}
+
+/*----------下划线转驼峰----------*/
+
+export function toHump(name) {
+    return name.replace(/\_(\w)/g, function(all, letter){
+        return letter.toUpperCase();
+    });
+}
+
+/*----------驼峰转下划线----------*/
+
+export function toLine(name) {
+    return name.replace(/([A-Z])/g,"_$1").toLowerCase();
+}
+
+/*----------时间戳转mysql的date格式----------*/
+
+export function toMysqlDate(ts) {
+    return (new Date(ts * 1000)).toJSON().slice(0, 19).replace('/T.*/', ' ');
+}
+
+/*----------js命名对象转mysql命名对象----------*/
+
+export function toMysqlObj(obj) {
+    for(let key in obj) {
+        if(toLine(key) != key) {
+            obj[toLine(key)] = obj[key];
+            delete obj[key];
+        }
+    }
 }

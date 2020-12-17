@@ -12,16 +12,7 @@ export function register(request, response, mapping) {
   }
   // 请求路径不存在返回404页面
   response.writeHeader(404, {
-    "Content-Type" : "text/html"
+    "Content-Type" : "text/plain"
   });
-  response.end(`
-    <html>
-      <head>
-        <title>NOT FOUND</title>
-      </head>
-      <body>
-        <h1>404 NOT FOUND</h1>
-      </body>
-    </html>
-  `);
+  response.end('invalid url');
 }

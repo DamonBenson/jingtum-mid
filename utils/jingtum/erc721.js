@@ -1,9 +1,10 @@
-import {Account, Server, ipfsConf, debugMode, tokenName} from '../info.js';
+import {chains} from '../info.js';
 
-const ai = Account.issuerAccount;
-const si = Account.issuerSecret;
-const ag = Account.gateAccount;
-const sg = Account.gateSecret;
+const tokenChain = chains[1];
+const ai = tokenChain.account.issuer.address;
+const si = tokenChain.account.issuer.secret;
+const ag = tokenChain.account.gate.address;
+const sg = tokenChain.account.gate.secret;
 
 /*----------授权发行通证----------*/
 
@@ -62,7 +63,7 @@ export function buildIssueTokenTx(r, seq, name, id, memos, showRes) {
             else if(result){
                 if(showRes) {
                     // console.log('buildIssueTokenTx:', result);
-                    console.log('buildIssueTokenTx:', result.engine_result + "_" + result.engine_result_message + "_" + result.tx_json.Sequence);
+                    console.log('buildIssueTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -71,7 +72,7 @@ export function buildIssueTokenTx(r, seq, name, id, memos, showRes) {
 
 }
 
-/*----------转让通证----------*/
+/*----------授予通证----------*/
 
 export function buildAuthTokenTx(r, seq, rcv, name, id, showRes) {
 
@@ -96,7 +97,7 @@ export function buildAuthTokenTx(r, seq, rcv, name, id, showRes) {
             else if(result){
                 if(showRes) {
                     // console.log('buildAuthTokenTx:', result);
-                    console.log('buildAuthTokenTx:', result.engine_result + "_" + result.engine_result_message + "_" + result.tx_json.Sequence);
+                    console.log('buildAuthTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -130,7 +131,7 @@ export function buildTransferTokenTx(s, r, seq, p, rcv, name, id, showRes) {
             else if(result){
                 if(showRes) {
                     // console.log('buildTransferTokenTx:', result);
-                    console.log('buildTransferTokenTx:', result.engine_result + "_" + result.engine_result_message + "_" + result.tx_json.Sequence);
+                    console.log('buildTransferTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }

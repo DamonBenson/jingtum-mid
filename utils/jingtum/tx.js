@@ -27,7 +27,7 @@ export function buildPaymentTx(a, s, r, seq, to, amount, memos, showRes) {
             else if(result){
                 if(showRes) {
                     // console.log('buildPaymentTx:', result);
-                    console.log('buildPaymentTx:', result.engine_result + "_" + result.engine_result_message + "_" + result.tx_json.Sequence);
+                    console.log('buildPaymentTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
