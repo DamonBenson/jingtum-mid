@@ -20,10 +20,10 @@ const chain1 = chains[1]; // 确权链
 
 const ag = chain1.account.gate.address;
 
-/*----------创建链接(确权链服务器1)----------*/
+/*----------创建链接(确权链服务器3)----------*/
 
 var Remote = jlib.Remote;
-var r = new Remote({server: chain1.server[1], local_sign: true});
+var r = new Remote({server: chain1.server[3], local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -79,18 +79,12 @@ r.connect(async function(err, result) {
             */
             if(txType == 'TransferToken') {
                 let txTokenName = localUtils.ascii2str(tx.FundCode);
-                if(src == ag && dst != ag) {
-                    switch(txTokenName) { // 考虑不同种类版权（图片、音乐、视频）为不同名称的通证
-                        case tokenName:
-                            tokenTxs.push(tx);
-                            break;
+                if(txTokenName == tokenName) {
+                    if(src == ag && dst != ag) {
+                        tokenTxs.push(tx);
                     }
-                }
-                else if(src != ag && dst != ag) {
-                    switch(txTokenName) {
-                        case tokenName:
-                            transferTxs.push(tx);
-                            break;
+                    else if(src != ag && dst != ag) {
+                        transferTxs.push(tx);
                     }
                 }
             }
@@ -134,7 +128,7 @@ r.connect(async function(err, result) {
                 authTxInfo.authId = tokenInfo.authId;
                 authTxInfo.authTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
                 authTxInfo.certHash = tokenInfo.certHash;
-                authTxInfo.authTime = localUtils.toMysqlDate(authTxInfo.authTime); // 通用时间戳转换为数据库date格式
+                // authTxInfo.authTime = localUtils.toMysqlDate(authTxInfo.authTime); // 通用时间戳转换为数据库date格式
                 localUtils.toMysqlObj(authTxInfo);
                 tokenTx[tokenInfo.workId] = 1;
                 if(debugMode) {
@@ -144,11 +138,11 @@ r.connect(async function(err, result) {
                     console.log('on auth:', authTxInfo.auth_id);
                 }
                 /* on auth: {
-                    auth_code: 'a3',
-                    auth_name: '国家版权局',
-                    cert_num: 'c3',
-                    auth_id: 'DCI0000000585',
-                    auth_time: '2020-12-17T02:40:00',
+                    auth_code: 'a1',
+                    auth_name: '上海版权局',
+                    cert_num: 'c1',
+                    auth_id: 'DCI0000003538',
+                    auth_time: 1608517760,
                     cert_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
                 } */
                 let workId = tokenInfo.workId;
@@ -188,16 +182,50 @@ r.connect(async function(err, result) {
             }
             /* on token: {
                 state: 2,
-                addr: 'jn3dGnngMBLXU2GPH8BbCS7qRmXvJFY2ZJ',
-                work_id: '01D42A929780AA2ECF1DBC35D7E132FAA476A1B4BAA8224089688806759B5BF8',       
-                right_type: 9,
+                addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
+                work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
+                right_type: 8,
                 approve_arr: '',
-                token_id: 'C3207FB2E9D510A8546A96FE77593621121AF9198CB831FC472AAF8BA9D7044B'       
+                token_id: 'C59209D11B745FF9903106E6339616CA15ABAA77E4AEC7306AB02D242048B4C5'       
             } */
             let sql = sqlText.table('token_info').data(tokenInfo).insert();
             postTokenInfoPromises[i] = mysqlUtils.sql(c, sql);
         }
         await Promise.all(postTokenInfoPromises);
+
+        // 交易信息存入数据库
+        let postTransferInfoPromises = new Array(transferCount);
+        let postAddrChangePromises = new Array(transferCount);
+        for(let i = transferLoopCounter; i >=0; i--) {
+            let tx = transferTxs[i];
+            let transferInfo = {
+                transfer_id: tx.hash,
+                token_id: tx.TokenID,
+                addr: tx.Account,
+                rcv: tx.Destination,
+                transfer_time: tx.date + 946684800,
+                // transfer_time: localUtils.toMysqlDate(tx.date + 946684800),
+            };
+            if(debugMode) {
+                console.log('on transfer:', transferInfo);
+            }
+            else {
+                console.log('on transfer:', transferInfo.token_id);
+            }
+            /* on transfer: {
+                transfer_id: 'F1697D6615E6F9FFD5534886DA62813F322AB5D699ACC69E41C7CFAD8EED4D4A',   
+                token_id: 'C59209D11B745FF9903106E6339616CA15ABAA77E4AEC7306AB02D242048B4C5',      
+                addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
+                rcv: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai',
+                transfer_time: 1608517950
+            } */
+            let sql = sqlText.table('transfer_info').data(transferInfo).insert();
+            postTransferInfoPromises[i] = mysqlUtils.sql(c, sql);
+            sql = sqlText.table('token_info').data({addr: tx.Destination}).where({token_id: tx.TokenID}).update();
+            postAddrChangePromises[i] = mysqlUtils.sql(c, sql);
+        }
+        await Promise.all(postTransferInfoPromises); // 交易信息存入transfer_info表
+        await Promise.all(postAddrChangePromises); // 更改token_info表中的拥有者地址
 
         // 结束计时
         let eTs = (new Date()).valueOf();

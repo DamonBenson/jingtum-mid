@@ -14,10 +14,6 @@ import {chains, authMemo, tokenName, ipfsConf, debugMode} from '../../utils/info
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const tokenChain = chains[1];
 
-/*----------版权人账号(确权链帐号2)----------*/
-
-const a2 = tokenChain.account.a[2].address;
-
 /*----------版权局账号(确权链银关账号)----------*/
 
 const ag = tokenChain.account.gate.address;
@@ -68,6 +64,7 @@ function handleAuth(request, response) {
 
         // 解析请求数据
         let workInfo = JSON.parse(chunk.toString());
+        let addr = workInfo.addr;
 
         // 设置通证信息
         let workId = workInfo.work_id;
@@ -116,16 +113,16 @@ function handleAuth(request, response) {
                 console.log('issue token:', workInfo.work_name + '_' + rightType);
             }
             /* issue token: {
-                workId: '01D42A929780AA2ECF1DBC35D7E132FAA476A1B4BAA8224089688806759B5BF8',        
-                authId: 'DCI0000000585',
+                workId: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',        
+                authId: 'DCI0000003538',
                 state: 2,
                 approveArr: [],
-                authInfoHash: 'QmQpDkPkNAKdhTZcWMPTSXYx1tzhdg5D2nYGYjLBcwNcEx',
+                authInfoHash: 'QmZUMssaWe2HMjoa22FvRuQtoq4MXUkq5tYv7khoemcfqP',
                 certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-                rightType: 0
+                rightType: 8
             } */
             tokenIssuePromises.push(erc721.buildIssueTokenTx(r, seq++, tokenName, tokenId, tokenMemos, true)); //银关填写通证memos
-            tokenAuthPromises.push(erc721.buildAuthTokenTx(r, seq++, a2, tokenName, tokenId, true)); //银关将通证转让给用户（目前井通sdk发行通证需要这两步，导致确权开销较大）
+            tokenAuthPromises.push(erc721.buildAuthTokenTx(r, seq++, addr, tokenName, tokenId, true)); //银关将通证转让给用户（目前井通sdk发行通证需要这两步，导致确权开销较大）
         }
         await Promise.all(tokenIssuePromises);
         await Promise.all(tokenAuthPromises);

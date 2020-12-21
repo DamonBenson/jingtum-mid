@@ -33,15 +33,15 @@ process.stdin.on('data', async function(chunk) {
     }
     /* authReq: RowDataPacket {
         work_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-        work_name: 'm3_',
-        created_time: 2020-01-14T08:00:00.000Z,
-        published_time: 2020-01-14T08:00:00.000Z,
-        work_type: 2,
-        work_form: 2,
-        work_field: 2,
-        work_id: '01D42A929780AA2ECF1DBC35D7E132FAA476A1B4BAA8224089688806759B5BF8',       
-        upload_time: 2020-12-16T18:39:40.000Z,
-        addr: 'jUJzw8Y1eBKMchijfndBV6KFeD87uk64K7'
+        work_name: 'm1_',
+        created_time: 1579017600,
+        published_time: 1579017600,
+        work_type: 0,
+        work_form: 0,
+        work_field: 0,
+        work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
+        upload_time: 1608517640,
+        addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW'
     } */
     await fetch.postData('http://127.0.0.1:9000/authReq', authInfo);
 

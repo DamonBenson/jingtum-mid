@@ -2,10 +2,12 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
+import * as localUtils from '../../utils/localUtils.js';
 import * as fetch from '../../utils/fetch.js';
 
 import {mysqlConf} from '../../utils/info.js';
 
+const msPerAuth = 20000; // 暂定20s防止发送相同作品id的确权请求（账本间隔10s+保护时间）
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // 数据库连接
 
@@ -25,8 +27,9 @@ setInterval(async function() {
     for(let i = uncheckCount - 1; i>=0; i--) {
         let uncheckId = uncheckIdArr[i].work_id;
         console.log('auth:', uncheckId);
-        // auth: 01D42A929780AA2ECF1DBC35D7E132FAA476A1B4BAA8224089688806759B5BF8
+        // auth: 7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12
         authReqArr[i] = fetch.postData('http://127.0.0.1:9001/authReq', uncheckId);
+        await localUtils.sleep(100);
     }
     await Promise.all(authReqArr);
 
@@ -34,4 +37,4 @@ setInterval(async function() {
     let eTs = (new Date()).valueOf();
     console.log('----------' + (eTs - sTs) + 'ms----------');
 
-}, 15000); // 15s防止发送相同作品id的确权请求（账本间隔10s+保护时间）
+}, msPerAuth);

@@ -43,7 +43,7 @@ http.createServer(function(request, response) {
 
 // 发送上传请求至子进程uploadMid.js
 function handleUpload(request, response) {
-    request.on('data', async function(chunk) {
+    request.on('data', function(chunk) {
         childUpload.stdin.write(chunk);
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('ok'); // 收到请求就返回ok信息，而非等待子进程处理完
@@ -52,7 +52,7 @@ function handleUpload(request, response) {
 
 // 发送确权请求至子进程authMid.js
 function handleAuth(request, response) {
-    request.on('data', async function(chunk) {
+    request.on('data', function(chunk) {
         childAuth.stdin.write(chunk);
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('ok');
@@ -61,7 +61,7 @@ function handleAuth(request, response) {
 
 // 发送转让请求至子进程transferMid.js
 function handleTransfer(request, response) {
-    request.on('data', async function(chunk) {
+    request.on('data', function(chunk) {
         childTransfer.stdin.write(chunk);
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('ok');

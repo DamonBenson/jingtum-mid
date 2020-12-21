@@ -10,14 +10,10 @@ import {chains, userMemo, ipfsConf, debugMode} from '../../utils/info.js';
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const uploadChain = chains[0]; // 存证链
 
-/*----------平台账号(存证链账号0)----------*/
+/*----------中间层账号(存证链账号0)----------*/
 
 const a0 = uploadChain.account.a[0].address;
 const s0 = uploadChain.account.a[0].secret;
-
-/*----------版权人账号(存证链帐号2)----------*/
-
-const a2 = uploadChain.account.a[2].address;
 
 /*----------创建链接(存证链服务器0)----------*/
 
@@ -34,7 +30,7 @@ r.connect(async function(err, result) {
         console.log('result: ', result);
     }
 
-    // 获取平台账号序列号
+    // 获取中间层账号序列号
     let accountInfo = await requestInfo.requestAccountInfo(a0, r, false);
     let seq = accountInfo.account_data.Sequence;
 
@@ -46,7 +42,8 @@ r.connect(async function(err, result) {
         let sTs = (new Date()).valueOf();
 
         // 解析请求数据
-        let memos = JSON.parse(chunk.toString());
+        let addr = JSON.parse(chunk.toString()).addr;
+        let memos = JSON.parse(chunk.toString()).uploadInfo;
         memos.work = userMemo[0].work;
 
         // 作品存入ipfs，获取哈希标识
@@ -59,12 +56,12 @@ r.connect(async function(err, result) {
             console.log('workInfo:', memos);
         }
         /* workInfo: {
-            workName: 'm3_',
+            workName: 'm1_',
             createdTime: 1579017600,
             publishedTime: 1579017600,
-            workType: 2,
-            workForm: 2,
-            workField: 2
+            workType: 0,
+            workForm: 0,
+            workField: 0
         } */
         let workInfoHash = await ipfsUtils.add(ipfs, workInfo);
         
@@ -82,9 +79,9 @@ r.connect(async function(err, result) {
         }
         /* upload: {
             workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-            workInfoHash: 'Qma71maJMdH7AydbUW9BUHZdyadqrpgZMNzEU2mev5Ffkt'
+            workInfoHash: 'QmPaUkFKrUzmcGUDP5k8zyD5XCohQkXfo8v4qRdDDHk5Bu'
         } */
-        await tx.buildPaymentTx(a0, s0, r, seq++, a2, 0.000001, uploadMemos, true);
+        await tx.buildPaymentTx(a0, s0, r, seq++, addr, 0.000001, uploadMemos, true);
 
         // 结束计时
         let eTs = (new Date()).valueOf();

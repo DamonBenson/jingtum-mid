@@ -1,40 +1,34 @@
-// import http from 'http';
 // import {spawn} from 'child_process';
+// import * as localUtils from './utils/localUtils.js';
 
-// import * as router from './utils/router.js';
+// // 启动子进程
+// const child = spawn('node', ['./test2.js']);
 
-// const childUpload = spawn('node', ['./test2.js']);
+// global.count = 0;
 
+// // 监听并打印子进程信息
+// child.stdout.on('data', function(chunk) {
+//     console.log(count++, chunk.toString());
+// });
 
+// child.stderr.on('data', function(chunk) {
+//     console.log('child err', chunk.toString());
+// });
+ 
+// setInterval(async function() {
+//     for(let i = 0; i < 100; i++) {
+//         child.stdin.write('aaa');
+//         await localUtils.sleep(1);
+//     }
+// }, 5000);
 
-// // 启动服务器
-// http.createServer(function(request, response) {
+import sha256 from 'crypto-js/sha256.js';
 
-//     childUpload.stdout.on('data', function(chunk) {
-//         console.log('childUpload', chunk);
-//     });
-    
-//     router.register(request, response, [
-//         {
-//             'url': '/uploadReq',
-//             'handler': handleUpload
-//         },
-//     ]);
+let o = {};
 
-// })
-// .listen(9001);
+for(let i = 0; i < 1000000; i++) {
+    i = i.toString();
+    o[sha256(i).toString()] = i;
+}
 
-// function handleUpload(request, response) {
-//     console.log('on upload');
-//     request.on('data', async function(chunk) {
-//         childUpload.stdin.write(chunk);
-//     });
-// }
-
-import {spawn} from 'child_process';
-
-const childUpload = spawn('node', ['../test2.js']);
-
-childUpload.stdout.on('data', function(chunk) {
-    console.log('childUpload', chunk.toString());
-});
+console.log(o);

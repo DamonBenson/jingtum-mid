@@ -15,10 +15,10 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const chain0 = chains[0]; // 存证链
 
-/*----------创建链接(存证链服务器1)----------*/
+/*----------创建链接(存证链服务器3)----------*/
 
 var Remote = jlib.Remote;
-var r = new Remote({server: chain0.server[1], local_sign: true});
+var r = new Remote({server: chain0.server[3], local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -106,9 +106,9 @@ r.connect(async function(err, result) {
             uploadInfo.workId = tx.hash;
             uploadInfo.uploadTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
             uploadInfo.addr = tx.Destination;
-            uploadInfo.createdTime = localUtils.toMysqlDate(uploadInfo.createdTime); // 通用时间戳转换为数据库date格式
-            uploadInfo.publishedTime = localUtils.toMysqlDate(uploadInfo.publishedTime);
-            uploadInfo.uploadTime = localUtils.toMysqlDate(uploadInfo.uploadTime);
+            // uploadInfo.createdTime = localUtils.toMysqlDate(uploadInfo.createdTime); // 通用时间戳转换为数据库date格式
+            // uploadInfo.publishedTime = localUtils.toMysqlDate(uploadInfo.publishedTime);
+            // uploadInfo.uploadTime = localUtils.toMysqlDate(uploadInfo.uploadTime);
             localUtils.toMysqlObj(uploadInfo);
             if(debugMode) {
                 console.log('on upload', uploadInfo);
@@ -116,17 +116,17 @@ r.connect(async function(err, result) {
             else {
                 console.log('on upload', uploadInfo.work_name);
             }
-            /* on upload {
-                addr: 'jUJzw8Y1eBKMchijfndBV6KFeD87uk64K7',
+            /* upload {
+                addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
                 work_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-                work_name: 'm3_',
-                created_time: '2020-01-14T16:00:00',
-                published_time: '2020-01-14T16:00:00',
-                work_type: 2,
-                work_form: 2,
-                work_field: 2,
-                work_id: '01D42A929780AA2ECF1DBC35D7E132FAA476A1B4BAA8224089688806759B5BF8',       
-                upload_time: '2020-12-17T02:39:40'
+                work_name: 'm1_',
+                created_time: 1579017600,
+                published_time: 1579017600,
+                work_type: 0,
+                work_form: 0,
+                work_field: 0,
+                work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
+                upload_time: 1608517640
             } */
             let sql = sqlText.table('work_info').data(uploadInfo).insert();
             postWorkInfoPromises[i] = mysqlUtils.sql(c, sql);

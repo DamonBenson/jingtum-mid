@@ -3,6 +3,21 @@ import fs from 'fs';
 const picPath = './resource/test.jpg';
 const pic = fs.readFileSync(picPath);
 
+const userAccount = [
+    {
+        address: 'jGz7YickjDQJ1hSjbRbsiZsB8gMEu6UNeN',
+        secret: 'snzFDY32WweGDGGdk2ZTRDbAnMzFo',
+    },
+    {
+        address: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai',
+        secret: 'sn6CS3BYd2mK2aYHtctzStYfhbqD5',
+    },
+    {
+        address: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
+        secret: 'snnBebAfq9ygmU7aCA4ZgeRj4V68A',
+    },
+];
+
 const chains = [
     {
         server: [
@@ -28,20 +43,7 @@ const chains = [
                 address: 'jnjTbty9qpPu2d9mHUjH5kzq4TRcnpJsQr',
                 secret: 'snEsawU3xG6cthJ7ucg8dKFuHvpwk',
             },
-            a: [
-                {
-                    address: 'jLeSgeH96ocNpYxycyyNuSjxuqqka4yCcw',
-                    secret: 'spv5YqzL96LBsTLENoJKqe7XPfM1Z',
-                },
-                {
-                    address: 'j4UwUpue8KL6cMXTGBFURs68GwWmn62B4H',
-                    secret: 'ssioeLtmJ4c7fUG8buvGa6tqKA9o7',
-                },
-                {
-                    address: 'jUJzw8Y1eBKMchijfndBV6KFeD87uk64K7',
-                    secret: 'spzCwHnjSdVDAR3yLzsgM4L5boo83',
-                },
-            ],
+            a: userAccount,
         },
     },
     {
@@ -68,20 +70,7 @@ const chains = [
                 address: 'jLLNL25iY8Adta2oknGiQwN9TTWCL7P469',
                 secret: 'sn5LBvoLSd86T7mCXDNQD5qoFCNGv',
             },
-            a: [
-                {
-                    address: 'jP5eN3N7fMGLEtYgfMUDtUYmkAc8UZMT3Y',
-                    secret: 'ssTA226mQcY8ZWovfK38DM9n35fdz',
-                },
-                {
-                    address: 'jf4D11eo2pNKVfR4TNUsR87cURyhaoQfSw',
-                    secret: 'shXBqhXZs1BdRv3GPbBcPi3aiTqLf',
-                },
-                {
-                    address: 'jn3dGnngMBLXU2GPH8BbCS7qRmXvJFY2ZJ',
-                    secret: 'sn4DpEn8e9Fykephih8GzgTsnJ9xc',
-                },
-            ],
+            a: userAccount,
         },
     },
 ]
