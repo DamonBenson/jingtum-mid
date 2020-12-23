@@ -8,7 +8,7 @@ import * as fetch from '../../utils/fetch.js';
 import {chains, mysqlConf, debugMode} from '../../utils/info.js';
 
 const msPerTransfer = 20000; // 转让间隔时间
-const transferPerInterval = 60; // 每个间隔内转让请求数量
+const transferPerInterval = 50; // 每个间隔内转让请求数量
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // 数据库连接
 
@@ -43,7 +43,7 @@ setInterval(async function() {
             rcv: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai'
         } */
         transferReqArr[i] = fetch.postData('http://127.0.0.1:9001/transferReq', transferReq);
-        await localUtils.sleep(50);
+        await localUtils.sleep(100);
     }
     await Promise.all(transferReqArr);
 

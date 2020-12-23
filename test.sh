@@ -9,6 +9,11 @@ processes=(
     "./main/watch/chain0Watch.js"
     "./main/watch/chain1Watch.js"
 )
+child_processes=(
+    "./main/mid/uploadMid.js"
+    "./main/mid/authMid.js"
+    "./main/mid/transferMid.js"
+)
 logs=(
     "./uploadReq.log"
     "./authReq.log"
@@ -19,6 +24,7 @@ logs=(
     "./chain1Watch.log"
 )
 job_count=${#processes[*]}
+child_count=${#child_processes[*]}
 
 while getopts "se" arg
 do
@@ -35,6 +41,16 @@ do
             do
                 echo "killing "${processes[$i]}"..."
                 pids=`ps -ef | grep ${processes[$i]} | grep -v grep | awk '{print $2}'`
+                echo $pids
+                for pid in $pids
+                do
+                    kill -9 $pid
+                done
+            done
+            for ((i=0;i<${child_count-1};i++))
+            do
+                echo "killing "${child_processes[$i]}"..."
+                pids=`ps -ef | grep ${child_processes[$i]} | grep -v grep | awk '{print $2}'`
                 echo $pids
                 for pid in $pids
                 do
