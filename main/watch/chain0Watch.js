@@ -10,6 +10,8 @@ import * as localUtils from '../../utils/localUtils.js';
 
 import {chains, ipfsConf, mysqlConf, debugMode} from '../../utils/info.js';
 
+const u = jlib.utils;
+
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -62,7 +64,7 @@ r.connect(async function(err, result) {
                 1、交易类型为支付
                 2、memos前两位为“0_”
             */
-            if(txType == 'Payment' && localUtils.ascii2str(tx.Memos[0].Memo.MemoData).slice(0, 1) == 0) {
+            if(txType == 'Payment' && u.hexToString(tx.Memos[0].Memo.MemoData).slice(0, 1) == 0) {
                 uploadTxs.push(tx);
             }
         }
@@ -74,7 +76,7 @@ r.connect(async function(err, result) {
         let uploadMemosArr = new Array(uploadCount);
         for(let i = uploadLoopCounter; i >= 0; i--) {
             let tx = uploadTxs[i];
-            uploadMemosArr[i] = JSON.parse(localUtils.ascii2str(tx.Memos[0].Memo.MemoData).slice(2));
+            uploadMemosArr[i] = JSON.parse(u.hexToString(tx.Memos[0].Memo.MemoData).slice(2));
         }
 
         // 从ipfs上获取作品信息

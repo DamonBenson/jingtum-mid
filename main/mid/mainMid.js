@@ -4,9 +4,9 @@ import {spawn} from 'child_process';
 import * as router from '../../utils/router.js';
 
 // 启动子进程
-const childUpload = spawn('node', ['./main/mid/uploadMid.js']);
-const childAuth = spawn('node', ['./main/mid/authMid.js']);
-const childTransfer = spawn('node', ['./main/mid/transferMid.js']);
+const childUpload = spawn('node', ['./main/mid/uploadMid.js']); // 相对于当前命令行所在目录的相对位置
+const childAuth = spawn('node', ['./main/mid/authMid.js']); // 相对于当前命令行所在目录的相对位置
+const childTransfer = spawn('node', ['./main/mid/transferMid.js']); // 相对于当前命令行所在目录的相对位置
 
 // 监听并打印子进程信息
 childUpload.stdout.on('data', function(chunk) {

@@ -3,7 +3,7 @@ import * as fetch from '../../utils/fetch.js';
 
 import {chains, userMemo, debugMode} from '../../utils/info.js';
 
-const msPerUpload = 6000; // 上传作品间隔时间
+const msPerUpload = 5000; // 上传作品间隔时间
 
 const a2 = chains[0].account.a[2].address; // 版权人账号(存证链帐号2)
 

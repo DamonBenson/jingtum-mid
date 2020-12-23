@@ -29,7 +29,7 @@ setInterval(async function() {
         console.log('auth:', uncheckId);
         // auth: 7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12
         authReqArr[i] = fetch.postData('http://127.0.0.1:9001/authReq', uncheckId);
-        await localUtils.sleep(100);
+        await localUtils.sleep(50);
     }
     await Promise.all(authReqArr);
 

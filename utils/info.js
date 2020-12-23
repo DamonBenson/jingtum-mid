@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const picPath = './resource/test.jpg';
+const picPath = './resource/test.jpg'; // 相对于当前命令行所在目录的相对位置
 const pic = fs.readFileSync(picPath);
 
 const userAccount = [
@@ -21,10 +21,10 @@ const userAccount = [
 const chains = [
     {
         server: [
-            'ws://39.102.91.224:5020',
-            'ws://39.102.92.249:5020',
-            'ws://39.102.90.153:5020',
-            'ws://39.102.92.229:5020',
+            'ws://172.31.43.237:5020',
+            'ws://172.31.43.240:5020',
+            'ws://172.31.43.238:5020',
+            'ws://172.31.43.239:5020',
         ],
         account: {
             root: {
@@ -48,10 +48,10 @@ const chains = [
     },
     {
         server: [
-            'ws://39.102.91.224:6030',
-            'ws://39.102.92.249:6030',
-            'ws://39.102.90.153:6030',
-            'ws://39.102.92.229:6030',
+            'ws://172.31.43.237:6030',
+            'ws://172.31.43.240:6030',
+            'ws://172.31.43.238:6030',
+            'ws://172.31.43.239:6030',
         ],
         account: {
             root: {
@@ -150,7 +150,7 @@ const ipfsConf = {
 }
 
 const mysqlConf = {
-    host: '39.102.93.47',       
+    host: '127.0.0.1',       
     user: 'root',              
     password: 'bykyl626',       
     port: '3306',                   

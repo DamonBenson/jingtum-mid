@@ -1,3 +1,6 @@
+import jlib from 'jingtum-lib';
+const u = jlib.utils;
+
 /*----------暂停----------*/
 
 export function sleep(ms) {
@@ -42,35 +45,35 @@ export function formatStr(num, len) {
     return (Array(len).join(0) + num).slice(-len);
 }
 
-/*----------16进制ascii码转字符串----------*/
+// /*----------16进制ascii码转字符串----------*/
 
-export function ascii2str(ascii) {
-    let str = '';
-    for(let i = ascii.length/2; i > 0; i--) {
-        str = String.fromCharCode(hex2int(ascii.substring(2 * i - 2, 2 * i))) + str;
-    }
-    return str;
-}
+// export function ascii2str(ascii) {
+//     let str = '';
+//     for(let i = ascii.length/2; i > 0; i--) {
+//         str = String.fromCharCode(hex2int(ascii.substring(2 * i - 2, 2 * i))) + str;
+//     }
+//     return str;
+// }
 
-/*----------16进制字符转10进制数字----------*/
+// /*----------16进制字符转10进制数字----------*/
 
-export function hex2int(hex) {
-    let len = hex.length, a = new Array(len), code;
-    for(let i = 0; i < len; i++) {
-        code = hex.charCodeAt(i);
-        if(48 <= code && code < 58) {
-            code -= 48;
-        } 
-        else {
-            code = (code & 0xdf) - 65 + 10;
-        }
-        a[i] = code;
-    }
-    return a.reduce(function(acc, c) {
-        acc = 16 * acc + c;
-        return acc;
-    }, 0);
-}
+// export function hex2int(hex) {
+//     let len = hex.length, a = new Array(len), code;
+//     for(let i = 0; i < len; i++) {
+//         code = hex.charCodeAt(i);
+//         if(48 <= code && code < 58) {
+//             code -= 48;
+//         } 
+//         else {
+//             code = (code & 0xdf) - 65 + 10;
+//         }
+//         a[i] = code;
+//     }
+//     return a.reduce(function(acc, c) {
+//         acc = 16 * acc + c;
+//         return acc;
+//     }, 0);
+// }
 
 /*----------对象转为ERC721Memos格式----------*/
 
@@ -91,8 +94,8 @@ export function obj2memos(obj) {
 export function memos2obj(arr) {
     let obj = new Object();
     for(let i = arr.length - 1; i >= 0; i--) {
-        let k = ascii2str(arr[i].Memo.MemoType);
-        let v = ascii2str(arr[i].Memo.MemoData);
+        let k = u.hexToString(arr[i].Memo.MemoType);
+        let v = u.hexToString(arr[i].Memo.MemoData);
         obj[k] = v;
     }
     obj['rightType'] = Number(obj['rightType']);
@@ -114,12 +117,6 @@ export function toLine(name) {
     return name.replace(/([A-Z])/g,"_$1").toLowerCase();
 }
 
-/*----------时间戳转mysql的date格式----------*/
-
-export function toMysqlDate(ts) {
-    return (new Date(ts * 1000)).toJSON().slice(0, 19).replace('/T.*/', ' ');
-}
-
 /*----------js命名对象转mysql命名对象----------*/
 
 export function toMysqlObj(obj) {
@@ -130,3 +127,9 @@ export function toMysqlObj(obj) {
         }
     }
 }
+
+// /*----------时间戳转mysql的date格式----------*/
+
+// export function toMysqlDate(ts) {
+//     return (new Date(ts * 1000)).toJSON().slice(0, 19).replace('/T.*/', ' ');
+// }

@@ -11,6 +11,8 @@ import * as localUtils from '../../utils/localUtils.js';
 
 import {chains, ipfsConf, mysqlConf, debugMode, tokenName} from '../../utils/info.js';
 
+const u = jlib.utils;
+
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -78,7 +80,7 @@ r.connect(async function(err, result) {
                 3、源地址为用户、目标地址为用户
             */
             if(txType == 'TransferToken') {
-                let txTokenName = localUtils.ascii2str(tx.FundCode);
+                let txTokenName = u.hexToString(tx.FundCode);
                 if(txTokenName == tokenName) {
                     if(src == ag && dst != ag) {
                         tokenTxs.push(tx);
