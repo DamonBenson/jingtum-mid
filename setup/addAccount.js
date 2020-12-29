@@ -1,53 +1,73 @@
-import jlib from 'jingtum-lib';
+import jlib, { Wallet } from 'jingtum-lib';
+import mysql from 'mysql';
+import sqlText from 'node-transform-mysql';
 
-import RequestInfo from '../utils/requestInfo.js';
-import Tx from '../utils/tx.js';
-import {Account, Server} from '../utils/info.js';
+import * as requestInfo from '../utils/jingtum/requestInfo.js';
+import * as tx from '../utils/jingtum/tx.js';
+import * as mysqlUtils from '../utils/mysqlUtils.js';
 
-const requestInfo = new RequestInfo();
-const tx = new Tx();
+import {chains, mysqlConf} from '../utils/info.js';
 
-const a1 = Account.rootAccount;
-const s1 = Account.rootSecret;
+const addAmount = 3;
+const addLoopCounter = addAmount - 1;
 
-const addAmount = 1;
+const c = mysql.createConnection(mysqlConf);
+c.connect(); // 数据库连接
 
 const Remote = jlib.Remote;
-const r = new Remote({server: Server.s4, local_sign: true});
 
-r.connect(async function(err, result) {
+let walletArr = new Array(addAmount);
+for(let i = addLoopCounter; i >= 0; i--) {
+    walletArr[i] = Wallet.generate()
+}
+console.log('generate wallets:', walletArr);
 
-    /*---------链接状态----------*/
+/*----------账号信息存入数据库----------*/
 
-    if(err) {
-        return console.log('err: ', err);
-    }
-    else if(result) {
-        console.log('connect: ', result);
-    }
+let postAccountInfoPromises = new Array(addAmount);
+for(let j = addLoopCounter; j >= 0; j--) {
+    let accountInfo = {
+        user_id: 'null',
+        addr: walletArr[j].address,
+        secret: walletArr[j].secret,
+    };
+    let sql = sqlText.table('account_info').data(accountInfo).insert();
+    postAccountInfoPromises[j] = mysqlUtils.sql(c, sql);
+}
+await Promise.all(postAccountInfoPromises);
 
-    /*----------生成账号----------*/
+for(let i = chains.length - 1; i >= 0; i--) {
 
-    let Wallet = jlib.Wallet;
-    let walletArr = [];
-    for(let i = 0; i < addAmount; i++) {
-        let w = Wallet.generate();
-        console.log(w);
-        walletArr.push(w);
-    }
+    let chain = chains[i];
+    let ar = chain.account.root.address;
+    let sr = chain.account.root.secret;
 
-    /*----------转账激活账号----------*/
+    let r = new Remote({server: chain.server[0], local_sign: true});
+    r.connect(async function(err, result) {
 
-    let accountInfo = await requestInfo.requestAccountInfo(a1, r, true);
-    let seq = accountInfo.account_data.Sequence;
+        /*---------链接状态----------*/
+    
+        if(err) {
+            return console.log('err: ', err);
+        }
+        else if(result) {
+            console.log('connect: ', result);
+        }
 
-    let activatePromises = walletArr.map(w => {
-        let promise = tx.buildPaymentTx(a1, s1, r, seq, w.address, 100000000, 'setup', true);
-        seq += 2;
-        return promise;
-    })
-    await Promise.all(activatePromises);
+        let accountInfo = await requestInfo.requestAccountInfo(ar, r, true);
+        let seq = accountInfo.account_data.Sequence;
 
-    r.disconnect();
+        /*----------生成账号----------*/
 
-});
+        let activatePromises = new Array(addAmount);
+        for(let j = addLoopCounter; j >= 0; j--) {
+            let a = walletArr[j].address;
+            activatePromises[j] = tx.buildPaymentTx(ar, sr, r, seq++, a, 100000000, 'setup', true); // 转账激活账号
+        }
+        await Promise.all(activatePromises);
+
+        r.disconnect();
+    
+    });
+
+}

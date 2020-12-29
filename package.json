@@ -13,6 +13,8 @@
     "crypto-js": "^4.0.0",
     "ipfs-api": "^26.1.2",
     "jingtum-lib": "^2.4.2",
-    "node-fetch": "^2.6.1"
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.1",
+    "node-transform-mysql": "0.0.4"
   }
 }

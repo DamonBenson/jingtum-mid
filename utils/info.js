@@ -1,29 +1,82 @@
 import fs from 'fs';
 
-const picPath = './resource/test.jpg';
+const picPath = './resource/test.jpg'; // 相对于当前命令行所在目录的相对位置
 const pic = fs.readFileSync(picPath);
 
-const Account = {
-    rootAccount: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
-    rootSecret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
-    chargeAccount: 'jfHQQqeja9i7CQdYLHbRFPs9sgaxY4S9Wr',
-    chargeSecret: 'ssZwTGVwYY2KS2k8N7WskqAKLVSwD',
-    issuerAccount: 'jJns7cetGGamKL1WekDgvzViPgEJohj9f2',
-    issuerSecret: 'shWTVB7rWk5iip5vWRGiMo2LEkoKo',
-    gateAccount: 'jdNdAv5chV3iN44SrxzSbyxBTuSXJXEKq',
-    gateSecret: 'ssxpkgauMpf4sYT5CmNm3DXvoGkfN',
-}
+const userAccount = [
+    {
+        address: 'jGz7YickjDQJ1hSjbRbsiZsB8gMEu6UNeN',
+        secret: 'snzFDY32WweGDGGdk2ZTRDbAnMzFo',
+    },
+    {
+        address: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai',
+        secret: 'sn6CS3BYd2mK2aYHtctzStYfhbqD5',
+    },
+    {
+        address: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
+        secret: 'snnBebAfq9ygmU7aCA4ZgeRj4V68A',
+    },
+];
 
-const Server = {
-    s1: 'ws://39.96.5.207:6020',
-    s2: 'ws://39.96.27.111:6020',
-    s3: 'ws://39.107.124.25:6020',
-    s4: 'ws://39.96.28.111:6020',
-    s5: 'ws://39.107.113.240:6020',
-}
+const chains = [
+    {
+        server: [
+            'ws://172.31.43.237:5020',
+            'ws://172.31.43.240:5020',
+            'ws://172.31.43.238:5020',
+            'ws://172.31.43.239:5020',
+        ],
+        account: {
+            root: {
+                address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
+                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
+            },
+            charge: {
+                address: 'j7xQsY7aGJVoAaTGWYzyLoCLtGe9NwX7w',
+                secret: 'ss1nxL1FkJAZmVtHzHJKAw52He8fB',
+            },
+            issuer: {
+                address: 'jaXFNVexGYnFALQzSHUkLakyVs1Lxs9ETJ',
+                secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn',
+            },
+            gate: {
+                address: 'jnjTbty9qpPu2d9mHUjH5kzq4TRcnpJsQr',
+                secret: 'snEsawU3xG6cthJ7ucg8dKFuHvpwk',
+            },
+            a: userAccount,
+        },
+    },
+    {
+        server: [
+            'ws://172.31.43.237:6030',
+            'ws://172.31.43.240:6030',
+            'ws://172.31.43.238:6030',
+            'ws://172.31.43.239:6030',
+        ],
+        account: {
+            root: {
+                address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
+                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
+            },
+            charge: {
+                address: 'jsUXopMd8RAYX2GEK5u7qw6xNny7sgfKAS',
+                secret: 'sntpWAgCpioVbJEr4UwA9J6DRbhbM',
+            },
+            issuer: {
+                address: 'jJVzfzdpXvZYeMADkhKJvPhu3nT55eKSUE',
+                secret: 'sh4qJui9Tm8i59vrh1FYtBJVeZGoB',
+            },
+            gate: {
+                address: 'jLLNL25iY8Adta2oknGiQwN9TTWCL7P469',
+                secret: 'sn5LBvoLSd86T7mCXDNQD5qoFCNGv',
+            },
+            a: userAccount,
+        },
+    },
+]
 
-const userMemo = {
-    m1: {
+const userMemo = [
+    {
         work: pic,
         workName: 'm1_',
         createdTime: 1579017600,
@@ -32,7 +85,7 @@ const userMemo = {
         workForm: 0,
         workField: 0
     },
-    m2: {
+    {
         work: pic,
         workName: 'm2_',
         createdTime: 1579017600,
@@ -41,7 +94,7 @@ const userMemo = {
         workForm: 1,
         workField: 1
     },
-    m3: {
+    {
         work: pic,
         workName: 'm3_',
         createdTime: 1579017600,
@@ -50,7 +103,7 @@ const userMemo = {
         workForm: 2,
         workField: 2
     },
-    m4: {
+    {
         work: pic,
         workName: 'm4_',
         createdTime: 1579017600,
@@ -59,33 +112,51 @@ const userMemo = {
         workForm: 3,
         workField: 3
     }
-}
+];
 
-const authMemo = {
-    m1: {
-        authCode: 0,
+const authMemo = [
+    {
+        authCode: 'a0',
         authName: '天津版权局',
-        certNum: 0,
+        certNum: 'c0',
         cert: pic
     },
-    m2: {
-        authCode: 1,
+    {
+        authCode: 'a1',
         authName: '上海版权局',
-        certNum: 0,
+        certNum: 'c1',
         cert: pic
     },
-    m3: {
-        authCode: 2,
+    {
+        authCode: 'a2',
         authName: '北京版权保护中心',
-        certNum: 0,
+        certNum: 'c2',
         cert: pic
     },
-    m4: {
-        authCode: 3,
+    {
+        authCode: 'a3',
         authName: '国家版权局',
-        certNum: 0,
+        certNum: 'c3',
         cert: pic
     }
+];
+
+const tokenName = 'test1'
+
+const ipfsConf = {
+    host: '127.0.0.1',
+    port: '5001',
+    protocol: 'http'
 }
 
-export {Account, Server, userMemo, authMemo};
+const mysqlConf = {
+    host: '127.0.0.1',       
+    user: 'root',              
+    password: 'bykyl626',       
+    port: '3306',                   
+    database: 'jingtum'
+}
+
+const debugMode = false;
+
+export {chains, userMemo, authMemo, tokenName, ipfsConf, mysqlConf, debugMode};
