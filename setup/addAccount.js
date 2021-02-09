@@ -24,17 +24,17 @@ console.log('generate wallets:', walletArr);
 
 /*----------账号信息存入数据库----------*/
 
-let postAccountInfoPromises = new Array(addAmount);
-for(let j = addLoopCounter; j >= 0; j--) {
-    let accountInfo = {
-        user_id: 'null',
-        addr: walletArr[j].address,
-        secret: walletArr[j].secret,
-    };
-    let sql = sqlText.table('account_info').data(accountInfo).insert();
-    postAccountInfoPromises[j] = mysqlUtils.sql(c, sql);
-}
-await Promise.all(postAccountInfoPromises);
+// let postAccountInfoPromises = new Array(addAmount);
+// for(let j = addLoopCounter; j >= 0; j--) {
+//     let accountInfo = {
+//         user_id: 'null',
+//         addr: walletArr[j].address,
+//         secret: walletArr[j].secret,
+//     };
+//     let sql = sqlText.table('account_info').data(accountInfo).insert();
+//     postAccountInfoPromises[j] = mysqlUtils.sql(c, sql);
+// }
+// await Promise.all(postAccountInfoPromises);
 
 for(let i = chains.length - 1; i >= 0; i--) {
 
@@ -71,3 +71,4 @@ for(let i = chains.length - 1; i >= 0; i--) {
     });
 
 }
+

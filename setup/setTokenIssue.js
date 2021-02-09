@@ -7,7 +7,9 @@ import {chains} from '../utils/info.js';
 const tokenChain = chains[1];
 const ai = tokenChain.account.issuer.address;
 
-const tokenName = 'test1';
+const tokenName = 'test11';
+// const addr = tokenChain.account.a[0].address; //智能预警系统发币账号
+const addr = tokenChain.account.a[1].address; //智能授权系统发币账号
 
 const Remote = jlib.Remote;
 const r = new Remote({server: tokenChain.server[0], local_sign: true});
@@ -28,7 +30,7 @@ r.connect(async function(err, result) {
     let accountInfo = await requestInfo.requestAccountInfo(ai, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await erc721.buildTokenIssueReq(r, seq++, tokenName, 10000000, true);
+    await erc721.buildTokenIssueReq(r, addr, seq++, tokenName, 10000000, true);
 
     r.disconnect();
 

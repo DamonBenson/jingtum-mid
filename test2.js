@@ -1,7 +1,17 @@
 import * as localUtils from './utils/localUtils.js';
 
-process.stdin.on('data', async function(chunk) {
-    await localUtils.sleep(1000);
-    // await setTimeout(() => console.log('aaa'), 1000);
-    console.log('aaa');
-});
+import express from 'express';
+
+const app = express();
+const port = 9001;
+
+app.listen(port, () => console.log(`MainMid listening on port ${port}!`));
+
+app.post('/a', a);
+app.post('/b', a);
+
+var i = 1000;
+
+async function a() {
+    await localUtils.sleep(i++);
+}

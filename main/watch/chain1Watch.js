@@ -9,7 +9,7 @@ import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode, tokenName} from '../../utils/info.js';
+import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName} from '../../utils/info.js';
 
 const u = jlib.utils;
 
@@ -70,18 +70,27 @@ r.connect(async function(err, result) {
             let txType = tx.TransactionType;
             let src = tx.Account;
             let dst = tx.Destination;
-            /* 通证发行：
-                1、交易类型为通证转让（井通链sdk复用）
-                2、通证名称对应
-                3、源地址为银关、目标地址为用户
-            通证转让：
-                1、交易类型为通证转让（井通链sdk复用）
-                2、通证名称对应
+            /* 
+            权利项通证发行：
+                1、交易类型为通证转让
+                2、通证名称对应rightTokenName
+                3、源地址为智能预警系统发币账号、目标地址为用户
+            许可通证发行：
+                1、交易类型为通证转让
+                2、通证名称对应approveTokenName
+                3、源地址为智能授权系统发币账号、目标地址为用户
+            权利项通证转让：
+                1、交易类型为通证转让
+                2、通证名称对应rightTokenName
+                3、源地址为用户、目标地址为用户
+            许可通证转让：
+                1、交易类型为通证转让
+                2、通证名称对应approveTokenName
                 3、源地址为用户、目标地址为用户
             */
             if(txType == 'TransferToken') {
                 let txTokenName = u.hexToString(tx.FundCode);
-                if(txTokenName == tokenName) {
+                if(txTokenName == rightTokenName) {
                     if(src == ag && dst != ag) {
                         tokenTxs.push(tx);
                     }

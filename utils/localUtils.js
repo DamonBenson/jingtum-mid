@@ -7,6 +7,12 @@ export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/*----------生成区间[min, max)的随机整数---------*/
+
+export function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
 /*----------生成随机len位字符串----------*/
 
 export function randomString(len) {
