@@ -1,20 +1,26 @@
 import ipfsAPI from 'ipfs-api';
+import mysql from 'mysql';
+import sqlText from 'node-transform-mysql';
 import sha256 from 'crypto-js/sha256.js';
 
 import * as tx from '../../../utils/jingtum/tx.js'
 import * as erc721 from '../../../utils/jingtum/erc721.js';
+import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
+import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
 
 import {pic, chains, rightTokenName, ipfsConf, debugMode} from '../../../utils/info.js';
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
-const uploadChain = chains[0]; // 存证链
+const c = mysql.createConnection(mysqlConf);
+c.connect(); // mysql连接
+const tokenChain = chains[0]; // 交易链
 
-/*----------中间层账号(存证/交易链账号0)----------*/
+/*----------智能授权系统发币账号----------*/
 
-const a0 = uploadChain.account.a[0].address;
-const s0 = uploadChain.account.a[0].secret;
+const a0 = tokenChain.account.a[1].address;
+const s0 = tokenChain.account.a[1].secret;
 
 /*----------构造上传买单的交易----------*/
 
@@ -31,7 +37,33 @@ export async function handleBuyOrder(contractRemote, seqObj, req, res) {
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let sql = sqlText.table('contract_info').field('abi_hash').where({contract_addr: contractAddr}).select();
+    let abiHash = await mysqlUtils.sql(c, sql);
+    abiHash = abiHash[0];
+    let abiJson = ipfsUtils.get(ipfs, abiHash);
+    let abi = JSON.parse(abiJson);
+
+    // 解析需要存入合约的数据
+    let orderId = body.orderId;
+
+    // 解析平台地址
+    let platformAddress = body.addr;
+
+    // 次要信息存入IPFS
+    let orderInfo = JSON.stringify(body, [subBuyOrder, limitPrice, tradeStrategy, authorizationInfo, side, contact]);
+    let orderInfoHash = await ipfsUtils.add(ipfs, orderInfo);
+    
     // 构造交易
+    await contract.invokeContract()
+    let unsignedTx = contractRemote.invokeContract({
+        account: platformAddress, 
+        destination: contractAddr, // 待部署
+        abi: abi, // 待部署
+        func: makeOrder(orderId, orderInfoHash),
+    });
+    unsignedTx.setSequence(seqObj.contract++);
 
     console.timeEnd('handleBuyOrder');
     console.log('--------------------');
@@ -52,7 +84,11 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
+    let blob = body;
+
     // 提交交易
+    await tx.buildSignedTx(contractRemote, blob, true);
+
 
     console.timeEnd('handleSignedBuyOrder');
     console.log('--------------------');
@@ -76,7 +112,36 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let sql = sqlText.table('contract_info').field('abi_hash').where({contract_addr: contractAddr}).select();
+    let abiHash = await mysqlUtils.sql(c, sql);
+    abiHash = abiHash[0];
+    let abiJson = ipfsUtils.get(ipfs, abiHash);
+    let abi = JSON.parse(abiJson);
+
+    // 解析需要存入合约的数据
+    let orderId = body.orderId;
+    let assetId = body.assetId;
+    let assetType = body.assetType;
+    let consumable = body.consumable;
+    let expireTime = body.expireTime;
+
+    // 解析平台地址
+    let platformAddress = body.addr;
+
+    // 次要信息存入IPFS
+    let otherClauses = JSON.stringify(body, [labelSet, expectedPrice, contact]);
+    let otherClausesHash = await ipfsUtils.add(ipfs, otherClauses);
+    
     // 构造交易
+    let unsignedTx = contractRemote.invokeContract({
+        account: platformAddress, 
+        destination: contractAddr, // 待部署
+        abi: abi, // 待部署
+        func: makeOrder(orderId, assetId, assetType, consumable, expireTime, otherClausesHash),
+    });
+    unsignedTx.setSequence(seqObj.contract++);
 
     console.timeEnd('handleSellOrder');
     console.log('--------------------');
@@ -97,12 +162,15 @@ export async function handleSignedSellOrder(contractRemote, seqObj, req, res) {
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
+    let blob = body;
+
     // 提交交易
+    await tx.buildSignedTx(contractRemote, blob, true);
 
     console.timeEnd('handleSignedSellOrder');
     console.log('--------------------');
 
-    return orderId;
+    // return orderId;
 
 }
 

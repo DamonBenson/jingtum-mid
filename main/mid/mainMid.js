@@ -15,7 +15,7 @@ const contractChain = chains[1];
 
 const upload_a0 = uploadChain.account.a[0].address;
 const token_a0 = tokenChain.account.a[0].address;
-const contract_a0 = contractChain.account.a[0].addresss;
+const contract_a0 = contractChain.account.a[0].address;
 
 const Remote = jlib.Remote;
 const uploadRemote = new Remote({server: uploadChain.server[0], local_sign: true});
@@ -116,8 +116,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuy', async function(req, res) {
-                let orderId = await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
+                res.send('success');
             });
 
             // 提交卖单
@@ -132,8 +132,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedSell', async function(req, res) {
-                let orderId = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
+                res.send('success');
             });
 
             // 提交交易服务结果
@@ -240,7 +240,7 @@ uploadRemote.connect(async function(err, res) {
 
             app.listen(port, () => console.log(`MainMid listening on port ${port}!`));
 
-        // });
+        });
 
     });
 

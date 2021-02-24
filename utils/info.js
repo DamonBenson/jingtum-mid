@@ -27,7 +27,7 @@ const userAccount = [
     {
         address: 'jDG6K4JTptGi7hz3iAaqB8guaJZbpn5EcQ',
         secret: 'sn45ujQacJpjPtQp6HkrPbj3F6zxY'
-    }, // a[5]--用户3
+    }, // a[5]--平台
 ];
 
 const chains = [

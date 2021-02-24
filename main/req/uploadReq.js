@@ -23,15 +23,13 @@ async function postUploadReq() {
         console.log('upload:', uploadReq.workName);
     }
     /* upload: {
-        addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
-        uploadInfo: {
-            workName: 'm1_',
-            createdTime: 1579017600,
-            publishedTime: 1579017600,
-            workType: 0,
-            workForm: 0,
-            workField: 0
-        }
+        addr: 'jUy7sbmrwaphoPdACnZnxeKAAEqG46WkCC',     
+        workName: 'm1_0',
+        createdTime: 1579017600,
+        publishedTime: 1579017600,
+        workType: 0,
+        workForm: 0,
+        workField: 0
     } */
     await fetch.postData('http://127.0.0.1:9001/upload/init', uploadReq);
 

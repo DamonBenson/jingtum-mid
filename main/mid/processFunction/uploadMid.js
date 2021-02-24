@@ -62,7 +62,7 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
     }
     /* upload: {
         workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-        workInfoHash: 'QmPaUkFKrUzmcGUDP5k8zyD5XCohQkXfo8v4qRdDDHk5Bu'
+        workInfoHash: 'QmcmdhJ2zVCSc4yffgQXPzk6YcanX3wUvDeZzACjBCXX2Q'
     } */
     let paymentRes = await tx.buildPaymentTx(a0, s0, uploadRemote, seqObj.upload++, addr, 0.000001, uploadMemos, true);
     let hash = paymentRes.tx_json.hash;
@@ -100,13 +100,8 @@ export async function handleRightTokenIssue(tokenRemote, seqObj, addr, workId, r
             console.log('issue token:', workInfo.work_name + '_' + rightType);
         }
         /* issue token: {
-            workId: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',        
-            //authId: 'DCI0000003538',
-            state: 2,
-            //approveArr: [],
-            //authInfoHash: 'QmZUMssaWe2HMjoa22FvRuQtoq4MXUkq5tYv7khoemcfqP',
-            //certHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-            rightType: 8
+            workId: '909B18A4FCFE8ACDA0C8F4AC5C45AF2BA86F2DE7761C73126B1EDBF0A18FEBA5',
+            rightType: 6
         } */
         tokenIssuePromises.push(erc721.buildIssueTokenTx(s0, tokenRemote, seqObj.token++, a0, rightTokenName, tokenId, tokenMemos, true)); //银关填写通证memos
         tokenAuthPromises.push(erc721.buildAuthTokenTx(s0, tokenRemote, seqObj.token++, a0, addr, rightTokenName, tokenId, true)); //银关将通证转让给用户（目前井通sdk发行通证需要这两步，导致确权开销较大）

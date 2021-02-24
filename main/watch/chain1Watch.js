@@ -16,16 +16,16 @@ const u = jlib.utils;
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-const chain1 = chains[1]; // 确权链
+const tokenChain = chains[1]; // 确权链
 
-/*----------版权局账号(确权链银关账号)----------*/
+/*----------智能预警系统发币账号----------*/
 
-const ag = chain1.account.gate.address;
+const a0 = tokenChain.account.a[0].address;
 
 /*----------创建链接(确权链服务器3)----------*/
 
 var Remote = jlib.Remote;
-var r = new Remote({server: chain1.server[3], local_sign: true});
+var r = new Remote({server: tokenChain.server[3], local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -91,10 +91,10 @@ r.connect(async function(err, result) {
             if(txType == 'TransferToken') {
                 let txTokenName = u.hexToString(tx.FundCode);
                 if(txTokenName == rightTokenName) {
-                    if(src == ag && dst != ag) {
+                    if(src == a0 && dst != a0) {
                         tokenTxs.push(tx);
                     }
-                    else if(src != ag && dst != ag) {
+                    else if(src != a0 && dst != a0) {
                         transferTxs.push(tx);
                     }
                 }
@@ -120,58 +120,58 @@ r.connect(async function(err, result) {
             tokenInfoArr[i] = localUtils.memos2obj(res.TokenInfo.Memos);
         }
 
-        // 从ipfs上获取确权信息
-        let authInfoGetPromises = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let tokenInfo = tokenInfoArr[i];
-            authInfoGetPromises[i] = ipfsUtils.get(ipfs, tokenInfo.authInfoHash);
-        }
-        let authInfoJsonArr = await Promise.all(authInfoGetPromises);
+        // // 从ipfs上获取确权信息
+        // let authInfoGetPromises = new Array(tokenCount);
+        // for(let i = tokenLoopCounter; i >= 0; i--) {
+        //     let tokenInfo = tokenInfoArr[i];
+        //     authInfoGetPromises[i] = ipfsUtils.get(ipfs, tokenInfo.authInfoHash);
+        // }
+        // let authInfoJsonArr = await Promise.all(authInfoGetPromises);
 
-        // 确权信息存入数据库
-        let postAuthInfoPromises = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let tx = tokenTxs[i];
-            let tokenInfo = tokenInfoArr[i];
-            let authInfo = JSON.parse(authInfoJsonArr[i].toString());
-            if(!tokenTx[tokenInfo.workId]) {
-                let authTxInfo = {...authInfo};
-                authTxInfo.authId = tokenInfo.authId;
-                authTxInfo.authTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
-                authTxInfo.certHash = tokenInfo.certHash;
-                // authTxInfo.authTime = localUtils.toMysqlDate(authTxInfo.authTime); // 通用时间戳转换为数据库date格式
-                localUtils.toMysqlObj(authTxInfo);
-                tokenTx[tokenInfo.workId] = 1;
-                if(debugMode) {
-                    console.log('on auth:', authTxInfo);
-                }
-                else {
-                    console.log('on auth:', authTxInfo.auth_id);
-                }
-                /* on auth: {
-                    auth_code: 'a1',
-                    auth_name: '上海版权局',
-                    cert_num: 'c1',
-                    auth_id: 'DCI0000003538',
-                    auth_time: 1608517760,
-                    cert_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
-                } */
-                let workId = tokenInfo.workId;
-                let sql = sqlText.table('work_info').data(authTxInfo).where({work_id: workId}).update();
-                postAuthInfoPromises[i] = mysqlUtils.sql(c, sql);
-            }
+        // // 确权信息存入数据库
+        // let postAuthInfoPromises = new Array(tokenCount);
+        // for(let i = tokenLoopCounter; i >= 0; i--) {
+        //     let tx = tokenTxs[i];
+        //     let tokenInfo = tokenInfoArr[i];
+        //     let authInfo = JSON.parse(authInfoJsonArr[i].toString());
+        //     if(!tokenTx[tokenInfo.workId]) {
+        //         let authTxInfo = {...authInfo};
+        //         authTxInfo.authId = tokenInfo.authId;
+        //         authTxInfo.authTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
+        //         authTxInfo.certHash = tokenInfo.certHash;
+        //         // authTxInfo.authTime = localUtils.toMysqlDate(authTxInfo.authTime); // 通用时间戳转换为数据库date格式
+        //         localUtils.toMysqlObj(authTxInfo);
+        //         tokenTx[tokenInfo.workId] = 1;
+        //         if(debugMode) {
+        //             console.log('on auth:', authTxInfo);
+        //         }
+        //         else {
+        //             console.log('on auth:', authTxInfo.auth_id);
+        //         }
+        //         /* on auth: {
+        //             auth_code: 'a1',
+        //             auth_name: '上海版权局',
+        //             cert_num: 'c1',
+        //             auth_id: 'DCI0000003538',
+        //             auth_time: 1608517760,
+        //             cert_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
+        //         } */
+        //         let workId = tokenInfo.workId;
+        //         let sql = sqlText.table('work_info').data(authTxInfo).where({work_id: workId}).update();
+        //         postAuthInfoPromises[i] = mysqlUtils.sql(c, sql);
+        //     }
 
-            // 若已收到同一作品的17个通证，则删除记录
-            else if(tokenTx[tokenInfo.workId] == 16) {
-                delete tokenTx[tokenInfo.workId];
-            }
+        //     // 若已收到同一作品的17个通证，则删除记录
+        //     else if(tokenTx[tokenInfo.workId] == 16) {
+        //         delete tokenTx[tokenInfo.workId];
+        //     }
 
-            // 若已推送过通证对应作品的确权信息，则不推送并记录
-            else {
-                tokenTx[tokenInfo.workId]++;
-            }
-        }
-        await Promise.all(postAuthInfoPromises);
+        //     // 若已推送过通证对应作品的确权信息，则不推送并记录
+        //     else {
+        //         tokenTx[tokenInfo.workId]++;
+        //     }
+        // }
+        // await Promise.all(postAuthInfoPromises);
 
         // 通证信息存入数据库
         let postTokenInfoPromises = new Array(tokenCount);
@@ -179,9 +179,6 @@ r.connect(async function(err, result) {
             let tx = tokenTxs[i];
             let tokenInfoRes = tokenInfoResArr[i];
             let tokenInfo = tokenInfoArr[i];
-            delete tokenInfo.authInfoHash;
-            delete tokenInfo.authId;
-            delete tokenInfo.certHash;
             tokenInfo.tokenId = tx.TokenID;
             tokenInfo.addr = tokenInfoRes.TokenInfo.TokenOwner;
             localUtils.toMysqlObj(tokenInfo);
@@ -199,7 +196,7 @@ r.connect(async function(err, result) {
                 approve_arr: '',
                 token_id: 'C59209D11B745FF9903106E6339616CA15ABAA77E4AEC7306AB02D242048B4C5'       
             } */
-            let sql = sqlText.table('token_info').data(tokenInfo).insert();
+            let sql = sqlText.table('right_token_info').data(tokenInfo).insert();
             postTokenInfoPromises[i] = mysqlUtils.sql(c, sql);
         }
         await Promise.all(postTokenInfoPromises);
@@ -232,7 +229,7 @@ r.connect(async function(err, result) {
             } */
             let sql = sqlText.table('transfer_info').data(transferInfo).insert();
             postTransferInfoPromises[i] = mysqlUtils.sql(c, sql);
-            sql = sqlText.table('token_info').data({addr: tx.Destination}).where({token_id: tx.TokenID}).update();
+            sql = sqlText.table('right_token_info').data({addr: tx.Destination}).where({token_id: tx.TokenID}).update();
             postAddrChangePromises[i] = mysqlUtils.sql(c, sql);
         }
         await Promise.all(postTransferInfoPromises); // 交易信息存入transfer_info表

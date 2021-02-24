@@ -28,14 +28,17 @@ export function randomString(len) {
 /*----------按prob概率分布从res中随机选择----------*/
 
 export function randomSelect(res, prob) {
-    var sum = 0;
+    if(!prob) {
+        prob = (new Array(res.length)).fill(1);
+    }
+    let sum = 0;
     let factor = 0;
     let random = Math.random();
-    for(var i = prob.length - 1; i >= 0; i--) {
+    for(let i = prob.length - 1; i >= 0; i--) {
         sum += prob[i];
     };
     random *= sum;
-    for(var i = prob.length - 1; i >= 0; i--) {
+    for(let i = prob.length - 1; i >= 0; i--) {
         factor += prob[i];
         if(random <= factor) {
             return res[i];
@@ -105,7 +108,7 @@ export function memos2obj(arr) {
         obj[k] = v;
     }
     obj['rightType'] = Number(obj['rightType']);
-    obj['state'] = Number(obj['state']);
+    // obj['state'] = Number(obj['state']);
     return obj;
 }
 
