@@ -24,7 +24,7 @@ export function initContract(a, s, r, seq, abi, payload, showRes) {
                 if(showRes) {
                     console.log('initContract:', result);
                 }
-                resolve(result.ContractState);
+                resolve(result);
             }
         });
     });

@@ -8,7 +8,7 @@ import * as mysqlUtils from '../utils/mysqlUtils.js';
 
 import {chains, mysqlConf} from '../utils/info.js';
 
-const addAmount = 3;
+const addAmount = 10;
 const addLoopCounter = addAmount - 1;
 
 const c = mysql.createConnection(mysqlConf);

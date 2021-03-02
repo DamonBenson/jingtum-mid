@@ -10,12 +10,15 @@ import * as contractMid from './processFunction/contractMid.js';
 import * as transactionMid from './processFunction/transactionMid.js';
 
 const uploadChain = chains[0];
-const tokenChain = chains[1];
+const tokenChain = chains[0];
 const contractChain = chains[1];
 
 const upload_a0 = uploadChain.account.a[0].address;
 const token_a0 = tokenChain.account.a[0].address;
 const contract_a0 = contractChain.account.a[0].address;
+const upload_a1 = uploadChain.account.a[1].address;
+const token_a1 = tokenChain.account.a[1].address;
+const contract_a1 = contractChain.account.a[1].address;
 
 const Remote = jlib.Remote;
 const uploadRemote = new Remote({server: uploadChain.server[0], local_sign: true});
@@ -53,10 +56,17 @@ uploadRemote.connect(async function(err, res) {
             }
 
             // 获取中间层账号在每条链上的序列号
-            let seqObj = {};
-            seqObj.upload = (await requestInfo.requestAccountInfo(upload_a0, uploadRemote, false)).account_data.Sequence;
-            seqObj.token = (await requestInfo.requestAccountInfo(token_a0, tokenRemote, false)).account_data.Sequence;
-            seqObj.contract = (await requestInfo.requestAccountInfo(contract_a0, contractRemote, false)).account_data.Sequence;
+            let seqObj = {
+                a0: {},
+                a1: {},
+            };
+            // 目前upload同token，不能分开计数
+            // seqObj.a0.upload = (await requestInfo.requestAccountInfo(upload_a0, uploadRemote, false)).account_data.Sequence;
+            seqObj.a0.token = (await requestInfo.requestAccountInfo(token_a0, tokenRemote, false)).account_data.Sequence;
+            seqObj.a0.contract = (await requestInfo.requestAccountInfo(contract_a0, contractRemote, false)).account_data.Sequence;
+            // seqObj.a1.upload = (await requestInfo.requestAccountInfo(upload_a1, uploadRemote, false)).account_data.Sequence;
+            seqObj.a1.token = (await requestInfo.requestAccountInfo(token_a1, tokenRemote, false)).account_data.Sequence;
+            seqObj.a1.contract = (await requestInfo.requestAccountInfo(contract_a1, contractRemote, false)).account_data.Sequence;
 
             /*----------存证请求路由配置----------*/
 

@@ -11,7 +11,7 @@ import {pic, chains, rightTokenName, ipfsConf, debugMode} from '../../../utils/i
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const uploadChain = chains[0]; // 存证链
 
-/*----------中间层账号(存证/交易链账号0)----------*/
+/*----------智能预警系统发币账号----------*/
 
 const a0 = uploadChain.account.a[0].address;
 const s0 = uploadChain.account.a[0].secret;
@@ -64,7 +64,7 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
         workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
         workInfoHash: 'QmcmdhJ2zVCSc4yffgQXPzk6YcanX3wUvDeZzACjBCXX2Q'
     } */
-    let paymentRes = await tx.buildPaymentTx(a0, s0, uploadRemote, seqObj.upload++, addr, 0.000001, uploadMemos, true);
+    let paymentRes = await tx.buildPaymentTx(a0, s0, uploadRemote, seqObj.a0.token++, addr, 0.000001, uploadMemos, true);
     let hash = paymentRes.tx_json.hash;
 
     // 结束计时
@@ -103,8 +103,8 @@ export async function handleRightTokenIssue(tokenRemote, seqObj, addr, workId, r
             workId: '909B18A4FCFE8ACDA0C8F4AC5C45AF2BA86F2DE7761C73126B1EDBF0A18FEBA5',
             rightType: 6
         } */
-        tokenIssuePromises.push(erc721.buildIssueTokenTx(s0, tokenRemote, seqObj.token++, a0, rightTokenName, tokenId, tokenMemos, true)); //银关填写通证memos
-        tokenAuthPromises.push(erc721.buildAuthTokenTx(s0, tokenRemote, seqObj.token++, a0, addr, rightTokenName, tokenId, true)); //银关将通证转让给用户（目前井通sdk发行通证需要这两步，导致确权开销较大）
+        tokenIssuePromises.push(erc721.buildIssueTokenTx(s0, tokenRemote, seqObj.a0.token++, a0, addr, rightTokenName, tokenId, tokenMemos, true)); //银关填写通证memos
+        // tokenAuthPromises.push(erc721.buildAuthTokenTx(s0, tokenRemote, seqObj.a0.token++, a0, addr, rightTokenName, tokenId, true)); //银关将通证转让给用户（目前井通sdk发行通证需要这两步，导致确权开销较大）
     }
     await Promise.all(tokenIssuePromises);
     await Promise.all(tokenAuthPromises);

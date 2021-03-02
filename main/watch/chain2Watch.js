@@ -9,23 +9,19 @@ import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName} from '../../utils/info.js';
+import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
 
 const u = jlib.utils;
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-const chain2 = chains[1]; // 确权链
-
-/*----------版权局账号(确权链银关账号)----------*/
-
-const ag = chain2.account.gate.address;
+const contractChain = chains[1]; // 确权链
 
 /*----------创建链接(确权链服务器3)----------*/
 
 var Remote = jlib.Remote;
-var r = new Remote({server: chain2.server[3], local_sign: true});
+var r = new Remote({server: contractChain.server[3], local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -62,198 +58,66 @@ r.connect(async function(err, result) {
         }
         let txs = await Promise.all(txPromises);
 
-        // 筛选通证发行交易、通证转让交易
-        let tokenTxs = [];
-        let transferTxs = [];
+        console.log(txs);
+
+        // 筛选通证买单提交、卖单提交、匹配结果、买方确认、卖方确认5类交易
+        let buyOrderTxs = [];
+        let sellOrderTxs = [];
+        let matchTxs = [];
+        let buyerConfirmTxs = [];
+        let sellerConfirmTxs = [];
         for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
             let txType = tx.TransactionType;
             let src = tx.Account;
             let dst = tx.Destination;
-            /*
-            合约部署：
-                1、交易类型为合约调用
-                2、合约地址为managementContract
-            买单提交：
-                1、交易类型为合约调用
-                2、调用方法为postOrder
-                （主题筛选）
-                3、合约地址对应
-                4、平台Id对应
-            卖单提交：
-                1、交易类型为合约调用
-                2、调用方法为postOrder
-                （主题筛选）
-                3、合约地址对应
-                4、平台Id对应
-            匹配结果：
-                1、交易类型为合约调用
-                2、调用方法为matchOrder
-                （主题筛选）
-                3、合约地址对应
-                4、平台Id对应
-            买方确认：
-                1、交易类型为合约调用
-                2、调用方法为buyerConfirm
-                （主题筛选）
-                3、合约地址对应
-                4、平台Id对应
-            卖方确认：
-                1、交易类型为合约调用
-                2、调用方法为sellerConfirm
-                （主题筛选）
-                3、合约地址对应
-                4、平台Id对应
-            */
-            if(txType == 'TransferToken') {
-                let txTokenName = u.hexToString(tx.FundCode);
-                if(txTokenName == rightTokenName) {
-                    if(src == ag && dst != ag) {
-                        tokenTxs.push(tx);
+            switch(txType) {
+                case 'AlethContract':
+                    let processedTx = u.processTx(tx, src);
+                    processedTx.account = src;
+                    let contractMethod = processedTx.func;
+                    switch(dst) {
+                        case buyOrderContractAddr:
+                            switch(contractMethod) {
+                                case 'makeOrder': 
+                                    buyOrderTxs.push(processedTx);
+                                    break;
+                                case 'updateMatches':
+                                    matchTxs.push(processedTx);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case sellOrderContractAddr:
+                            switch(contractMethod) {
+                                case 'makeOrder': 
+                                    sellOrderTxs.push(processedTx);
+                                    break;
+                                case 'makeBuyIntention':
+                                    buyerConfirmTxs.push(processedTx);
+                                    break;
+                                case 'commitOrder':
+                                    sellerConfirmTxs.push(processedTx);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
                     }
-                    else if(src != ag && dst != ag) {
-                        transferTxs.push(tx);
-                    }
-                }
+                    break;
+                default:
+                    break;
             }
         }
-        const tokenCount = tokenTxs.length;
-        const transferCount = transferTxs.length;
-        const tokenLoopCounter = tokenCount - 1;
-        const transferLoopCounter = transferCount - 1;
 
-        // 获取交易中的通证信息
-        let tokenInfoPromises = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let tx = tokenTxs[i];
-            tokenInfoPromises[i] = erc721.requestTokenInfo(r, tx.TokenID, false);
-        }
-        let tokenInfoResArr = await Promise.all(tokenInfoPromises);
-
-        // 解析信息
-        let tokenInfoArr = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let res = tokenInfoResArr[i];
-            tokenInfoArr[i] = localUtils.memos2obj(res.TokenInfo.Memos);
-        }
-
-        // 从ipfs上获取确权信息
-        let authInfoGetPromises = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let tokenInfo = tokenInfoArr[i];
-            authInfoGetPromises[i] = ipfsUtils.get(ipfs, tokenInfo.authInfoHash);
-        }
-        let authInfoJsonArr = await Promise.all(authInfoGetPromises);
-
-        // 确权信息存入数据库
-        let postAuthInfoPromises = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let tx = tokenTxs[i];
-            let tokenInfo = tokenInfoArr[i];
-            let authInfo = JSON.parse(authInfoJsonArr[i].toString());
-            if(!tokenTx[tokenInfo.workId]) {
-                let authTxInfo = {...authInfo};
-                authTxInfo.authId = tokenInfo.authId;
-                authTxInfo.authTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
-                authTxInfo.certHash = tokenInfo.certHash;
-                // authTxInfo.authTime = localUtils.toMysqlDate(authTxInfo.authTime); // 通用时间戳转换为数据库date格式
-                localUtils.toMysqlObj(authTxInfo);
-                tokenTx[tokenInfo.workId] = 1;
-                if(debugMode) {
-                    console.log('on auth:', authTxInfo);
-                }
-                else {
-                    console.log('on auth:', authTxInfo.auth_id);
-                }
-                /* on auth: {
-                    auth_code: 'a1',
-                    auth_name: '上海版权局',
-                    cert_num: 'c1',
-                    auth_id: 'DCI0000003538',
-                    auth_time: 1608517760,
-                    cert_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3'
-                } */
-                let workId = tokenInfo.workId;
-                let sql = sqlText.table('work_info').data(authTxInfo).where({work_id: workId}).update();
-                postAuthInfoPromises[i] = mysqlUtils.sql(c, sql);
-            }
-
-            // 若已收到同一作品的17个通证，则删除记录
-            else if(tokenTx[tokenInfo.workId] == 16) {
-                delete tokenTx[tokenInfo.workId];
-            }
-
-            // 若已推送过通证对应作品的确权信息，则不推送并记录
-            else {
-                tokenTx[tokenInfo.workId]++;
-            }
-        }
-        await Promise.all(postAuthInfoPromises);
-
-        // 通证信息存入数据库
-        let postTokenInfoPromises = new Array(tokenCount);
-        for(let i = tokenLoopCounter; i >= 0; i--) {
-            let tx = tokenTxs[i];
-            let tokenInfoRes = tokenInfoResArr[i];
-            let tokenInfo = tokenInfoArr[i];
-            delete tokenInfo.authInfoHash;
-            delete tokenInfo.authId;
-            delete tokenInfo.certHash;
-            tokenInfo.tokenId = tx.TokenID;
-            tokenInfo.addr = tokenInfoRes.TokenInfo.TokenOwner;
-            localUtils.toMysqlObj(tokenInfo);
-            if(debugMode) {
-                console.log('on token:', tokenInfo);
-            }
-            else {
-                console.log('on token:', tokenInfo.work_id + '_' + tokenInfo.right_type);
-            }
-            /* on token: {
-                state: 2,
-                addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
-                work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
-                right_type: 8,
-                approve_arr: '',
-                token_id: 'C59209D11B745FF9903106E6339616CA15ABAA77E4AEC7306AB02D242048B4C5'       
-            } */
-            let sql = sqlText.table('token_info').data(tokenInfo).insert();
-            postTokenInfoPromises[i] = mysqlUtils.sql(c, sql);
-        }
-        await Promise.all(postTokenInfoPromises);
-
-        // 交易信息存入数据库
-        let postTransferInfoPromises = new Array(transferCount);
-        let postAddrChangePromises = new Array(transferCount);
-        for(let i = transferLoopCounter; i >=0; i--) {
-            let tx = transferTxs[i];
-            let transferInfo = {
-                transfer_id: tx.hash,
-                token_id: tx.TokenID,
-                addr: tx.Account,
-                rcv: tx.Destination,
-                transfer_time: tx.date + 946684800,
-                // transfer_time: localUtils.toMysqlDate(tx.date + 946684800),
-            };
-            if(debugMode) {
-                console.log('on transfer:', transferInfo);
-            }
-            else {
-                console.log('on transfer:', transferInfo.token_id);
-            }
-            /* on transfer: {
-                transfer_id: 'F1697D6615E6F9FFD5534886DA62813F322AB5D699ACC69E41C7CFAD8EED4D4A',   
-                token_id: 'C59209D11B745FF9903106E6339616CA15ABAA77E4AEC7306AB02D242048B4C5',      
-                addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
-                rcv: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai',
-                transfer_time: 1608517950
-            } */
-            let sql = sqlText.table('transfer_info').data(transferInfo).insert();
-            postTransferInfoPromises[i] = mysqlUtils.sql(c, sql);
-            sql = sqlText.table('token_info').data({addr: tx.Destination}).where({token_id: tx.TokenID}).update();
-            postAddrChangePromises[i] = mysqlUtils.sql(c, sql);
-        }
-        await Promise.all(postTransferInfoPromises); // 交易信息存入transfer_info表
-        await Promise.all(postAddrChangePromises); // 更改token_info表中的拥有者地址
+        await processBuyOrder(buyOrderTxs, buyOrderTxs.length);
+        await processSellOrder(sellOrderTxs, sellOrderTxs.length);
+        await processMatch(matchTxs, matchTxs.length);
+        await processBuyerConfirmTxs(buyerConfirmTxs, buyerConfirmTxs.length);
+        await processSellerConfirmTxs(sellerConfirmTxs, sellerConfirmTxs.length);
 
         // 结束计时
         let eTs = (new Date()).valueOf();
@@ -262,3 +126,71 @@ r.connect(async function(err, result) {
     });
 
 });
+
+async function processBuyOrder(buyOrderTxs, loopConter) {
+
+    console.log('buyOrderTxs:', buyOrderTxs);
+
+    buyOrderTxs.forEach(async(buyOrderTx) => {
+
+        let orderId = buyOrderTx.func_parms[0];
+        let platformAddr = buyOrderTx.account;
+        let timeStamp = buyOrderTx.date;
+        
+        let orderInfoHash = buyOrderTx.func_parms[1];
+        let orderInfoJson = await ipfsUtils.get(ipfs, orderInfoHash);
+        let orderInfo = JSON.parse(orderInfoJson);
+
+        orderInfo.orderId = orderId;
+        orderInfo.platformAddr = platformAddr;
+        orderInfo.timeStamp = timeStamp;
+
+        console.log(orderInfo);
+        // 推送买单信息
+
+    });
+
+}
+
+async function processSellOrder(sellOrderTxs, loopConter) {
+
+    console.log('sellOrderTxs:', sellOrderTxs);
+
+    sellOrderTxs.forEach(async(sellOrderTx) => {
+
+        let orderId = sellOrderTx.func_parms[0];
+        let timeStamp = sellOrderTx.date;
+        
+        let orderInfoHash = sellOrderTx.func_parms[1];
+        let orderInfoJson = await ipfsUtils.get(ipfs, orderInfoHash);
+        let orderInfo = JSON.parse(orderInfoJson);
+        delete orderInfo.sellerAddr;
+        delete orderInfo.contact;
+
+        orderInfo.orderId = orderId;
+        orderInfo.timeStamp = timeStamp;
+
+        console.log(orderInfo);
+        // 推送卖单信息
+
+    });
+
+}
+
+async function processMatch(matchTxs, loopConter) {
+
+    console.log('matchTxs:', matchTxs);
+
+}
+
+async function processBuyerConfirmTxs(buyerConfirmTxs, loopConter) {
+
+    console.log('buyerConfirmTxs:', buyerConfirmTxs);
+
+}
+
+async function processSellerConfirmTxs(sellerConfirmTxs, loopConter) {
+
+    console.log('sellerConfirmTxs:', sellerConfirmTxs);
+
+}

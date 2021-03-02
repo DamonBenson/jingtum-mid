@@ -5,30 +5,46 @@ const pic = fs.readFileSync(picPath);
 
 const userAccount = [
     {
-        address: 'jDAUJMj9WrxspX5uZDAM5UxUReTT8Fm8V3',
-        secret: 'snVDk8Gx9L32cXbrj1XeXhjZokApA'
+      secret: 'ssyYuua1z4J312TNVrz4pqaZLs7yG',
+      address: 'j9uudceu9gX3DyLcTL7czGgUnfzP9fQxko'
     }, // a[0]--智能预警系统发币账号
     {
-        address: 'j9pouNtZbErrTfLHF1PwJ4thmTFkk2oRGX',
-        secret: 'shw9MXFmcZg7H7AS3LFKQCfFwAJSG'
+      secret: 'ssxNDn2zSdjXTDFkANWpKWctHYMHZ',
+      address: 'jNPZMZxYx1Gj9rRYadiTfLG5ypQTJgmLAm'
     }, // a[1]--智能授权系统发币账号
     {
-        address: 'jUy7sbmrwaphoPdACnZnxeKAAEqG46WkCC',
-        secret: 'snQrY7QH65NYYvvSkReUwn64AR4ad'
+      secret: 'snj7uooT7AyWECSEFdtfgktaqYeA2',
+      address: 'jBwyKkquJFXT3VMUxr71v7XxQHfqgAdUac'
     }, // a[2]--版权局确权账号
     {
-        address: 'jE8kjQZT6cfP7pqofqHNiiM3doQu5SvsGX',
-        secret: 'ssneHKG9VxLwtvmZCAZHhkUZqo3Qd'
-    }, // a[3]--用户1
+      secret: 'snvrxFowqi2CbdsCAqRzqYnyUHkzU',
+      address: 'jUXNAu8YrzNQ6Vf6EsJcJTjhHKgGzb29y4'
+    }, // a[3]--买方平台账号
     {
-        address: 'jGgEkVqoJEgX4BDnpPDmcX69xd3BqpbmCM',
-        secret: 'snneqRWvKt72A8i5XkWw7H4woX6MB'
-    }, // a[4]--用户2
+      secret: 'ssyfiS2TBDiJP5Vq7Lht7kityxuXz',
+      address: 'jEY6Jr3qkDFnMcPZBig8jkdzTBt8ktMZA'
+    }, // a[4]--卖方平台账号
     {
-        address: 'jDG6K4JTptGi7hz3iAaqB8guaJZbpn5EcQ',
-        secret: 'sn45ujQacJpjPtQp6HkrPbj3F6zxY'
-    }, // a[5]--平台
-];
+      secret: 'shQxyCmFp937mHNrHmqvCxEqhmDzr',
+      address: 'jDg1GG5JpyFdrafjUcid99mKZeUXKHUptu'
+    }, // a[5]--智能交易系统账号
+    {
+      secret: 'ss6x7sLB6dVLKTnA2WHgAZUrkduZC',
+      address: 'jw382C55JLbLbUJNu8iJtisaqb4TAoQDGC'
+    }, // a[6]--用户1
+    {
+      secret: 'ssAHHWR2WUVEfyN5VUzcFkVmtsnBj',
+      address: 'jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3'
+    }, // a[7]--用户2
+    {
+      secret: 'shC3KW3vZFtRCpquGFtiXwQvtsXJw',
+      address: 'jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan'
+    }, // a[8]--用户3
+    {
+      secret: 'shegH3jnyxLFFtCiZBgEALTkwvBjy',
+      address: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9'
+    }, // a[9]--用户4
+]
 
 const chains = [
     {
@@ -60,10 +76,10 @@ const chains = [
     },
     {
         server: [
-            'ws://39.102.91.224:6030',
-            'ws://39.102.92.249:6030',
-            'ws://39.102.90.153:6030',
-            'ws://39.102.92.229:6030'
+            'ws://39.102.91.224:9030',
+            'ws://39.102.92.249:9030',
+            'ws://39.102.90.153:9030',
+            'ws://39.102.92.229:9030'
         ],
         account: {
             root: {
@@ -71,16 +87,12 @@ const chains = [
                 secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb'
             },
             charge: {
-                address: 'jsUXopMd8RAYX2GEK5u7qw6xNny7sgfKAS',
-                secret: 'sntpWAgCpioVbJEr4UwA9J6DRbhbM'
+                address: 'jEx8qHwy2r5vMrVrbc7i4juWKmtsSm4DS9',
+                secret: 'snQfZGdaR9sMe7D3uCcEHMvs4ocjA'
             },
             issuer: {
-                address: 'jJVzfzdpXvZYeMADkhKJvPhu3nT55eKSUE',
-                secret: 'sh4qJui9Tm8i59vrh1FYtBJVeZGoB'
-            },
-            gate: {
-                address: 'jLLNL25iY8Adta2oknGiQwN9TTWCL7P469',
-                secret: 'sn5LBvoLSd86T7mCXDNQD5qoFCNGv'
+                address: 'jfCdDWueik3AsSjcfcaQsdpFjW8CyZYT76',
+                secret: 'snjQmeX9gdwuVNHqvypxn2d663jKL'
             },
             a: userAccount
         }
@@ -89,7 +101,7 @@ const chains = [
 
 const userMemo = [
     {
-        addr: userAccount[2].address,
+        addr: userAccount[6].address,
         workName: 'm1_',
         createdTime: 1579017600,
         publishedTime: 1579017600,
@@ -98,7 +110,7 @@ const userMemo = [
         workField: 0
     },
     {
-        addr: userAccount[3].address,
+        addr: userAccount[7].address,
         workName: 'm2_',
         createdTime: 1581696000,
         publishedTime: 1581696000,
@@ -107,7 +119,7 @@ const userMemo = [
         workField: 1
     },
     {
-        addr: userAccount[4].address,
+        addr: userAccount[8].address,
         workName: 'm3_',
         createdTime: 1584201600,
         publishedTime: 1584201600,
@@ -116,7 +128,7 @@ const userMemo = [
         workField: 2
     },
     {
-        addr: userAccount[5].address,
+        addr: userAccount[9].address,
         workName: 'm4_',
         createdTime: 1586880000,
         publishedTime: 1586880000,
@@ -149,11 +161,11 @@ const authMemo = [
     }
 ];
 
-const rightTokenName = 'test10';
-const approveTokenName = 'test11';
+const rightTokenName = 'rightToken';
+const approveTokenName = 'approveToken';
 
 const ipfsConf = {
-    host: '127.0.0.1',
+    host: '39.102.93.47',
     port: '5001',
     protocol: 'http'
 }
@@ -168,4 +180,7 @@ const mysqlConf = {
 
 const debugMode = true;
 
-export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, ipfsConf, mysqlConf, debugMode};
+const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd'
+const sellOrderContractAddr = 'jpSgd31d1rEimK5kAQdxofgFNyKtEqZF7c'
+
+export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr};

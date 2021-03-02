@@ -4,10 +4,10 @@ import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as erc721 from '../utils/jingtum/erc721.js';
 import {chains} from '../utils/info.js';
 
-const tokenChain = chains[1];
+const tokenChain = chains[0];
 const ai = tokenChain.account.issuer.address;
 
-const tokenName = 'test11';
+const tokenName = 'approveToken';
 // const addr = tokenChain.account.a[0].address; //智能预警系统发币账号
 const addr = tokenChain.account.a[1].address; //智能授权系统发币账号
 

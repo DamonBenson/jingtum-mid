@@ -1,36 +1,77 @@
 import jlib from 'jingtum-lib';
+import mysql from 'mysql';
+import sqlText from 'node-transform-mysql';
+import sha256 from 'crypto-js/sha256.js';
 
+import * as requestInfo from '../../utils/jingtum/requestInfo.js';
+import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 import * as fetch from '../../utils/fetch.js';
 
-import {userAccount, debugMode} from '../../utils/info.js';
+import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '../../utils/info.js';
+
+const c = mysql.createConnection(mysqlConf);
+c.connect(); // mysql连接
 
 const msPerSellOrder = 10000;
-const platformAddress = userAccount[5].address; // 平台账号
-const platformSecret = userAccount[5].secret;
+const platformAddr = userAccount[4].address; // 平台账号
+const platformSecret = userAccount[4].secret;
+// const sellerAddr = userAccount[5].address;
 
 // setInterval(postSellOrderReq, msPerSellOrder);
 
-postSellOrderReq();
+const contractChain = chains[1];
+const Remote = jlib.Remote;
+const contractRemote = new Remote({server: contractChain.server[0], local_sign: true});
+
+// 连接到权益链
+contractRemote.connect(async function(err, res) {
+
+    if(err) {
+        return console.log('err: ', err);
+    }
+    else if(res) {
+        console.log('connect: ', res);
+    }
+    global.seq = (await requestInfo.requestAccountInfo(platformAddr, contractRemote, false)).account_data.Sequence;
+
+    postSellOrderReq();
+
+});
 
 async function postSellOrderReq() {
 
     console.time('sellOrderReq');
-    let sellOrder = generateSellOrder();
-    if(debugMode) {
-        console.log('sellOrder:', sellOrder);
-    }
-    let unsignedTx = await fetch.postData('http://127.0.0.1:9001/transaction/sell', sellOrder);
-    unsignedTx.setSecret(platformSecret);
-    unsignedTx.sign();
-    let blob = signedTx.blob;
-    await fetch.postData('http://127.0.0.1:9001/transaction/signedSell', blob);
+
+    let sql = sqlText.table('work_info').field('work_id, addr').order('RAND()').limit(1).select();
+    let workInfoArr = await mysqlUtils.sql(c, sql);
+
+    workInfoArr.map(async(workInfo) => {
+        let workId = workInfo.work_id;
+        let sellerAddr = workInfo.addr;
+        let sellOrder = generateSellOrder(workId, sellerAddr);
+        if(debugMode) {
+            console.log('sellOrder:', sellOrder);
+        }
+        let sellOrderRes = await fetch.postData('http://127.0.0.1:9001/transaction/sell', sellOrder);
+        let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);
+        let txJson = JSON.parse(buf.toString());
+        let unsignedTx = {
+            tx_json: txJson,
+        };
+        jlib.Transaction.prototype.setSequence.call(unsignedTx, seq++);
+        jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
+        jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
+        let blob = unsignedTx.tx_json.blob;
+        await fetch.postData('http://127.0.0.1:9001/transaction/signedSell', blob);
+    })
+    
     console.timeEnd('sellOrderReq');
     console.log('--------------------');
 
 }
 
-function generateSellOrder() {
+function generateSellOrder(wrokId, sellerAddr) {
     
     let labelSet = generateLabelSet();
     let basePrice = localUtils.randomNumber(100, 1000);
@@ -38,15 +79,17 @@ function generateSellOrder() {
     let sellOrder = {
         labelSet: labelSet,
         expectedPrice: expectedPrice,
+        sellerAddr: sellerAddr,
         contact: 'phoneNumber', // 联系方式
-        workId: '7848E52E59ACDB6BD51CB0BC219628B01980633E6D1AAB1C6A22547985C0927A',
+        assetId: wrokId,
         assetType: 0,
-        consumable: true,
+        consumable: false,
         expireTime: 86400,
-        addr: platformAddress,
-        contractAddr: '', // 待部署
+        addr: platformAddr,
+        contractAddr: sellOrderContractAddr, // 待部署
     }
-    sellOrder.orderId = sha256(sellOrder).toString();
+    sellOrder.orderId = sha256(seq.toString()).toString();
+    
     return sellOrder;
 
 }
@@ -55,7 +98,8 @@ function generateLabelSet() {
 
     let labelSet = {};
     for(let i = 0; i < 5; i++) {
-        labelSet[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
+        // labelSet[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
+        labelSet[i] = [0];
     }
     return labelSet;
 
@@ -63,7 +107,18 @@ function generateLabelSet() {
 
 function generateExpectedPrice(basePrice) {
 
-    let expectedPrice = {};
+    let expectedPrice = {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+        7: [],
+        8: [],
+        9: [],
+    };
     for(let i = 0; i < 9; i++) {
         switch(i) {
             case 0:
@@ -137,5 +192,7 @@ function generateExpectedPrice(basePrice) {
                 break;
         }
     }
+
+    return expectedPrice;
 
 }

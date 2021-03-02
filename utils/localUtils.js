@@ -142,3 +142,13 @@ export function toMysqlObj(obj) {
 // export function toMysqlDate(ts) {
 //     return (new Date(ts * 1000)).toJSON().slice(0, 19).replace('/T.*/', ' ');
 // }
+
+/*----------拼接函数表达式----------*/
+
+export function generateFuncStr(funcName, funcArgs) {
+
+    let funcStr = funcName + "('" + funcArgs.join("','") + "')";
+    console.log(funcStr);
+    return funcStr;
+
+}

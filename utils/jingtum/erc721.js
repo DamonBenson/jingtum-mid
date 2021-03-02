@@ -1,6 +1,6 @@
 import {chains} from '../info.js';
 
-const tokenChain = chains[1];
+const tokenChain = chains[0];
 const ai = tokenChain.account.issuer.address;
 const si = tokenChain.account.issuer.secret;
 
@@ -38,11 +38,11 @@ export function buildTokenIssueReq(r, addr, seq, name, num, showRes) {
 
 /*----------发行通证----------*/
 
-export function buildIssueTokenTx(s, r, seq, p, name, id, memos, showRes) {
+export function buildIssueTokenTx(s, r, seq, p, addr, name, id, memos, showRes) {
 
     let tx = r.buildTransferTokenTx({
         publisher: p,
-        receiver: p,
+        receiver: addr,
         token: name,
         tokenId: id,
         memos: memos
@@ -70,39 +70,39 @@ export function buildIssueTokenTx(s, r, seq, p, name, id, memos, showRes) {
 
 }
 
-/*----------授予通证----------*/
+// /*----------授予通证----------*/
 
-export function buildAuthTokenTx(s, r, seq, p, rcv, name, id, showRes) {
+// export function buildAuthTokenTx(s, r, seq, p, rcv, name, id, showRes) {
 
-    let tx = r.buildTransferTokenTx({
-        publisher: p,
-        receiver: rcv,
-        token: name,
-        tokenId: id,
-        memos: []
-    });
+//     let tx = r.buildTransferTokenTx({
+//         publisher: p,
+//         receiver: rcv,
+//         token: name,
+//         tokenId: id,
+//         memos: []
+//     });
 
-    tx.setSecret(s);
+//     tx.setSecret(s);
 
-    tx.setSequence(seq);
+//     tx.setSequence(seq);
 
-    return new Promise((resolve, reject) => {
-        tx.submit(function(err, result) {
-            if(err) {
-                console.log('err:',err);
-                reject('err');
-            }
-            else if(result){
-                if(showRes) {
-                    // console.log('buildAuthTokenTx:', result);
-                    console.log('buildAuthTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
-                }
-                resolve(result);
-            }
-        });
-    });
+//     return new Promise((resolve, reject) => {
+//         tx.submit(function(err, result) {
+//             if(err) {
+//                 console.log('err:',err);
+//                 reject('err');
+//             }
+//             else if(result){
+//                 if(showRes) {
+//                     // console.log('buildAuthTokenTx:', result);
+//                     console.log('buildAuthTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
+//                 }
+//                 resolve(result);
+//             }
+//         });
+//     });
 
-}
+// }
 
 /*----------转让通证----------*/
 
