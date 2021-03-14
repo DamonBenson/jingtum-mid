@@ -15,6 +15,7 @@
     "express": "^4.17.1",
     "ipfs-api": "^26.1.2",
     "jingtum-lib": "^2.4.3",
+    "kafka-node": "^5.0.0",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.1",
     "node-transform-mysql": "0.0.4"

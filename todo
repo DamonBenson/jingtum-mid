@@ -2,7 +2,11 @@
 接口：根据卖单ID查找卖单信息
 接口：根据作品ID查找作品信息
 
-买卖单上传跑通；
-watch整理数据；
-问daemon交易签名方式；
-合约架构测试；
+调通买卖单上传
+给黄文伟watch
+测试合约架构
+问题：签名
+
+platformAddr: 'jEY6Jr3qkDFnMcPZBig8jkdzTBt8ktMZA'
+matchSystemAddr: 'jDg1GG5JpyFdrafjUcid99mKZeUXKHUptu'
+contractAddr: 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd'

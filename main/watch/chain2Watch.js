@@ -181,16 +181,52 @@ async function processMatch(matchTxs, loopConter) {
 
     console.log('matchTxs:', matchTxs);
 
+    matchTxs.forEach(async(matchTx) => {
+        
+        let matchInfoHash = matchTx.func_parms[2];
+        let matchInfoJson = await ipfsUtils.get(ipfs, matchInfoHash);
+        let matchInfo = JSON.parse(matchInfoJson);
+
+        console.log(matchInfo);
+        // 推送交易匹配信息
+
+    });
+
 }
 
 async function processBuyerConfirmTxs(buyerConfirmTxs, loopConter) {
 
     console.log('buyerConfirmTxs:', buyerConfirmTxs);
 
+    buyerConfirmTxs.forEach(async(buyerConfirmTx) => {
+
+        let sellOrderId = buyerConfirmTx.func_parms[0];
+
+        let buyOrderInfoHash = matchTx.func_parms[2];
+        let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
+        let buyerConfirmInfo = {};
+        buyerConfirmInfo.buyOrderInfo = JSON.parse(buyOrderInfoJson);
+
+        buyerConfirmInfo.sellOrderId = sellOrderId;
+
+        console.log(buyerConfirmInfo);
+        //推送买方确认信息
+
+    });
+
 }
 
 async function processSellerConfirmTxs(sellerConfirmTxs, loopConter) {
 
     console.log('sellerConfirmTxs:', sellerConfirmTxs);
+
+    sellerConfirmTxs.forEach(async(sellerConfirmTx) => {
+
+        let sellOrderId = sellerConfirmTx.func_parms[0];
+
+        console.log(sellOrderId);
+        //推送卖方确认信息
+
+    });
 
 }
