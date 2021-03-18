@@ -8,9 +8,55 @@ import * as erc721 from '../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
+//kafka消费者
+import * as getConsumer from '../../utils/KafkaUtils/getConsumer.js';
 
 import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
+//kafka集群
+const kafkaHostIP = ["39.102.93.47:9092",
+"39.102.91.224:9092",
+"39.102.92.249:9092",
+"39.102.90.153:9092",
+"39.102.92.229:9092"];//L
+/*创建消费者1:其中Consumer_1_queue为消费者1对应的接收队列，队列中存的是json对象*/
+//根据队列中的对象依次执行 买单、卖单、匹配结果、买卖确认
 
+let ConsumerBuyOrder = await getConsumer.getConsumer(conn = {'kafkaHost':kafkaHostIP[0]}, 
+                                                topic = 'FormalTest',
+                                                consumer = 'Mid');
+let ConsumerSellOrder = await getConsumer.getConsumer(conn = {'kafkaHost':kafkaHostIP[0]}, 
+                                                topic = 'FormalTest',
+                                                consumer = 'Mid');
+        await processBuyOrder(buyOrderTxs, buyOrderTxs.length);
+        await processSellOrder(sellOrderTxs, sellOrderTxs.length);
+        await processMatch(matchTxs, matchTxs.length);
+        await processBuyerConfirmTxs(buyerConfirmTxs, buyerConfirmTxs.length);
+        await processSellerConfirmTxs(sellerConfirmTxs, sellerConfirmTxs.length);
+let Consumer_1_queue = [];
+if(debugMode)console.log('主页面',mq);
+//(conn = {'kafkaHost':'39.102.93.47:9092'}, 
+// topic = 'Test',
+// consumer = 'Bernard')
+function AddConsumer(mq, queue){
+    let conn = mq.conn, topics = mq.consumers[0].topic, options = mq.consumers[0].options;
+    mq.ConConsumer(conn, topics, options,  function (message){
+        message.value = JSON.parse(message.value)
+        if(debugMode){console.log(message.value)};//debugMode
+        console.log('队长：',queue.push(message.value));//入队
+    });
+}
+AddConsumer(Consumer_1, Consumer_1_queue);
+
+
+
+//例子：模拟处理队列的过程：30s内读取数据并进行操作
+setInterval(function(){
+    while(0 != queue.length)
+    {
+        console.log('shift',queue.shift());//出队
+        //then put your code to deal with the element//
+    }
+}, 30000);
 const u = jlib.utils;
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
@@ -112,7 +158,7 @@ r.connect(async function(err, result) {
                     break;
             }
         }
-
+        //根据队列中的对象依次执行 买单、卖单、匹配结果、买卖确认
         await processBuyOrder(buyOrderTxs, buyOrderTxs.length);
         await processSellOrder(sellOrderTxs, sellOrderTxs.length);
         await processMatch(matchTxs, matchTxs.length);

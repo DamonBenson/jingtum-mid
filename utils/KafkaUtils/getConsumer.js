@@ -47,12 +47,11 @@ export class MQ {
         });
     }
 }
-export async function getConsumer(conn = {'kafkaHost':'39.102.93.47:9092'}, 
-                                    topic = 'Test',
+export function getConsumer(conn = {'kafkaHost':'39.102.93.47:9092'}, 
+                                    // topic = ['Test','FormalTest'],
+                                    topic = 'FormalTest',
                                         consumer = 'Bernard'){
     if(debugMode){console.log('我动了')};//debugMode
-
-
     let mq = new MQ(conn,topic,consumer);
     if(debugMode){console.log(mq)};//debugMode
     return mq;

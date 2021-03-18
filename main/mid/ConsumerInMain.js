@@ -5,7 +5,7 @@ import {debugMode} from '../../utils/info.js';
 /*创建消费者1:其中Consumer_1_queue为消费者1对应的接收队列，队列中存的是json对象*/
 let Consumer_1 = await getConsumer.getConsumer();
 let Consumer_1_queue = [];
-if(debugMode)console.log('主页面',mq);
+if(debugMode)console.log('主页面',Consumer_1);
 //(conn = {'kafkaHost':'39.102.93.47:9092'}, 
 // topic = 'Test',
 // consumer = 'Bernard')
@@ -18,6 +18,8 @@ function AddConsumer(mq, queue){
     });
 }
 AddConsumer(Consumer_1, Consumer_1_queue);
+AddConsumer(Consumer_1, Consumer_1_queue);
+
 
 
 
