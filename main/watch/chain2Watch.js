@@ -9,54 +9,20 @@ import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 //kafka消费者
-import * as getConsumer from '../../utils/KafkaUtils/getConsumer.js';
+import * as getClient from '../../utils/KafkaUtils/getClient.js';
 
 import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
 //kafka集群
-const kafkaHostIP = ["39.102.93.47:9092",
-"39.102.91.224:9092",
-"39.102.92.249:9092",
-"39.102.90.153:9092",
-"39.102.92.229:9092"];//L
-/*创建消费者1:其中Consumer_1_queue为消费者1对应的接收队列，队列中存的是json对象*/
-//根据队列中的对象依次执行 买单、卖单、匹配结果、买卖确认
-
-let ConsumerBuyOrder = await getConsumer.getConsumer(conn = {'kafkaHost':kafkaHostIP[0]}, 
-                                                topic = 'FormalTest',
-                                                consumer = 'Mid');
-let ConsumerSellOrder = await getConsumer.getConsumer(conn = {'kafkaHost':kafkaHostIP[0]}, 
-                                                topic = 'FormalTest',
-                                                consumer = 'Mid');
-        await processBuyOrder(buyOrderTxs, buyOrderTxs.length);
-        await processSellOrder(sellOrderTxs, sellOrderTxs.length);
-        await processMatch(matchTxs, matchTxs.length);
-        await processBuyerConfirmTxs(buyerConfirmTxs, buyerConfirmTxs.length);
-        await processSellerConfirmTxs(sellerConfirmTxs, sellerConfirmTxs.length);
-let Consumer_1_queue = [];
-if(debugMode)console.log('主页面',mq);
-//(conn = {'kafkaHost':'39.102.93.47:9092'}, 
-// topic = 'Test',
-// consumer = 'Bernard')
-function AddConsumer(mq, queue){
-    let conn = mq.conn, topics = mq.consumers[0].topic, options = mq.consumers[0].options;
-    mq.ConConsumer(conn, topics, options,  function (message){
-        message.value = JSON.parse(message.value)
-        if(debugMode){console.log(message.value)};//debugMode
-        console.log('队长：',queue.push(message.value));//入队
-    });
-}
-AddConsumer(Consumer_1, Consumer_1_queue);
+/*----------消息队列----------*/
 
 
 
-//例子：模拟处理队列的过程：30s内读取数据并进行操作
-setInterval(function(){
-    while(0 != queue.length)
-    {
-        console.log('shift',queue.shift());//出队
-        //then put your code to deal with the element//
-    }
-}, 30000);
+/*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
+const KafkaClient_Wath2 = await getClient.getClient();
+let ConsumerQueue = [];
+KafkaClient_Wath2.Watch2WithKafkaInit(ConsumerQueue);
+
+// /*----------------------------------------*/
 const u = jlib.utils;
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
@@ -193,9 +159,12 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
 
         console.log(orderInfo);
         // 推送买单信息
+        KafkaClient_Wath2.ProducerSend('BuyOrder',orderInfo);
+
+
 
     });
-
+    
 }
 
 async function processSellOrder(sellOrderTxs, loopConter) {
@@ -218,6 +187,8 @@ async function processSellOrder(sellOrderTxs, loopConter) {
 
         console.log(orderInfo);
         // 推送卖单信息
+        KafkaClient_Wath2.ProducerSend('SellOrder',orderInfo);
+
 
     });
 
@@ -235,6 +206,7 @@ async function processMatch(matchTxs, loopConter) {
 
         console.log(matchInfo);
         // 推送交易匹配信息
+        KafkaClient_Wath2.ProducerSend('Match',matchInfo);
 
     });
 
@@ -257,6 +229,8 @@ async function processBuyerConfirmTxs(buyerConfirmTxs, loopConter) {
 
         console.log(buyerConfirmInfo);
         //推送买方确认信息
+        KafkaClient_Wath2.ProducerSend('BuyerConfirmTxs',buyerConfirmInfo);
+
 
     });
 
@@ -272,7 +246,7 @@ async function processSellerConfirmTxs(sellerConfirmTxs, loopConter) {
 
         console.log(sellOrderId);
         //推送卖方确认信息
-
+        KafkaClient_Wath2.ProducerSend('SellerConfirmTxs',sellOrderId);
     });
 
 }

@@ -1,16 +1,23 @@
 import * as kafka from 'kafka-node';
 import {debugMode} from '../info.js';
+const kafkaHostIP = ["39.102.93.47:9092",
+"39.102.91.224:9092",
+"39.102.92.249:9092",
+"39.102.90.153:9092",
+"39.102.92.229:9092"];//L
+// const debugMode = 0;
  /*  初始化消费者option    */
 export class Client {
-    constructor(conn, topic, consumer) {
+    constructor(conn) {
+        this.kafkaHostIP = kafkaHostIP;
         if(debugMode){console.log('消息队列打开了')};//debugMode
         this.conn = conn;
         this.client = new kafka.KafkaClient(conn);
         this.mq_producer = null;
 
-        this.mq_consumers = {};
-        this.consumers = {};
-        this.producers = {};
+        this.mq_consumers = new Map;
+        this.consumers = null;
+        this.producers = null;
         this.producerOpitons = {
             // Configuration for when to consider a message as acknowledged, default 1
             requireAcks: 1,
@@ -18,62 +25,13 @@ export class Client {
             ackTimeoutMs: 5000,
             // Partitioner type (default = 0, random = 1, cyclic = 2, keyed = 3, custom = 4), default 0
             partitionerType: 0
-        };
-        this.ConsumerQueue = [];
-        this.ProduceQueue = [];
+            };
+
+
     }   
-    insertConsumer(consumer){
-        this.consumers.push(consumer)
-        if (debugMode){console.log('现在有消费者', this.consumers.length);}; //debugMode
-    }
-    // insertProducer(producer){
-    //     this.producers.push(producer)
-    //     if (debugMode){console.log('现在有生产者', this.producers.length);}; //debugMode
-    // }
-    Watch2WithKafkaInit()
-    {
-        this.producers ={
-            'BuyOrder': 'BuyOrder' ,
-            'SellOrder': 'SellOrder' ,
-            'Match': 'Match' ,
-            'BuyerConfirmTxs': 'BuyerConfirmTxs',
-            'SellerConfirmTxs': 'SellerConfirmTxs' 
-        };
-        this.consumers = {
-            'BuyOrder': {topic:'BuyOrder' ,'options': { 'autoCommit': true }},
-            'SellOrder': {topic:'SellOrder','options': { 'autoCommit': true }} ,
-            'Match': {topic:'Match' ,'options': { 'autoCommit': true }},
-            'BuyerConfirmTxs': {topic:'BuyerConfirmTxs' ,'options': { 'autoCommit': true }},
-            'SellerConfirmTxs': {topic:'SellerConfirmTxs' ,'options': { 'autoCommit': true }} 
-        };
-        if (debugMode){console.log('Client Setting UP');}; //debugMode
-        this.SetupClient();
-        if (debugMode){console.log('Client Setting Finished');}; //debugMode
-
-    }
-    SetupClient(){
-
-        // this.ConProducer(this.producerOpitons,  function (){
-        //     console.log('生产者队长：',this.ProduceQueue.length);//入队
-        // });
-        if (debugMode){console.log(this.consumers.length);}; //debugMode
-    
-        for(let i = (this.consumers.length -1); i >= 0; i--)
-        {
-            temp = this.consumers[i];
-            if (debugMode){console.log('Consumer 号:',i,temp);}; //debugMode
-
-            this.ConConsumer(temp.topic, temp.options, function (message){
-                message.value = JSON.parse(message.value)
-                if(debugMode){console.log(message.value)};//debugMode
-                console.log('消费者队长：',this.ConsumerQueue.push(message.value));//入队
-            });
-        }
-    }
-
     /*  消费者  */
-    ConConsumer(topic, options, handler) {
-        if (debugMode){console.log('增加消费者', this.conn, topic);}; //debugMode
+    ConConsumer(topics, options, handler) {
+        if (debugMode){console.log('增加消费者', topics, options);}; //debugMode
 
         let consumer = new kafka.Consumer(this.client, topics, options);
 
@@ -82,15 +40,16 @@ export class Client {
             consumer.on('message', handler);
         }
 
+
         consumer.on('error', function (err) {
             console.error('consumer error ', err.stack);
         });
 
-        this.mq_consumers[topic] = consumer;
+        this.mq_consumers.set[topics, consumer];
     }
 
-
-    ConProducer(options, handler){
+    /*  生产者  */
+    ConProducer(options){
         let producer = new kafka.Producer(this.client,options);
         if (debugMode){console.log('增加生产者',this.conn);}; //debugMode
         producer.on('ready', function(){
@@ -106,16 +65,60 @@ export class Client {
     
         this.mq_producer = producer;
     }
-
-
-    AddConsumer(topic = this.consumers[0][0].topic, options = this.consumers[0][0].options){
-        this.ConConsumer(this.conn, topic, options,  function (message){
+    //para consumer eg：consumer = {topic:[{'topic': 'FormalTest', 'partition': 0}],options: { 'autoCommit': true }}
+    //console.log(consumer.topic.topic);
+    //添加一个消费者
+    AddConsumer(consumer,ConsumerQueue){
+        this.consumers.set([consumer.topic[0].topic,consumer])
+        this.ConConsumer(consumer.topic, consumer.options, function (message){                                    
             message.value = JSON.parse(message.value)
             if(debugMode){console.log(message.value)};//debugMode
+            console.log('消费者队长：',ConsumerQueue.push(message.value));//入队
         });
+        if (debugMode){console.log('现在有消费者', this.consumers);}; //debugMode
     }
+    //TODO添加一个消费者
+    // AddConsumer(topic = this.consumers[0][0].topic, options = this.consumers[0][0].options){
+    //     this.ConConsumer(this.conn, topic, options,  function (message){
+    //         message.value = JSON.parse(message.value)
+    //         if(debugMode){console.log(message.value)};//debugMode
+    //     });
+    // }
+    //TODO插入生产者
+    // insertProducer(producer){
+    //     this.producers.push(producer)
+    //     if (debugMode){console.log('现在有生产者', this.producers.length);}; //debugMode
+    // }
 
-
+    //Watch2的初始化 Client.Watch2WithKafkaInit()
+    //console.log(consumers.get('FormalTest').topic.topic);//访问consumers对象
+    Watch2WithKafkaInit(ConsumerQueue)
+    {
+        this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
+        this.consumers = new Map([
+            ['consumers', {topic:[  {'topic': 'BuyOrder', 'partition': 0},
+                                    {'topic': 'SellOrder', 'partition': 0},
+                                    {'topic': 'Match', 'partition': 0},
+                                    {'topic': 'BuyerConfirmTxs', 'partition': 0},
+                                    {'topic': 'SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
+        ]);
+        if (debugMode){console.log('Client Setting UP');}; //debugMode
+        this.SetupClient(ConsumerQueue);
+        if (debugMode){console.log('Client Setting Finished');}; //debugMode
+    }
+    SetupClient(ConsumerQueue){
+        this.ConProducer(this.producerOpitons);
+        if (debugMode){console.log(this.consumers);}; //debugMode
+        if (debugMode){console.log('消费者队长：',ConsumerQueue.size);}//入队
+        for (let value of this.consumers.values()) {
+            console.log('topic:' + value.topic + 'options:' + value.options);
+            this.ConConsumer(value.topic, value.options, function (message){                                    
+                message.value = JSON.parse(message.value)
+                if(debugMode){console.log(message.value)};//debugMode
+                console.log('消费者队长：',ConsumerQueue.push(message.value));//入队
+            });
+        }
+    }
     CheckTopic(topic){
         try{
             this.mq_producer.createTopics([topic], function (){
@@ -126,28 +129,41 @@ export class Client {
         }
     }
     
-    //@para producer string     Producer's Topic
-    //@para _msg Str(json)      msg use the json in stringing
-    ProducerSend(topic,_msg){
-        this.mq_producer.send([_msg], function (err, data){
-            if(err != null)
-            {
-                console.log("err：",err);
-                console.log("提交失败，主题:",topic,"_msg：",_msg);
-                return
-            }
-            console.log("提交成功，主题:",topic,"data：",data);
-            console.log("..... ");
-        });
+    //@para selTopic string     selected Topic in string
+    //@para msg Str(json)       msg use the json in stringing
+    ProducerSend(selTopic,msg){
+        //确认topic是合法的
+        if(this.producers.includes(selTopic))
+        var _msg = {
+            topic:[selTopic], 
+            messages:[JSON.stringify(msg)],
+            partition: 0
+        };
+        try{
+            this.mq_producer.send([_msg], function (err, data){
+
+                if(err == null)
+                    console.log("发送成功",selTopic);
+                else
+                {
+                    console.log("err：",err);
+                    console.log("_msg：",_msg);
+                    console.log("出错");
+                }
+                console.log("data：",data);
+                console.log("..... ");
+            })
+        }
+        catch{this.CheckTopic(selTopic);}
     }
 }
 
 export function getClient(conn = {'kafkaHost':'39.102.93.47:9092'}, options = null){
     if(debugMode){console.log('我动了')};//debugMode
-
-    
-    let client = new Client(conn);
+    const client = new Client(conn);
     if(debugMode){console.log('Client init',client)};//debugMode
+    if(debugMode){console.log('Client init Finished,\n..........\n')};//debugMode
+
     return client;
 }
 

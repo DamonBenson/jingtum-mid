@@ -18,7 +18,7 @@ export class MQ {
                 'options': { 'autoCommit': true },
                 'name': consumer,
                 'topic': [
-                    { 'topic': topic }
+                    { 'topic': topic , 'partition': 0,'offset':0}
                 ]
             }
         ];  
