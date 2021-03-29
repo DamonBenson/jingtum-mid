@@ -8,15 +8,10 @@ import * as erc721 from '../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
-//kafka消费者
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
 
 import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
-//kafka集群
 /*----------消息队列----------*/
-
-
-
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
 const KafkaClient_Wath2 = await getClient.getClient();
 let ConsumerQueue = [];
@@ -149,9 +144,9 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
         let platformAddr = buyOrderTx.account;
         let timeStamp = buyOrderTx.date;
         
-        let orderInfoHash = buyOrderTx.func_parms[1];
-        let orderInfoJson = await ipfsUtils.get(ipfs, orderInfoHash);
-        let orderInfo = JSON.parse(orderInfoJson);
+        let orderInfoHash = buyOrderTx.func_parms[1];//获取买单数据存储地址
+        let orderInfoJson = await ipfsUtils.get(ipfs, orderInfoHash);//获取买单数据
+        let orderInfo = JSON.parse(orderInfoJson);//解析买单数据
 
         orderInfo.orderId = orderId;
         orderInfo.platformAddr = platformAddr;

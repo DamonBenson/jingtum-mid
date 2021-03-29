@@ -90,26 +90,12 @@ export class Client {
     //     if (debugMode){console.log('现在有生产者', this.producers.length);}; //debugMode
     // }
 
-    //Watch2的初始化 Client.Watch2WithKafkaInit()
-    //console.log(consumers.get('FormalTest').topic.topic);//访问consumers对象
-    Watch2WithKafkaInit(ConsumerQueue)
-    {
-        this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
-        this.consumers = new Map([
-            ['consumers', {topic:[  {'topic': 'BuyOrder', 'partition': 0},
-                                    {'topic': 'SellOrder', 'partition': 0},
-                                    {'topic': 'Match', 'partition': 0},
-                                    {'topic': 'BuyerConfirmTxs', 'partition': 0},
-                                    {'topic': 'SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
-        ]);
-        if (debugMode){console.log('Client Setting UP');}; //debugMode
-        this.SetupClient(ConsumerQueue);
-        if (debugMode){console.log('Client Setting Finished');}; //debugMode
-    }
+
     SetupClient(ConsumerQueue){
         this.ConProducer(this.producerOpitons);
-        if (debugMode){console.log(this.consumers);}; //debugMode
-        if (debugMode){console.log('消费者队长：',ConsumerQueue.size);}//入队
+        if (debugMode){console.log("this.consumers: ", this.consumers);}; //debugMode
+        if (this.consumers == null)//没有消费者需要创建
+            return;
         for (let value of this.consumers.values()) {
             console.log('topic:' + value.topic + 'options:' + value.options);
             this.ConConsumer(value.topic, value.options, function (message){                                    
@@ -132,9 +118,6 @@ export class Client {
     //@para selTopic string     selected Topic in string
     //@para msg Str(json)       msg use the json in stringing
     ProducerSend(selTopic,msg){
-        //确认topic是合法的
-        if(this.producers.includes(selTopic))
-            console.log("主题合法",selTopic);
             
         var _msg = {
             topic:[selTopic], 
@@ -157,6 +140,22 @@ export class Client {
             })
         }
         catch{this.CheckTopic(selTopic);}
+    }
+    //Watch2的初始化 Client.Watch2WithKafkaInit()
+    //console.log(consumers.get('FormalTest').topic.topic);//访问consumers对象
+    Watch2WithKafkaInit(ConsumerQueue)
+    {
+        this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
+        this.consumers = new Map([
+            ['consumers', {topic:[  {'topic': 'BuyOrder', 'partition': 0},
+                                    {'topic': 'SellOrder', 'partition': 0},
+                                    {'topic': 'Match', 'partition': 0},
+                                    {'topic': 'BuyerConfirmTxs', 'partition': 0},
+                                    {'topic': 'SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
+        ]);
+        if (debugMode){console.log('Client Setting UP');}; //debugMode
+        this.SetupClient(ConsumerQueue);
+        if (debugMode){console.log('Client Setting Finished');}; //debugMode
     }
 }
 
