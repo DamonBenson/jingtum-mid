@@ -49,7 +49,7 @@ export class Client {
     }
 
     /*  生产者  */
-    ConProducer(options){
+    ConProducer(options, handler){
         let producer = new kafka.Producer(this.client,options);
         if (debugMode){console.log('增加生产者',this.conn);}; //debugMode
         producer.on('ready', function(){
@@ -134,6 +134,8 @@ export class Client {
     ProducerSend(selTopic,msg){
         //确认topic是合法的
         if(this.producers.includes(selTopic))
+            console.log("主题合法",selTopic);
+            
         var _msg = {
             topic:[selTopic], 
             messages:[JSON.stringify(msg)],
