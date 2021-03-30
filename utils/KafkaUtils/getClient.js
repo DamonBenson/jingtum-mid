@@ -1,5 +1,5 @@
 import * as kafka from 'kafka-node';
-import {debugMode} from '../info.js';
+import {buyOrderContractAddr, sellOrderContractAddr, debugMode} from '../info.js';
 const kafkaHostIP = ["39.102.93.47:9092",
 "39.102.91.224:9092",
 "39.102.92.249:9092",
@@ -96,11 +96,11 @@ export class Client {
     {
         this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
         this.consumers = new Map([
-            ['consumers', {topic:[  {'topic': 'BuyOrderContractAddr_BuyOrder', 'partition': 0}, // buyOrderContractAddr在平台初次部署合约时获取，并生成主题
-                                    {'topic': 'SellOrderContractAddr_SellOrder', 'partition': 0},
-                                    {'topic': 'BuyOrderContractAddr_Match', 'partition': 0},
-                                    {'topic': 'SellOrderContractAddr_BuyerConfirmTxs', 'partition': 0},
-                                    {'topic': 'SellOrderContractAddr_SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
+            ['consumers', {topic:[  {'topic': buyOrderContractAddr + '_BuyOrder', 'partition': 0}, // buyOrderContractAddr在平台初次部署合约时获取，并生成主题
+                                    {'topic': sellOrderContractAddr + '_SellOrder', 'partition': 0},
+                                    {'topic': buyOrderContractAddr + '_Match', 'partition': 0},
+                                    {'topic': sellOrderContractAddr + '_BuyerConfirmTxs', 'partition': 0},
+                                    {'topic': sellOrderContractAddr + '_SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
         ]);
         if (debugMode){console.log('Client Setting UP');}; //debugMode
         this.SetupClient(ConsumerQueue);

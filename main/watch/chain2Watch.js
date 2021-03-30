@@ -1,17 +1,12 @@
 import jlib from 'jingtum-lib';
 import ipfsAPI from 'ipfs-api';
-import mysql from 'mysql';
-import sqlText from 'node-transform-mysql';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
-import * as erc721 from '../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
-import * as mysqlUtils from '../../utils/mysqlUtils.js';
-import * as localUtils from '../../utils/localUtils.js';
 //kafka消费者
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
+import {chains, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
 //kafka集群
 /*----------消息队列----------*/
 
@@ -26,9 +21,7 @@ KafkaClient_Watch2.Watch2WithKafkaInit(ConsumerQueue);
 const u = jlib.utils;
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
-const c = mysql.createConnection(mysqlConf);
-c.connect(); // mysql连接
-const contractChain = chains[1]; // 确权链
+const contractChain = chains[1]; // 权益链
 
 /*----------创建链接(确权链服务器3)----------*/
 
@@ -45,8 +38,6 @@ r.connect(async function(err, result) {
     else if(result) {
         console.log('result: ', result);
     }
-
-    let tokenTx = {}; // 用以判断哪些通证发行交易中的确权信息已经存入数据库（对于确权信息，只需推送17个中的一个）
 
     /*----------监听交易，信息存入数据库----------*/
 
@@ -146,9 +137,10 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
     buyOrderTxs.forEach(async(buyOrderTx) => {
 
         let buyOrderId = buyOrderTx.func_parms[0];
-        let contractAddr = buyOrderTx.destination; // ???
+        let contractAddr = buyOrderTx.destination;
         
         let buyOrderInfoHash = buyOrderTx.func_parms[1];
+        console.log(buyOrderId, buyOrderInfoHash);
         let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
         let buyOrderInfo = JSON.parse(buyOrderInfoJson);
 
@@ -159,7 +151,7 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
 
         console.log(buyOrderInfo);
         // 推送买单信息
-        KafkaClient_Watch2.ProducerSend('BuyOrderContractAddr_BuyOrder', buyOrderInfo);
+        KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_BuyOrder', buyOrderInfo);
 
     });
     
@@ -173,7 +165,7 @@ async function processSellOrder(sellOrderTxs, loopConter) {
 
         let sellOrderId = sellOrderTx.func_parms[0];
         let workId = sellOrderTx.func_parms[1];
-        let contractAddr = buyOrderTx.destination; // ???
+        let contractAddr = buyOrderTx.destination;
         
         let sellOrderInfoHash = sellOrderTx.func_parms[1];
         let sellOrderInfoJson = await ipfsUtils.get(ipfs, sellOrderInfoHash);
@@ -190,7 +182,7 @@ async function processSellOrder(sellOrderTxs, loopConter) {
 
         console.log(sellOrderInfo);
         // 推送卖单信息
-        KafkaClient_Watch2.ProducerSend('SellOrderContractAddr_SellOrder', sellOrderInfo);
+        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellOrder', sellOrderInfo);
 
     });
 
@@ -208,7 +200,7 @@ async function processMatch(matchTxs, loopConter) {
 
         console.log(matchInfo);
         // 推送交易匹配信息
-        KafkaClient_Watch2.ProducerSend('BuyOrderContractAddr_Match',matchInfo);
+        KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_Match',matchInfo);
 
     });
 
@@ -231,7 +223,7 @@ async function processBuyerConfirmTxs(buyerConfirmTxs, loopConter) {
 
         console.log(buyerConfirmInfo);
         //推送买方确认信息
-        KafkaClient_Watch2.ProducerSend('SellOrderContractAddr_BuyerConfirmTxs', buyerConfirmInfo);
+        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_BuyerConfirmTxs', buyerConfirmInfo);
 
     });
 
@@ -253,7 +245,7 @@ async function processSellerConfirmTxs(sellerConfirmTxs, loopConter) {
 
         console.log(sellConfirmInfo);
         //推送卖方确认信息
-        KafkaClient_Watch2.ProducerSend('SellOrderContractAddr_SellerConfirmTxs', sellConfirmInfo);
+        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellerConfirmTxs', sellConfirmInfo);
 
     });
 
