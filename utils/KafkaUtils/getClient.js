@@ -96,11 +96,11 @@ export class Client {
     {
         this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
         this.consumers = new Map([
-            ['consumers', {topic:[  {'topic': 'BuyOrder', 'partition': 0},
-                                    {'topic': 'SellOrder', 'partition': 0},
-                                    {'topic': 'Match', 'partition': 0},
-                                    {'topic': 'BuyerConfirmTxs', 'partition': 0},
-                                    {'topic': 'SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
+            ['consumers', {topic:[  {'topic': 'BuyOrderContractAddr_BuyOrder', 'partition': 0}, // buyOrderContractAddr在平台初次部署合约时获取，并生成主题
+                                    {'topic': 'SellOrderContractAddr_SellOrder', 'partition': 0},
+                                    {'topic': 'BuyOrderContractAddr_Match', 'partition': 0},
+                                    {'topic': 'SellOrderContractAddr_BuyerConfirmTxs', 'partition': 0},
+                                    {'topic': 'SellOrderContractAddr_SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
         ]);
         if (debugMode){console.log('Client Setting UP');}; //debugMode
         this.SetupClient(ConsumerQueue);

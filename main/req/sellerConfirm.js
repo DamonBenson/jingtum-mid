@@ -25,7 +25,7 @@ contractRemote.connect(async function(err, res) {
     global.seq = (await requestInfo.requestAccountInfo(platformAddr, contractRemote, false)).account_data.Sequence;
 
     let mq = await getConsumer();
-    mq.ConConsumer(undefined, [{'topic': 'Test'}], undefined, postSellerConfirmReq);
+    mq.ConConsumer(undefined, [{'topic': 'SellOrderContractAddr_BuyerConfirmTxs'}], undefined, postSellerConfirmReq);
 
 });
 
@@ -39,7 +39,7 @@ async function postSellerConfirmReq(msg) {
 
     let confirmMsg = {
         contractAddr: sellOrderContractAddr,
-        addr: platformAddr,
+        platformAddr: platformAddr,
         sellOrderId: sellOrderId,
         buyOrderInfo: buyOrderInfo,
     }

@@ -14,7 +14,7 @@ console.log(KafkaClient_Wath2.kafkaHostIP);
 const produceTopic = 'FormalTest'
 var msg = {
         OrderId	            :'买单标识'             ,	              //买单标识	Y
-        SubBuyOrder	        :'子买单'          	    ,             //子买单	Y
+        SubBuyOrderList	    :'子买单'          	    ,             //子买单	Y
         LimitPrice          :'限价'	          	    ,                 //限价	Y
         TradeStrategy	    :'交易策略'   	        ,             //交易策略	Y
         AuthorizationInfo	:'授权信息'   	        ,         //授权信息	Y

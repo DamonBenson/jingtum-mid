@@ -14,6 +14,7 @@ const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const contractChain = chains[1];
+//买单合约：智能交易系统 卖单合约：平台
 const platformAddr = contractChain.account.a[5].address;
 const platformSecret = contractChain.account.a[5].secret;
 

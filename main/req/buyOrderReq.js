@@ -8,7 +8,7 @@ import * as fetch from '../../utils/fetch.js';
 import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../utils/info.js';
 
 const msPerBuyOrder = 10000;
-const subBuyOrderAmount = 3;
+const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
 const platformSecret = userAccount[5].secret;
 const buyerAddr = userAccount[9].address;
@@ -59,9 +59,9 @@ async function postBuyOrderReq() {
 
 function generateBuyOrder() {
     
-    let subBuyOrder = [];
-    for(let i = subBuyOrderAmount; i > 0; i--) {
-        subBuyOrder.push({
+    let subBuyOrderList = [];
+    for(let i = subBuyOrderListAmount; i > 0; i--) {
+        subBuyOrderList.push({
             labelAmount: localUtils.randomNumber(1, 5),
             labelDemand: generateLabelDemand(),
             labelWeight: generateLabelWeight(),
@@ -73,17 +73,17 @@ function generateBuyOrder() {
     let authorizationInfo = generateAuthorizationInfo(authorizationType);
     let side = 0;
     let buyOrder = {
-        subBuyOrder: subBuyOrder,
+        subBuyOrderList: subBuyOrderList,
         limitPrice: limitPrice,
         tradeStrategy: tradeStrategy,
         authorizationInfo: authorizationInfo,
         side: side,
         buyerAddr: buyerAddr,
         contact: 'phoneNumber', // 联系方式
-        addr: platformAddr,
+        platformAddr: platformAddr,
         contractAddr: buyOrderContractAddr, // 待部署
     }
-    buyOrder.orderId = sha256(seq.toString()).toString();
+    buyOrder.buyOrderId = sha256(seq.toString()).toString();
 
     return buyOrder;
 
