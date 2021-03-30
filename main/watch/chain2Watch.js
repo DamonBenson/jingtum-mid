@@ -9,9 +9,6 @@ import * as getClient from '../../utils/KafkaUtils/getClient.js';
 import {chains, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
 //kafka集群
 /*----------消息队列----------*/
-
-
-
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
 const KafkaClient_Watch2 = await getClient.getClient();
 let ConsumerQueue = [];

@@ -7,7 +7,7 @@ const KafkaClient_Wath2 = await getClient.getClient();
 let ConsumerQueue = [];
 // console.log(KafkaClient_Wath2.conn);
 KafkaClient_Wath2.Watch2WithKafkaInit(ConsumerQueue);
-console.log(KafkaClient_Wath2.kafkaHostIP);
+if(debugMode)console.log("kafkaHostIP: ",KafkaClient_Wath2.kafkaHostIP);
 
 // console.log(KafkaClient_Wath2.consumers['BuyOrder']['options']['autoCommit']);
 //Test
