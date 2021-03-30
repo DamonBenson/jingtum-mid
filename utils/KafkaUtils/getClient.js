@@ -90,26 +90,6 @@ export class Client {
     //     if (debugMode){console.log('现在有生产者', this.producers.length);}; //debugMode
     // }
 
-<<<<<<< HEAD
-    //Watch2的初始化 Client.Watch2WithKafkaInit()
-    //console.log(consumers.get('FormalTest').topic.topic);//访问consumers对象
-    Watch2WithKafkaInit(ConsumerQueue)
-    {
-        this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
-        this.consumers = new Map([
-            ['consumers', {topic:[  {'topic': buyOrderContractAddr + '_BuyOrder', 'partition': 0}, // buyOrderContractAddr在平台初次部署合约时获取，并生成主题
-                                    {'topic': sellOrderContractAddr + '_SellOrder', 'partition': 0},
-                                    {'topic': buyOrderContractAddr + '_Match', 'partition': 0},
-                                    {'topic': sellOrderContractAddr + '_BuyerConfirmTxs', 'partition': 0},
-                                    {'topic': sellOrderContractAddr + '_SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
-        ]);
-        if (debugMode){console.log('Client Setting UP');}; //debugMode
-        this.SetupClient(ConsumerQueue);
-        if (debugMode){console.log('Client Setting Finished');}; //debugMode
-    }
-=======
-
->>>>>>> 94cab894f0ff9206800025528f9c8f2c46faa4bc
     SetupClient(ConsumerQueue){
         this.ConProducer(this.producerOpitons);
         if (debugMode){console.log("this.consumers: ", this.consumers);}; //debugMode
