@@ -1,8 +1,7 @@
-
 import * as localUtils from '../../utils/localUtils.js';
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
-
 import {userAccount, buyOrderContractAddr, debugMode} from '../../utils/info.js';
+
 /*----------消息队列----------*/
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
 const randonBuyorder_KafkaClient = await getClient.getClient();
@@ -14,18 +13,13 @@ const subBuyOrderAmount = 3;
 const platformAddr = userAccount[5].address;
 const buyerAddr = userAccount[9].address;
 
+// 每10s上传一次数据
 setInterval(produceBuyOrderReq, msPerBuyOrder);
-// //例子：模拟处理队列的过程：30s内读取数据并进行操作
-
-
 
 async function produceBuyOrderReq(KafkaClient) {
 
     console.time('buyOrderReq');
     let buyOrder = generateBuyOrder();
-    // if(debugMode) {
-    //     console.log('buyOrder:', buyOrder);
-    // }
 
     //mashall
     //unmashall
@@ -80,6 +74,9 @@ function generateBuyOrder() {
         addr: platformAddr,
         contractAddr: buyOrderContractAddr, // 待部署
         orderId :  localUtils.randomNumber(100, 100000).toString(),//origin as sha256  
+    }
+    if(debugMode) {
+        console.log('buyOrder:', buyOrder);
     }
 
     return buyOrder;

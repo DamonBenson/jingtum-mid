@@ -1,8 +1,7 @@
-
 import * as localUtils from '../../utils/localUtils.js';
-
 import {userAccount, sellOrderContractAddr, debugMode} from '../../utils/info.js';
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
+
 /*----------消息队列----------*/
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
 const randonSellorder_KafkaClient = await getClient.getClient();
@@ -12,6 +11,8 @@ randonSellorder_KafkaClient.SetupClient(ConsumerQueue);
 const msPerSellOrder = 10000;
 const platformAddr = userAccount[4].address; // 平台账号
 const sellerAddr = userAccount[5].address;
+
+// 每10s上传一次数据
 setInterval(produceSellOrderReq, msPerSellOrder);
 
 async function produceSellOrderReq(KafkaClient) {
@@ -21,23 +22,12 @@ async function produceSellOrderReq(KafkaClient) {
     // let sellerAddr = workInfo.addr;
     let workId = localUtils.randomNumber(100, 100000).toString(); 
     let sellOrder = generateSellOrder(workId, sellerAddr);
-    // if(debugMode) {
-    //     console.log('SellOrder:', sellOrder);
-    // }
+
 
     //mashall
     //unmashall
 
-    // let sellOrderInfoForExchange = {
-    //     orderId: sellOrder.orderId,
-    //     sellOrderHash: '626',
-    //     labelSet: sellOrder.labelSet,
-    //     expectedPrice: sellOrder.expectedPrice,
-    //     timeStamp: 626,
-    //     assetId: sellOrder.assetId,//origin as workInfo.work_id
-    //     matchScore: 626,    
-    //     contractAddr: sellOrder.contractAddr, // 待部署
-    // }
+
     // order by 权衡版本推送接口
     let sellOrderInfo = {
         TimeStamp: 0,
@@ -60,6 +50,7 @@ async function produceSellOrderReq(KafkaClient) {
     console.log('--------------------');
 }
 
+
 function generateSellOrder(wrokId, sellerAddr) {
     
     let labelSet = generateLabelSet();
@@ -78,7 +69,10 @@ function generateSellOrder(wrokId, sellerAddr) {
         contractAddr: sellOrderContractAddr, // 待部署
         orderId:localUtils.randomNumber(100, 100000).toString(),
     }
-    
+    if(debugMode) {
+        console.log('SellOrder:', sellOrder);
+    }
+
     return sellOrder;
 
 }
