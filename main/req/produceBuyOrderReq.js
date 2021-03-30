@@ -1,4 +1,3 @@
-import sha256 from 'crypto-js/sha256.js';
 
 import * as localUtils from '../../utils/localUtils.js';
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
@@ -20,20 +19,35 @@ setInterval(produceBuyOrderReq, msPerBuyOrder);
 
 
 
-function produceBuyOrderReq() {
+async function produceBuyOrderReq(KafkaClient) {
 
     console.time('buyOrderReq');
     let buyOrder = generateBuyOrder();
-    if(debugMode) {
-        console.log('buyOrder:', buyOrder);
-    }
+    // if(debugMode) {
+    //     console.log('buyOrder:', buyOrder);
+    // }
 
     //mashall
     //unmashall
+    // order by 权衡版本推送接口
+    let buyOrderInfo = {
+        SubBuyOrderList : buyOrder.subBuyOrder,
+        LimitPrice : buyOrder.limitPrice,
+        TradeStrategy : buyOrder.tradeStrategy,
+        AuthorizationInfo : buyOrder.authorizationInfo,
+        TimeStamp : 0,
+        Side : buyOrder.side,
+        BuyOrderID :  buyOrder.orderId,//origin as sha256  
+        BuyOrderHash : '0', 
+        BuyerAddr : buyOrder.buyerAddr,
+        Contact: 'phoneNumber', // 联系方式
+        ContractAddr: buyOrder.contractAddr, // 待部署
+    }
 
     // 推送买单信息
-    randonBuyorder_KafkaClient.ProducerSend('BuyOrder',buyOrder);
-
+    if(KafkaClient == null){
+        randonBuyorder_KafkaClient.ProducerSend('BuyOrder',buyOrderInfo);
+    }
     console.timeEnd('buyOrderReq');
     console.log('--------------------');
 
@@ -42,6 +56,7 @@ function produceBuyOrderReq() {
 function generateBuyOrder() {
     
     let subBuyOrder = [];
+
     for(let i = subBuyOrderAmount; i > 0; i--) {
         subBuyOrder.push({
             labelAmount: localUtils.randomNumber(1, 5),
