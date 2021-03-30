@@ -25,7 +25,7 @@ contractRemote.connect(async function(err, res) {
     global.seq = (await requestInfo.requestAccountInfo(platformAddr, contractRemote, false)).account_data.Sequence;
 
     let mq = await getConsumer();
-    mq.ConConsumer(undefined, [{'topic': 'Test'}], undefined, postBuyerConfirmReq);// 买单确认查收
+    mq.ConConsumer(undefined, [{'topic': 'BuyOrderContractAddr_Match'}], undefined, postBuyerConfirmReq);// 买单确认查收
 
 });
 
@@ -40,13 +40,13 @@ async function postBuyerConfirmReq(msg) {
     //  继续提取合约地址、卖单ID
     let contractAddrs = (new Array(sellOrderAmount)).fill(sellOrderContractAddr);
     let sellOrderIds = sellOrderInfo.map(order => {
-        return order.orderId;
+        return order.sellOrderId;
     })
     let expireTime = 86400;
     //  再生数据结构
     let confirmMsg = {
         contractAddrs: contractAddrs, // 合约列表
-        addr: platformAddr,
+        platformAddr: platformAddr,
         sellOrderId: sellOrderIds, // 订单列表
         expireTime: expireTime,
         buyOrderInfo: buyOrderInfo,

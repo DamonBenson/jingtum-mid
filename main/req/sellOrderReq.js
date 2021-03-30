@@ -81,14 +81,14 @@ function generateSellOrder(wrokId, sellerAddr) {
         expectedPrice: expectedPrice,
         sellerAddr: sellerAddr,
         contact: 'phoneNumber', // 联系方式
-        assetId: wrokId,
+        assetId: [wrokId],
         assetType: 0,
         consumable: false,
         expireTime: 86400,
-        addr: platformAddr,
+        platformAddr: platformAddr,
         contractAddr: sellOrderContractAddr, // 待部署
     }
-    sellOrder.orderId = sha256(seq.toString()).toString();
+    sellOrder.sellOrderId = sha256(seq.toString()).toString();
     
     return sellOrder;
 

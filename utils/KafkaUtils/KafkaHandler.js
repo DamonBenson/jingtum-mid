@@ -7,7 +7,7 @@ export async function produceSellOrder(msg) {
             topic:[produceTopic], 
             messages:[JSON.stringify({
                 OrderId	            :'买单标识:0x57A689E'             ,	              //买单标识	Y
-                SubBuyOrder	        :'子买单:0x57A689D'          	    ,             //子买单	Y
+                SubBuyOrderList	    :'子买单:0x57A689D'          	    ,             //子买单	Y
                 LimitPrice          :1500	          	    ,                 //限价	Y
                 TradeStrategy	    :0   	        ,             //交易策略	Y
                 AuthorizationInfo	:'授权信息:全授权'   	        ,         //授权信息	Y

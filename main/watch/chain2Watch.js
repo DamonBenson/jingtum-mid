@@ -1,29 +1,24 @@
 import jlib from 'jingtum-lib';
 import ipfsAPI from 'ipfs-api';
-import mysql from 'mysql';
-import sqlText from 'node-transform-mysql';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
-import * as erc721 from '../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
-import * as mysqlUtils from '../../utils/mysqlUtils.js';
-import * as localUtils from '../../utils/localUtils.js';
+//kafka消费者
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
+import {chains, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr} from '../../utils/info.js';
+//kafka集群
 /*----------消息队列----------*/
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
-const KafkaClient_Wath2 = await getClient.getClient();
+const KafkaClient_Watch2 = await getClient.getClient();
 let ConsumerQueue = [];
-KafkaClient_Wath2.Watch2WithKafkaInit(ConsumerQueue);
+KafkaClient_Watch2.Watch2WithKafkaInit(ConsumerQueue);
 
 // /*----------------------------------------*/
 const u = jlib.utils;
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
-const c = mysql.createConnection(mysqlConf);
-c.connect(); // mysql连接
-const contractChain = chains[1]; // 确权链
+const contractChain = chains[1]; // 权益链
 
 /*----------创建链接(确权链服务器3)----------*/
 
@@ -41,15 +36,13 @@ r.connect(async function(err, result) {
         console.log('result: ', result);
     }
 
-    let tokenTx = {}; // 用以判断哪些通证发行交易中的确权信息已经存入数据库（对于确权信息，只需推送17个中的一个）
-
     /*----------监听交易，信息存入数据库----------*/
 
     r.on('ledger_closed', async function(msg) {
 
         // 开始计时
         console.log('on ledger_closed: ' + msg.ledger_index);
-        let sTs = (new Date()).valueOf();
+        console.time('chain2Watch');
 
         // 获取所有交易哈希
         let ledgerIndex = msg.ledger_index;
@@ -127,8 +120,8 @@ r.connect(async function(err, result) {
         await processSellerConfirmTxs(sellerConfirmTxs, sellerConfirmTxs.length);
 
         // 结束计时
-        let eTs = (new Date()).valueOf();
-        console.log('----------' + (eTs - sTs) + 'ms----------');
+        console.timeEnd('chain2Watch');
+        console.log('--------------------');
 
     });
 
@@ -140,23 +133,22 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
 
     buyOrderTxs.forEach(async(buyOrderTx) => {
 
-        let orderId = buyOrderTx.func_parms[0];
-        let platformAddr = buyOrderTx.account;
-        let timeStamp = buyOrderTx.date;
+        let buyOrderId = buyOrderTx.func_parms[0];
+        let contractAddr = buyOrderTx.destination;
         
-        let orderInfoHash = buyOrderTx.func_parms[1];//获取买单数据存储地址
-        let orderInfoJson = await ipfsUtils.get(ipfs, orderInfoHash);//获取买单数据
-        let orderInfo = JSON.parse(orderInfoJson);//解析买单数据
+        let buyOrderInfoHash = buyOrderTx.func_parms[1];
+        console.log(buyOrderId, buyOrderInfoHash);
+        let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
+        let buyOrderInfo = JSON.parse(buyOrderInfoJson);
 
-        orderInfo.orderId = orderId;
-        orderInfo.platformAddr = platformAddr;
-        orderInfo.timeStamp = timeStamp;
+        buyOrderInfo.buyOrderId = buyOrderId;
+        buyOrderInfo.buyOrderHash = '0';
+        buyOrderInfo.contractAddr = contractAddr;
+        buyOrderInfo.timeStamp = 0;
 
-        console.log(orderInfo);
+        console.log(buyOrderInfo);
         // 推送买单信息
-        KafkaClient_Wath2.ProducerSend('BuyOrder',orderInfo);
-
-
+        KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_BuyOrder', buyOrderInfo);
 
     });
     
@@ -168,22 +160,26 @@ async function processSellOrder(sellOrderTxs, loopConter) {
 
     sellOrderTxs.forEach(async(sellOrderTx) => {
 
-        let orderId = sellOrderTx.func_parms[0];
-        let timeStamp = sellOrderTx.date;
+        let sellOrderId = sellOrderTx.func_parms[0];
+        let workId = sellOrderTx.func_parms[1];
+        let contractAddr = buyOrderTx.destination;
         
-        let orderInfoHash = sellOrderTx.func_parms[1];
-        let orderInfoJson = await ipfsUtils.get(ipfs, orderInfoHash);
-        let orderInfo = JSON.parse(orderInfoJson);
-        delete orderInfo.sellerAddr;
-        delete orderInfo.contact;
+        let sellOrderInfoHash = sellOrderTx.func_parms[1];
+        let sellOrderInfoJson = await ipfsUtils.get(ipfs, sellOrderInfoHash);
+        let sellOrderInfo = JSON.parse(sellOrderInfoJson);
+        delete sellOrderInfo.sellerAddr;
+        delete sellOrderInfo.contact;
 
-        orderInfo.orderId = orderId;
-        orderInfo.timeStamp = timeStamp;
+        sellOrderInfo.sellOrderId = sellOrderId;
+        sellOrderInfo.sellOrderHash = '0';
+        sellOrderInfo.timeStamp = 0;
+        sellOrderInfo.workId = workId;
+        sellOrderInfo.matchScore = 0;
+        sellOrderInfo.contractAddr = contractAddr;
 
-        console.log(orderInfo);
+        console.log(sellOrderInfo);
         // 推送卖单信息
-        KafkaClient_Wath2.ProducerSend('SellOrder',orderInfo);
-
+        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellOrder', sellOrderInfo);
 
     });
 
@@ -201,7 +197,7 @@ async function processMatch(matchTxs, loopConter) {
 
         console.log(matchInfo);
         // 推送交易匹配信息
-        KafkaClient_Wath2.ProducerSend('Match',matchInfo);
+        KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_Match',matchInfo);
 
     });
 
@@ -224,8 +220,7 @@ async function processBuyerConfirmTxs(buyerConfirmTxs, loopConter) {
 
         console.log(buyerConfirmInfo);
         //推送买方确认信息
-        KafkaClient_Wath2.ProducerSend('BuyerConfirmTxs',buyerConfirmInfo);
-
+        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_BuyerConfirmTxs', buyerConfirmInfo);
 
     });
 
@@ -238,10 +233,17 @@ async function processSellerConfirmTxs(sellerConfirmTxs, loopConter) {
     sellerConfirmTxs.forEach(async(sellerConfirmTx) => {
 
         let sellOrderId = sellerConfirmTx.func_parms[0];
+        let buyerAddr = sellerConfirmTx.func_parms[3];
 
-        console.log(sellOrderId);
+        let sellConfirmInfo = {
+            sellOrderId: sellOrderId,
+            buyerAddr: buyerAddr,
+        }
+
+        console.log(sellConfirmInfo);
         //推送卖方确认信息
-        KafkaClient_Wath2.ProducerSend('SellerConfirmTxs',sellOrderId);
+        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellerConfirmTxs', sellConfirmInfo);
+
     });
 
 }

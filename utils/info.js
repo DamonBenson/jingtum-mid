@@ -43,7 +43,7 @@ const userAccount = [
     {
       secret: 'shegH3jnyxLFFtCiZBgEALTkwvBjy',
       address: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9'
-    }, // a[9]--用户4
+    }, // a[9]--中间层
 ]
 
 const chains = [

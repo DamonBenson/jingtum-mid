@@ -19,6 +19,9 @@ const contract_a0 = contractChain.account.a[0].address;
 const upload_a1 = uploadChain.account.a[1].address;
 const token_a1 = tokenChain.account.a[1].address;
 const contract_a1 = contractChain.account.a[1].address;
+const upload_a9 = uploadChain.account.a[9].address;
+const token_a9 = tokenChain.account.a[9].address;
+const contract_a9 = contractChain.account.a[9].address;
 
 const Remote = jlib.Remote;
 const uploadRemote = new Remote({server: uploadChain.server[0], local_sign: true});
@@ -59,6 +62,7 @@ uploadRemote.connect(async function(err, res) {
             let seqObj = {
                 a0: {},
                 a1: {},
+                a9: {},
             };
             // 目前upload同token，不能分开计数
             // seqObj.a0.upload = (await requestInfo.requestAccountInfo(upload_a0, uploadRemote, false)).account_data.Sequence;
@@ -67,6 +71,9 @@ uploadRemote.connect(async function(err, res) {
             // seqObj.a1.upload = (await requestInfo.requestAccountInfo(upload_a1, uploadRemote, false)).account_data.Sequence;
             seqObj.a1.token = (await requestInfo.requestAccountInfo(token_a1, tokenRemote, false)).account_data.Sequence;
             seqObj.a1.contract = (await requestInfo.requestAccountInfo(contract_a1, contractRemote, false)).account_data.Sequence;
+            // seqObj.a9.upload = (await requestInfo.requestAccountInfo(upload_a9, uploadRemote, false)).account_data.Sequence;
+            seqObj.a9.token = (await requestInfo.requestAccountInfo(token_a9, tokenRemote, false)).account_data.Sequence;
+            seqObj.a9.contract = (await requestInfo.requestAccountInfo(contract_a9, contractRemote, false)).account_data.Sequence;
 
             /*----------存证请求路由配置----------*/
 
@@ -130,6 +137,16 @@ uploadRemote.connect(async function(err, res) {
                 res.send('success');
             });
 
+            transactionRouter.post('/buyOrderConfirm', async function(req, res) {
+                let unsignedTx = await transactionMid.handleBuyOrderConfirm(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
+            });
+
+            transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) {
+                await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
+                res.send('success');
+            });
+
             // 提交卖单
             // -	应用层——请求路由模块: postServiceReq(serviceAddr, platformId, contact, orderInfo)
             // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘postOrder(platformId, contact, orderInfo)’)
@@ -143,6 +160,16 @@ uploadRemote.connect(async function(err, res) {
 
             transactionRouter.post('/signedSell', async function(req, res) {
                 await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
+                res.send('success');
+            });
+
+            transactionRouter.post('/sellOrderConfirm', async function(req, res) {
+                let unsignedTx = await transactionMid.handleSellOrderConfirm(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
+            });
+
+            transactionRouter.post('/signedSellOrderConfirm', async function(req, res) {
+                await transactionMid.handleSignedSellOrderComfirm(contractRemote, seqObj, req, res);
                 res.send('success');
             });
 

@@ -42,21 +42,21 @@ export async function handleBuyOrder(contractRemote, seqObj, req, res) {
     let abi = await getAbi(contractAddr);
 
     // 解析买单ID
-    let orderId = body.orderId;
+    let buyOrderId = body.buyOrderId;
 
     // 解析买方地址
-    let platformAddr = body.addr;
+    let platformAddr = body.platformAddr;
 
     // 所有买单信息存入IPFS
-    let orderInfo = Buffer.from(JSON.stringify(body, ['subBuyOrder', 'limitPrice', 'tradeStrategy', 'authorizationInfo', 'side', 'buyerAddr', 'contact']));
-    let orderInfoHash = await ipfsUtils.add(ipfs, orderInfo); // 直接存数据不需要这行
+    let buyOrderInfo = Buffer.from(JSON.stringify(body, ['subBuyOrderList', 'limitPrice', 'tradeStrategy', 'authorizationInfo', 'side', 'buyerAddr', 'contact']));
+    let buyOrderInfoHash = await ipfsUtils.add(ipfs, buyOrderInfo); // 直接存数据不需要这行
     
     // 构造交易
     let unsignedTx = contractRemote.invokeContract({
         account: platformAddr, 
         destination: contractAddr, // 待部署
         abi: abi, // 待部署
-        func: "makeOrder('" + orderId + "','" + orderInfoHash + "')", // 存索引
+        func: "makeOrder('" + buyOrderId + "','" + buyOrderInfoHash + "')", // 存索引
         // func: makeOrder(orderId, orderInfo), // 直接存数据
     });
 
@@ -89,6 +89,42 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
 
 }
 
+/*----------构造买单确认接收的交易----------*/
+
+export async function handleBuyOrderConfirm(contractRemote, seqObj, req, res) {
+
+    console.time('handleBuyOrderConfirm');
+
+    let body = JSON.parse(Object.keys(req.body)[0]);
+
+    // 获取合约元数据
+
+    // 获取新旧订单标识
+    
+    // 构造交易
+
+    console.timeEnd('handleBuyOrderConfirm');
+    console.log('--------------------');
+
+    return unsignedTx.tx_json;
+
+}
+
+/*----------构造已签名买单确认接收的交易----------*/
+
+export async function handleSignedBuyOrderConfirm(contractRemote, seqObj, req, res) {
+
+    console.time('handleSignedBuyOrderConfirm');
+
+    let body = JSON.parse(Object.keys(req.body)[0]);
+    
+    // 构造交易
+
+    console.timeEnd('handleSignedBuyOrderConfirm');
+    console.log('--------------------');
+
+}
+
 /*----------构造上传卖单的交易----------*/
 
 /**
@@ -109,21 +145,21 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     let abi = await getAbi(contractAddr);
 
     // 解析需要存入合约的卖单信息
-    let orderId = body.orderId;
+    let sellOrderId = body.sellOrderId;
     let assetId = body.assetId;
     let assetType = body.assetType;
     let consumable = body.consumable;
     let expireTime = body.expireTime;
 
     // 解析平台地址
-    let platformAddr = body.addr;
+    let platformAddr = body.platformAddr;
 
     // 卖单次要信息（标签、授权价格、联系方式）存入IPFS
     let otherClauses = Buffer.from(JSON.stringify(body, ['labelSet', 'expectedPrice', 'sellerAddr', 'contact']));
     let otherClausesHash = await ipfsUtils.add(ipfs, otherClauses);
     
     // 构造交易
-    let func = "makeOrder('" + orderId + "','" + assetId + "'," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
+    let func = "makeOrder('" + sellOrderId + "','" + assetId + "'," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
     console.log(func);
     let unsignedTx = contractRemote.invokeContract({
         account: platformAddr, 
@@ -163,6 +199,42 @@ export async function handleSignedSellOrder(contractRemote, seqObj, req, res) {
 
 }
 
+/*----------构造卖单确认接收的交易----------*/
+
+export async function handleSellOrderConfirm(contractRemote, seqObj, req, res) {
+
+    console.time('handleSellOrderConfirm');
+
+    let body = JSON.parse(Object.keys(req.body)[0]);
+
+    // 获取合约元数据
+
+    // 获取新旧订单标识
+    
+    // 构造交易
+
+    console.timeEnd('handleSellOrderConfirm');
+    console.log('--------------------');
+
+    return unsignedTx.tx_json;
+
+}
+
+/*----------构造已签名买单确认接收的交易----------*/
+
+export async function handleSignedSellOrderConfirm(contractRemote, seqObj, req, res) {
+
+    console.time('handleSignedSellOrderConfirm');
+
+    let body = JSON.parse(Object.keys(req.body)[0]);
+    
+    // 构造交易
+
+    console.timeEnd('handleSignedSellOrderConfirm');
+    console.log('--------------------');
+
+}
+
 /*----------构造写入交易匹配结果的交易----------*/
 
 /**
@@ -183,15 +255,20 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     let abi = await getAbi(contractAddr);
 
     // 获取智能交易系统账户地址
-    let matchSystemAddr = body.addr;
+    let matchSystemAddr = body.matchSystemAddr;
 
     // 解析买方平台地址、买单ID、撮合信息
-    let platformAddr = body.platformAddr;
+    let buyOrderInfo = body.buyOrderInfo;
     let buyOrderId = body.buyOrderId;
-    let matchResults = body.matchResults;
+    let buyerAddr = buyOrderInfo.buyerAddr;
+    let sellOrderInfo = body.sellOrderInfo;
+    let matchResults = {
+        buyOrderInfo: buyOrderInfo,
+        sellOrderInfo: sellOrderInfo,
+    }
     /* {
         买单: {买单信息}
-        卖单: [{卖方平台，卖单ID，作品ID}，……]
+        卖单: [{合约地址，卖单ID}，……]
     } */
     let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
@@ -201,14 +278,14 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
         account: matchSystemAddr, 
         destination: contractAddr, // 待部署
         abi: abi, // 待部署
-        func: updateMatches(platformAddr, buyOrderId, matchResultsHash),
+        func: updateMatches(buyerAddr, buyOrderId, matchResultsHash),
     });
-    unsignedTx.setSequence(seqObj.a1.contract++);
+    unsignedTx.setSequence(seqObj.a1.contract++); // 需要智能交易系统维护
 
     console.timeEnd('handleMatch');
     console.log('--------------------');
 
-    return unsignedTx;
+    return unsignedTx.tx_json;
 
 }
 
@@ -280,7 +357,7 @@ export async function handleBuyerConfirm(contractRemote, seqObj, req, res) {
     })
 
     // 获取买方平台账户地址
-    let platformAddr = body.addr;
+    let platformAddr = body.platformAddr;
 
     // 解析卖单ID、超时限制
     let sellOrderIds = body.sellOrderIds;
@@ -299,8 +376,7 @@ export async function handleBuyerConfirm(contractRemote, seqObj, req, res) {
             abi: abis[index], // 待部署
             func: makeBuyIntention(sellOrderIds[index], expireTime, buyOrderInfoHash),
         });
-        unsignedTx.setSequence(seqObj.a1.contract++);
-        return unsignedTx;
+        return unsignedTx.tx_json;
     })
 
     console.timeEnd('handleBuyerConfirm');
@@ -446,6 +522,7 @@ export async function handleSellerApproveConfirm(tokenRemote, contractRemote, se
     let platformAddr = body.addr;
     let sellOrderId = body.sellOrderId;
     let buyOrderInfo = body.buyOrderInfo;
+    let buyerAddr = buyOrderInfo.buyerAddr;
 
     // 默认mono值
     let mono = false;
@@ -455,58 +532,60 @@ export async function handleSellerApproveConfirm(tokenRemote, contractRemote, se
         account: platformAddr, 
         destination: contractAddr, // 待部署
         abi: abi, // 待部署
-        func: commitOrder(sellOrderId, platformAddr, mono),
+        func: commitOrder(sellOrderId, platformAddr, mono, buyerAddr),
     });
-    unsignedTx.setSequence(seqObj.a1.contract++);
 
-    // 根据卖单ID，从合约中获取卖单信息
-    let func = "getOrderInfo('" + sellOrderId + "')";
-    let getOrderInfoRes = await contract.invokeContract(a1, s1, contractRemote, seqObj.a1.contract++, abi, contractAddr, func, true);
-    let sellOrderInfo = getOrderInfoRes.ContractState;
-    let workId = sellOrderInfo.asset_id;
+    /* 智能授权系统处理许可通证发行
+    workId为数组，待处理 */
 
-    // 根据卖单信息，查询数据库，获取相关的通证ID
-    let authorizationInfo = buyOrderInfo.authorizationInfo;
-    let authorizationType = getType(authorizationInfo);
-    let rightTokenIds = getTokenIds(workId, authorizationType);
+    // // 根据卖单ID，从合约中获取卖单信息
+    // let func = "getOrderInfo('" + sellOrderId + "')";
+    // let getOrderInfoRes = await contract.invokeContract(a1, s1, contractRemote, seqObj.a1.contract++, abi, contractAddr, func, true);
+    // let sellOrderInfo = getOrderInfoRes.ContractState;
+    // let workId = sellOrderInfo.asset_id;
 
-    // 为版权通证生成对应的许可通证，并发放给用户
-    let buyerAddr = buyOrderInfo.buyerAddr;
-    let tokenIssuePromises = [];
-    let tokenAuthPromises = [];
-    rightTokenIds.map(tokenId => {
-        let rightTokenId = tokenId;
-        let apprChannel = authorizationInfo[authorizationType].AuthorizationChannel;
-        let apprArea = authorizationInfo[authorizationType].AuthorizationArea;
-        let apprTime = authorizationInfo[authorizationType].AuthorizationTime;
-        let apprTokenId = sha256(rightTokenId + seqObj.a1.token).toString(); // tokenId暂定为hash(workId+0~16)
-        let tokenInfo = {
-            rightTokenId: rightTokenId,
-            apprChannel: apprChannel,
-            apprArea: apprArea,
-            apprTime: apprTime,
-        }
-        let tokenMemos = localUtils.obj2memos(tokenInfo);
-        if(debugMode) {
-            console.log('issue token:', tokenInfo);
-        }
-        else {
-            console.log('issue token:', tokenInfo.rightTokenId + '_' + seqObj.a1.token);
-        }
-        /* issue token: {
-            workId: '909B18A4FCFE8ACDA0C8F4AC5C45AF2BA86F2DE7761C73126B1EDBF0A18FEBA5',
-            rightType: 6
-        } */
-        tokenIssuePromises.push(erc721.buildIssueTokenTx(s1, tokenRemote, seqObj.a1.token++, a1, approveTokenName, apprTokenId, tokenMemos, true));
-        tokenAuthPromises.push(erc721.buildAuthTokenTx(s1, tokenRemote, seqObj.a1.token++, a1, buyerAddr, approveTokenName, apprTokenId, true));
-    })
-    await Promise.all(tokenIssuePromises);
-    await Promise.all(tokenAuthPromises);
+    // // 根据卖单信息，查询数据库，获取相关的通证ID
+    // let authorizationInfo = buyOrderInfo.authorizationInfo;
+    // let authorizationType = getType(authorizationInfo);
+    // let rightTokenIds = getTokenIds(workId, authorizationType);
+
+    // // 为版权通证生成对应的许可通证，并发放给用户
+    // let buyerAddr = buyOrderInfo.buyerAddr;
+    // let tokenIssuePromises = [];
+    // let tokenAuthPromises = [];
+    // rightTokenIds.map(tokenId => {
+    //     let rightTokenId = tokenId;
+    //     let apprChannel = authorizationInfo[authorizationType].AuthorizationChannel;
+    //     let apprArea = authorizationInfo[authorizationType].AuthorizationArea;
+    //     let apprTime = authorizationInfo[authorizationType].AuthorizationTime;
+    //     let apprTokenId = sha256(rightTokenId + seqObj.a1.token).toString(); // tokenId暂定为hash(workId+0~16)
+    //     let tokenInfo = {
+    //         rightTokenId: rightTokenId,
+    //         apprChannel: apprChannel,
+    //         apprArea: apprArea,
+    //         apprTime: apprTime,
+    //     }
+    //     let tokenMemos = localUtils.obj2memos(tokenInfo);
+    //     if(debugMode) {
+    //         console.log('issue token:', tokenInfo);
+    //     }
+    //     else {
+    //         console.log('issue token:', tokenInfo.rightTokenId + '_' + seqObj.a1.token);
+    //     }
+    //     /* issue token: {
+    //         workId: '909B18A4FCFE8ACDA0C8F4AC5C45AF2BA86F2DE7761C73126B1EDBF0A18FEBA5',
+    //         rightType: 6
+    //     } */
+    //     tokenIssuePromises.push(erc721.buildIssueTokenTx(s1, tokenRemote, seqObj.a1.token++, a1, approveTokenName, apprTokenId, tokenMemos, true));
+    //     tokenAuthPromises.push(erc721.buildAuthTokenTx(s1, tokenRemote, seqObj.a1.token++, a1, buyerAddr, approveTokenName, apprTokenId, true));
+    // })
+    // await Promise.all(tokenIssuePromises);
+    // await Promise.all(tokenAuthPromises);
 
     console.timeEnd('handleSellerApproveConfirm');
     console.log('--------------------');
 
-    return [unsignedTx];
+    return unsignedTx.tx_json;
 
 }
 
