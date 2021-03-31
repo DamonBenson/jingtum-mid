@@ -133,14 +133,13 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
 
     buyOrderTxs.forEach(async(buyOrderTx) => {
 
-        let buyOrderId = buyOrderTx.func_parms[0];
+        let buyOrderId = buyOrderTx.func_parms[0].replace(/\'/g,"");
         let contractAddr = buyOrderTx.destination;
         
-        let buyOrderInfoHash = buyOrderTx.func_parms[1];
+        let buyOrderInfoHash = buyOrderTx.func_parms[1].replace(/\'/g,"");
         console.log(buyOrderId, buyOrderInfoHash);
         let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
         let buyOrderInfo = JSON.parse(buyOrderInfoJson);
-
         buyOrderInfo.buyOrderId = buyOrderId;
         buyOrderInfo.buyOrderHash = '0';
         buyOrderInfo.contractAddr = contractAddr;

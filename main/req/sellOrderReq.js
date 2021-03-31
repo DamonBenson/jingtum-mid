@@ -2,6 +2,7 @@ import jlib from 'jingtum-lib';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 import sha256 from 'crypto-js/sha256.js';
+import util from 'util';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
@@ -12,7 +13,7 @@ import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-
+const MidIP = '39.102.93.47';// 中间层服务器IP
 const msPerSellOrder = 10000;
 const platformAddr = userAccount[4].address; // 平台账号
 const platformSecret = userAccount[4].secret;
@@ -53,7 +54,8 @@ async function postSellOrderReq() {
         if(debugMode) {
             console.log('sellOrder:', sellOrder);
         }
-        let sellOrderRes = await fetch.postData('http://127.0.0.1:9001/transaction/sell', sellOrder);
+        
+        let sellOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
         let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);
         let txJson = JSON.parse(buf.toString());
         let unsignedTx = {
@@ -63,7 +65,8 @@ async function postSellOrderReq() {
         jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
         jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         let blob = unsignedTx.tx_json.blob;
-        await fetch.postData('http://127.0.0.1:9001/transaction/signedSell', blob);
+        
+        await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
     })
     
     console.timeEnd('sellOrderReq');

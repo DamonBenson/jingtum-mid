@@ -4,9 +4,11 @@ import sha256 from 'crypto-js/sha256.js';
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 import * as localUtils from '../../utils/localUtils.js';
 import * as fetch from '../../utils/fetch.js';
+import util from 'util';
 
 import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../utils/info.js';
-
+import { exit, kill } from 'process';
+const MidIP = '39.102.93.47';// 中间层服务器IP
 const msPerBuyOrder = 10000;
 const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
@@ -30,7 +32,10 @@ contractRemote.connect(async function(err, res) {
     }
     global.seq = (await requestInfo.requestAccountInfo(platformAddr, contractRemote, false)).account_data.Sequence;
 
+    // setInterval(postBuyOrderReq, msPerBuyOrder);
     postBuyOrderReq();
+    // localUtils.sleep(5000)
+    // exit();
 
 });
 
@@ -38,11 +43,10 @@ async function postBuyOrderReq() {
 
     console.time('buyOrderReq');
     let buyOrder = generateBuyOrder();
-    if(debugMode) {
-        console.log('buyOrder:', buyOrder);
-    }
-    let buyOrderRes = await fetch.postData('http://127.0.0.1:9001/transaction/buy', buyOrder);
+    if(debugMode) console.log('buyOrder:', buyOrder);
+    let buyOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
     let buf = Buffer.from(buyOrderRes.body._readableState.buffer.head.data);
+    if(debugMode) console.log('buf.toString():', buf.toString());
     let txJson = JSON.parse(buf.toString());
     let unsignedTx = {
         tx_json: txJson,
@@ -51,7 +55,7 @@ async function postBuyOrderReq() {
     jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
-    await fetch.postData('http://127.0.0.1:9001/transaction/signedBuy', blob);
+    await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
     console.timeEnd('buyOrderReq');
     console.log('--------------------');
 

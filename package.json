@@ -18,6 +18,7 @@
     "kafka-node": "^5.0.0",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.1",
-    "node-transform-mysql": "0.0.4"
+    "node-transform-mysql": "0.0.4",
+    "string-format": "^2.0.0"
   }
 }
