@@ -191,7 +191,7 @@ uploadRemote.connect(async function(err, res) {
 
             // 获取交易服务结果
             // -	应用层——请求路由模块: getSeviceInfo (serviceAddr, orderId)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘getOrderInfo(orderId)’)
+            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘getOrderInfo(orderId)’) q
 
             transactionRouter.get('/matchInfo', async function(req, res) {
                 let matchInfo = await transactionMid.handleMatchInfo(contractRemote, seqObj, req, res);

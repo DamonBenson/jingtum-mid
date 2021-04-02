@@ -8,7 +8,8 @@ import util from 'util';
 
 import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../utils/info.js';
 import { exit, kill } from 'process';
-const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = '39.102.93.47';// 中间层服务器IP
+const MidIP = 'localhost';// 中间层服务器IP
 const msPerBuyOrder = 10000;
 const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
@@ -46,7 +47,7 @@ async function postBuyOrderReq() {
     if(debugMode) console.log('buyOrder:', buyOrder);
     let buyOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
     let buf = Buffer.from(buyOrderRes.body._readableState.buffer.head.data);
-    if(debugMode) console.log('buf.toString():', buf.toString());
+    // if(debugMode) console.log('buf.toString():', buf.toString());
     let txJson = JSON.parse(buf.toString());
     let unsignedTx = {
         tx_json: txJson,

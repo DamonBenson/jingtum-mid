@@ -78,7 +78,7 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
     console.time('handleSignedBuyOrder');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-
+    console.log("body:",body);
     let blob = body;
 
     // 提交交易
@@ -159,7 +159,7 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     let otherClausesHash = await ipfsUtils.add(ipfs, otherClauses);
     
     // 构造交易
-    let func = "makeOrder('" + sellOrderId + "','" + assetId + "'," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
+    let func = "makeOrder([" + sellOrderId + "],[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
     console.log(func);
     let unsignedTx = contractRemote.invokeContract({
         account: platformAddr, 
@@ -186,7 +186,7 @@ export async function handleSignedSellOrder(contractRemote, seqObj, req, res) {
     console.time('handleSignedSellOrder');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-
+    // console.log("body:",body);
     let blob = body;
 
     // 提交交易

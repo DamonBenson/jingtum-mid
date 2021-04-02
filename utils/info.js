@@ -179,8 +179,10 @@ const mysqlConf = {
 }
 
 const debugMode = true;
-
-const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd'
-const sellOrderContractAddr = 'jpSgd31d1rEimK5kAQdxofgFNyKtEqZF7c'
+//OLD Version : uint256
+const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd';
+// const sellOrderContractAddr = 'jpSgd31d1rEimK5kAQdxofgFNyKtEqZF7c'
+//New Version : bytes32
+const sellOrderContractAddr = 'jBwQZiCXWj3k8vphoxx8xGWXMYpPrHYgKn';
 
 export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr};
