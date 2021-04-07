@@ -1,6 +1,6 @@
-import * as localUtils from '../../utils/localUtils.js';
-import * as getClient from '../../utils/KafkaUtils/getClient.js';
-import {userAccount, buyOrderContractAddr, debugMode} from '../../utils/info.js';
+import * as localUtils from '../../../utils/localUtils.js';
+import * as getClient from '../../../utils/KafkaUtils/getClient.js';
+import {userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
 
 /*----------消息队列----------*/
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/

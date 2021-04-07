@@ -1,8 +1,8 @@
 import jlib from 'jingtum-lib';
 
-import * as requestInfo from '../../utils/jingtum/requestInfo.js';
-import * as fetch from '../../utils/fetch.js';
-import {getConsumer} from '../../utils/kafkaUtils/getConsumer.js';
+import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
+import * as fetch from '../../../utils/fetch.js';
+import {getConsumer} from '../../../utils/kafkaUtils/getConsumer.js';
 
 import {chains, userAccount, sellOrderContractAddr, debugMode} from '../../utils/info.js';
 

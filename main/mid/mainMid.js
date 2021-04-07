@@ -6,6 +6,7 @@ import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 
 import {chains} from '../../utils/info.js';
 import * as uploadMid from './processFunction/uploadMid.js';
+import * as infoMid from './processFunction/infoMid.js';
 import * as contractMid from './processFunction/contractMid.js';
 import * as transactionMid from './processFunction/transactionMid.js';
 
@@ -95,17 +96,17 @@ uploadRemote.connect(async function(err, res) {
             });
 
             infoRouter.post('/work', async function(req, res) {
-                let workInfo = await infoMid.handleWorkInfo(uploadRemote, seqObj, req, res);
+                let workInfo = await infoMid.handleWorkInfo(req, res);
                 res.send(workInfo);
             });
 
             infoRouter.post('/copyright', async function(req, res) {
-                let copyrightInfo = await infoMid.handleCopyrightInfo(tokenRemote, seqObj, req, res);
+                let copyrightInfo = await infoMid.handleCopyrightInfo(req, res);
                 res.send(copyrightInfo);
             });
 
             infoRouter.post('/approve', async function(req, res) {
-                let approveInfo = await infoMid.handleApproveInfo(tokenRemote, seqObj, req, res);
+                let approveInfo = await infoMid.handleApproveInfo(req, res);
                 res.send(approveInfo);
             });
 

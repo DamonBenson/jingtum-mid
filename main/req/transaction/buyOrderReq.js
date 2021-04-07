@@ -1,12 +1,12 @@
 import jlib from 'jingtum-lib';
 import sha256 from 'crypto-js/sha256.js';
 
-import * as requestInfo from '../../utils/jingtum/requestInfo.js';
-import * as localUtils from '../../utils/localUtils.js';
-import * as fetch from '../../utils/fetch.js';
+import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
+import * as localUtils from '../../../utils/localUtils.js';
+import * as fetch from '../../../utils/fetch.js';
 import util from 'util';
 
-import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../utils/info.js';
+import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
 import { exit, kill } from 'process';
 // const MidIP = '39.102.93.47';// 中间层服务器IP
 const MidIP = 'localhost';// 中间层服务器IP
