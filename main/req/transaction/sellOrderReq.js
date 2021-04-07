@@ -18,6 +18,7 @@ c.connect(); // mysql连接
 // const MidIP = '39.102.93.47';// 中间层服务器IP
 const MidIP = 'localhost';// 中间层服务器IP
 const msPerSellOrder = 10000;
+const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
 const platformSecret = userAccount[4].secret;
 // const sellerAddr = userAccount[5].address;
@@ -47,13 +48,19 @@ async function postSellOrderReq() {
 
     console.time('sellOrderReq');
 
-    let sql = sqlText.table('work_info').field('work_id, addr').order('RAND()').limit(1).select();
-    let workInfoArr = await mysqlUtils.sql(c, sql);
+    for(let i = 0; i < sellOrderAmount; i++) {
 
-    workInfoArr.map(async(workInfo) => {
-        let workId = workInfo.work_id;
-        let sellerAddr = workInfo.addr;
-        let sellOrder = generateSellOrder(workId, sellerAddr);
+        let addrFilter = {
+            addr: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9',
+        };
+        let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();
+        let workInfoArr = await mysqlUtils.sql(c, sql);
+
+        let workIds = workInfoArr.map(workInfo => {
+            return workInfo.work_id;
+        });
+        let sellerAddr = addrFilter.addr;
+        let sellOrder = generateSellOrder(workIds, sellerAddr);
         if(debugMode) {
             console.log('sellOrder:', sellOrder);
         }
@@ -71,7 +78,8 @@ async function postSellOrderReq() {
         let blob = unsignedTx.tx_json.blob;
         
         await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
-    })
+
+    }
     
     console.timeEnd('sellOrderReq');
     console.log('--------------------');
@@ -82,67 +90,54 @@ async function postSellOrderReq() {
  *
  * @param s the input string as HexNumber
  */
-function Hex2decimal(s) {
+// function Hex2decimal(s) {
 
-    var dec = BigInt(0);
-    function pow(a,x) {
-        var temp = BigInt(1);
-        var cheng = BigInt(a)
-        while(x>0){
-            temp = temp * cheng;
-            x --;
-        }
-        return temp;
-    }
-    function add(dec ,n ,chrn) {
-        var temp = BigInt(pow(16,n) * BigInt(chrn));
-        dec = dec + temp;
-        return dec;
-    }
-    var n = 0;
-    s.split('').forEach(function(chr) {
-        // console.log(chr)
-        var chrn = parseInt(chr, 16);
-        dec = add(dec, n, chrn);
-        n ++;
-    });
-    var result = "";
-    result = dec.toString();
-    return result;
-}
-function generateSellOrder(wrokId, sellerAddr) {
+//     var dec = BigInt(0);
+//     function pow(a,x) {
+//         var temp = BigInt(1);
+//         var cheng = BigInt(a)
+//         while(x>0){
+//             temp = temp * cheng;
+//             x --;
+//         }
+//         return temp;
+//     }
+//     function add(dec ,n ,chrn) {
+//         var temp = BigInt(pow(16,n) * BigInt(chrn));
+//         dec = dec + temp;
+//         return dec;
+//     }
+//     var n = 0;
+//     s.split('').forEach(function(chr) {
+//         // console.log(chr)
+//         var chrn = parseInt(chr, 16);
+//         dec = add(dec, n, chrn);
+//         n ++;
+//     });
+//     var result = "";
+//     result = dec.toString();
+//     return result;
+// }
+
+function generateSellOrder(wrokIds, sellerAddr) {
     let labelSet = generateLabelSet();
     let basePrice = localUtils.randomNumber(100, 1000);
     let expectedPrice = generateExpectedPrice(basePrice);
-    wrokId = ("0x"+wrokId);
-    wrokId = web3.utils.hexToBytes(wrokId);
 
-    // console.log(wrokId);
-    // wrokId = BigNumber(wrokId,16);
-    // console.log(wrokId.toFixed());
-    // wrokId = wrokId.toFixed();
-    // console.log("toString(16)",wrokId.toString(16));
     let sellOrder = {
         labelSet: labelSet,
         expectedPrice: expectedPrice,
         sellerAddr: sellerAddr,
         contact: 'phoneNumber', // 联系方式
-        assetId: [wrokId],
+        assetId: wrokIds,
         assetType: 0,
         consumable: false,
         expireTime: 86400,
         platformAddr: platformAddr,
-        contractAddr: sellOrderContractAddr, // 待部署
+        contractAddr: sellOrderContractAddr,
     }
-    // let temp = sha256(seq.toString()).toString();
-    // temp = BigNumber(temp,16);
-    // temp = temp.toFixed();
-    // sellOrder.sellOrderId = temp;
-    sellOrder.sellOrderId = sha256(seq.toString()).toString();
-    sellOrder.sellOrderId = ("0x"+sellOrder.sellOrderId);
-    sellOrder.sellOrderId = web3.utils.hexToBytes(sellOrder.sellOrderId);
 
-    console.log("sellOrderId :（" + sellOrder.sellOrderId  + ")");
+    sellOrder.sellOrderId = sha256(seq.toString()).toString();
     return sellOrder;
 
 }
@@ -151,8 +146,7 @@ function generateLabelSet() {
 
     let labelSet = {};
     for(let i = 0; i < 5; i++) {
-        // labelSet[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
-        labelSet[i] = [0];
+        labelSet[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
     }
     return labelSet;
 
@@ -172,7 +166,7 @@ function generateExpectedPrice(basePrice) {
         8: [],
         9: [],
     };
-    for(let i = 0; i < 9; i++) {
+    for(let i = 0; i < 10; i++) {
         switch(i) {
             case 0:
             case 8:

@@ -179,12 +179,14 @@ const mysqlConf = {
 }
 
 const debugMode = true;
-//OLD Version : uint256
-const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd';
-// const sellOrderContractAddr = 'jpSgd31d1rEimK5kAQdxofgFNyKtEqZF7c'
-//New Version : bytes32
-const sellOrderContractAddr = 'jBwQZiCXWj3k8vphoxx8xGWXMYpPrHYgKn';
-// const sellOrderContractAddr = 'jpwCwEskfRiiedH8zqLroPWgu4qiBJtuPU';//Test Byte32
 
+const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd';
+
+// OLD Version : uint256
+const sellOrderContractAddr = 'jDamHMfeuENdNDzyQciGjojGLuMmRnhifU';
+// New Version : bytes32
+// const sellOrderContractAddr = 'jBwQZiCXWj3k8vphoxx8xGWXMYpPrHYgKn';
+// Version : Test Byte32
+// const sellOrderContractAddr = 'jpwCwEskfRiiedH8zqLroPWgu4qiBJtuPU';//Test Byte32
 
 export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr};

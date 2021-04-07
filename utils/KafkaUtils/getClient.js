@@ -144,14 +144,26 @@ export class Client {
     //console.log(consumers.get('FormalTest').topic.topic);//访问consumers对象
     Watch2WithKafkaInit(ConsumerQueue)
     {
-        this.producers = ['BuyOrder' ,'SellOrder' ,'BuyerConfirmTxs','SellerConfirmTxs' ];
-        this.consumers = new Map([
-            ['consumers', {topic:[  {'topic': 'BuyOrder', 'partition': 0},
-                                    {'topic': 'SellOrder', 'partition': 0},
-                                    {'topic': 'Match', 'partition': 0},
-                                    {'topic': 'BuyerConfirmTxs', 'partition': 0},
-                                    {'topic': 'SellerConfirmTxs', 'partition': 0}],options: { 'autoCommit': true }}]
-        ]);
+        this.producers = [
+            buyOrderContractAddr + '_BuyOrder',
+            sellOrderContractAddr + '_SellOrder',
+            buyOrderContractAddr + '_Match',
+            sellOrderContractAddr + '_BuyerConfirmTxs',
+            sellOrderContractAddr + '_SellerConfirmTxs'
+        ];
+        // this.consumers = new Map([[
+        //     'consumers',
+        //     {
+        //         topic: [
+        //             {'topic': buyOrderContractAddr + '_BuyOrder', 'partition': 0},
+        //             {'topic': sellOrderContractAddr + '_SellOrder', 'partition': 0},
+        //             {'topic': buyOrderContractAddr + '_Match', 'partition': 0},
+        //             {'topic': sellOrderContractAddr + '_BuyerConfirmTxs', 'partition': 0},
+        //             {'topic': sellOrderContractAddr + '_SellerConfirmTxs', 'partition': 0}
+        //         ],
+        //         options: {'autoCommit': true }
+        //     }
+        // ]]);
         if (debugMode){console.log('Client Setting UP');}; //debugMode
         this.SetupClient(ConsumerQueue);
         if (debugMode){console.log('Client Setting Finished');}; //debugMode

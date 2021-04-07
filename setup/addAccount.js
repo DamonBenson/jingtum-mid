@@ -1,18 +1,13 @@
 import jlib, { Wallet } from 'jingtum-lib';
 import mysql from 'mysql';
-import sqlText from 'node-transform-mysql';
 
 import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as tx from '../utils/jingtum/tx.js';
-import * as mysqlUtils from '../utils/mysqlUtils.js';
 
-import {chains, mysqlConf} from '../utils/info.js';
+import {chains} from '../utils/info.js';
 
 const addAmount = 10;
 const addLoopCounter = addAmount - 1;
-
-const c = mysql.createConnection(mysqlConf);
-c.connect(); // 数据库连接
 
 const Remote = jlib.Remote;
 
@@ -71,4 +66,3 @@ for(let i = chains.length - 1; i >= 0; i--) {
     });
 
 }
-
