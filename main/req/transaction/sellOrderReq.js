@@ -12,8 +12,8 @@ import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-// const MidIP = '39.102.93.47';// 中间层服务器IP
-const MidIP = 'localhost';// 中间层服务器IP
+const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = 'localhost';// 中间层服务器IP
 const msPerSellOrder = 10000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
