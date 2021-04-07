@@ -3,20 +3,17 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 import sha256 from 'crypto-js/sha256.js';
 import util from 'util';
-import web3 from 'web3';
-import BigNumber from "bignumber.js";
-import Decimal from "decimal.js";
-import * as requestInfo from '../../utils/jingtum/requestInfo.js';
-import * as mysqlUtils from '../../utils/mysqlUtils.js';
-import * as localUtils from '../../utils/localUtils.js';
-import * as fetch from '../../utils/fetch.js';
+import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
+import * as mysqlUtils from '../../../utils/mysqlUtils.js';
+import * as localUtils from '../../../utils/localUtils.js';
+import * as fetch from '../../../utils/fetch.js';
 
-import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '../../utils/info.js';
+import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '../../../utils/info.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-// const MidIP = '39.102.93.47';// 中间层服务器IP
-const MidIP = 'localhost';// 中间层服务器IP
+const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = 'localhost';// 中间层服务器IP
 const msPerSellOrder = 10000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
