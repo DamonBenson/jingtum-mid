@@ -5,79 +5,103 @@ const pic = fs.readFileSync(picPath);
 
 const userAccount = [
     {
-        address: 'jGz7YickjDQJ1hSjbRbsiZsB8gMEu6UNeN',
-        secret: 'snzFDY32WweGDGGdk2ZTRDbAnMzFo',
-    },
+      secret: 'ssyYuua1z4J312TNVrz4pqaZLs7yG',
+      address: 'j9uudceu9gX3DyLcTL7czGgUnfzP9fQxko'
+    }, // a[0]--智能预警系统发币账号
     {
-        address: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai',
-        secret: 'sn6CS3BYd2mK2aYHtctzStYfhbqD5',
-    },
+      secret: 'ssxNDn2zSdjXTDFkANWpKWctHYMHZ',
+      address: 'jNPZMZxYx1Gj9rRYadiTfLG5ypQTJgmLAm'
+    }, // a[1]--智能授权系统发币账号
     {
-        address: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
-        secret: 'snnBebAfq9ygmU7aCA4ZgeRj4V68A',
-    },
-];
+      secret: 'snj7uooT7AyWECSEFdtfgktaqYeA2',
+      address: 'jBwyKkquJFXT3VMUxr71v7XxQHfqgAdUac'
+    }, // a[2]--版权局确权账号
+    {
+      secret: 'snvrxFowqi2CbdsCAqRzqYnyUHkzU',
+      address: 'jUXNAu8YrzNQ6Vf6EsJcJTjhHKgGzb29y4'
+    }, // a[3]--买方平台账号
+    {
+      secret: 'ssyfiS2TBDiJP5Vq7Lht7kityxuXz',
+      address: 'jEY6Jr3qkDFnMcPZBig8jkdzTBt8ktMZA'
+    }, // a[4]--卖方平台账号
+    {
+      secret: 'shQxyCmFp937mHNrHmqvCxEqhmDzr',
+      address: 'jDg1GG5JpyFdrafjUcid99mKZeUXKHUptu'
+    }, // a[5]--智能交易系统账号
+    {
+      secret: 'ss6x7sLB6dVLKTnA2WHgAZUrkduZC',
+      address: 'jw382C55JLbLbUJNu8iJtisaqb4TAoQDGC'
+    }, // a[6]--用户1
+    {
+      secret: 'ssAHHWR2WUVEfyN5VUzcFkVmtsnBj',
+      address: 'jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3'
+    }, // a[7]--用户2
+    {
+      secret: 'shC3KW3vZFtRCpquGFtiXwQvtsXJw',
+      address: 'jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan'
+    }, // a[8]--用户3
+    {
+      secret: 'shegH3jnyxLFFtCiZBgEALTkwvBjy',
+      address: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9'
+    }, // a[9]--中间层
+]
 
 const chains = [
     {
         server: [
-            'ws://172.31.43.237:5020',
-            'ws://172.31.43.240:5020',
-            'ws://172.31.43.238:5020',
-            'ws://172.31.43.239:5020',
+            'ws://39.102.91.224:5020',
+            'ws://39.102.92.249:5020',
+            'ws://39.102.90.153:5020',
+            'ws://39.102.92.229:5020'
         ],
         account: {
             root: {
                 address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
-                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
+                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb'
             },
             charge: {
                 address: 'j7xQsY7aGJVoAaTGWYzyLoCLtGe9NwX7w',
-                secret: 'ss1nxL1FkJAZmVtHzHJKAw52He8fB',
+                secret: 'ss1nxL1FkJAZmVtHzHJKAw52He8fB'
             },
             issuer: {
                 address: 'jaXFNVexGYnFALQzSHUkLakyVs1Lxs9ETJ',
-                secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn',
+                secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn'
             },
             gate: {
                 address: 'jnjTbty9qpPu2d9mHUjH5kzq4TRcnpJsQr',
-                secret: 'snEsawU3xG6cthJ7ucg8dKFuHvpwk',
+                secret: 'snEsawU3xG6cthJ7ucg8dKFuHvpwk'
             },
-            a: userAccount,
-        },
+            a: userAccount
+        }
     },
     {
         server: [
-            'ws://172.31.43.237:6030',
-            'ws://172.31.43.240:6030',
-            'ws://172.31.43.238:6030',
-            'ws://172.31.43.239:6030',
+            'ws://39.102.91.224:9030',//因为闯祸临时修改，改到剩下那三个服务器也能跑
+            'ws://39.102.92.249:9030',
+            'ws://39.102.90.153:9030',
+            'ws://39.102.92.229:9030'
         ],
         account: {
             root: {
                 address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
-                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
+                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb'
             },
             charge: {
-                address: 'jsUXopMd8RAYX2GEK5u7qw6xNny7sgfKAS',
-                secret: 'sntpWAgCpioVbJEr4UwA9J6DRbhbM',
+                address: 'jEx8qHwy2r5vMrVrbc7i4juWKmtsSm4DS9',
+                secret: 'snQfZGdaR9sMe7D3uCcEHMvs4ocjA'
             },
             issuer: {
-                address: 'jJVzfzdpXvZYeMADkhKJvPhu3nT55eKSUE',
-                secret: 'sh4qJui9Tm8i59vrh1FYtBJVeZGoB',
+                address: 'jfCdDWueik3AsSjcfcaQsdpFjW8CyZYT76',
+                secret: 'snjQmeX9gdwuVNHqvypxn2d663jKL'
             },
-            gate: {
-                address: 'jLLNL25iY8Adta2oknGiQwN9TTWCL7P469',
-                secret: 'sn5LBvoLSd86T7mCXDNQD5qoFCNGv',
-            },
-            a: userAccount,
-        },
-    },
+            a: userAccount
+        }
+    }
 ]
 
 const userMemo = [
     {
-        work: pic,
+        addr: userAccount[6].address,
         workName: 'm1_',
         createdTime: 1579017600,
         publishedTime: 1579017600,
@@ -86,28 +110,28 @@ const userMemo = [
         workField: 0
     },
     {
-        work: pic,
+        addr: userAccount[7].address,
         workName: 'm2_',
-        createdTime: 1579017600,
-        publishedTime: 1579017600,
+        createdTime: 1581696000,
+        publishedTime: 1581696000,
         workType: 1,
         workForm: 1,
         workField: 1
     },
     {
-        work: pic,
+        addr: userAccount[8].address,
         workName: 'm3_',
-        createdTime: 1579017600,
-        publishedTime: 1579017600,
+        createdTime: 1584201600,
+        publishedTime: 1584201600,
         workType: 2,
         workForm: 2,
         workField: 2
     },
     {
-        work: pic,
+        addr: userAccount[9].address,
         workName: 'm4_',
-        createdTime: 1579017600,
-        publishedTime: 1579017600,
+        createdTime: 1586880000,
+        publishedTime: 1586880000,
         workType: 3,
         workForm: 3,
         workField: 3
@@ -119,44 +143,50 @@ const authMemo = [
         authCode: 'a0',
         authName: '天津版权局',
         certNum: 'c0',
-        cert: pic
     },
     {
         authCode: 'a1',
         authName: '上海版权局',
         certNum: 'c1',
-        cert: pic
     },
     {
         authCode: 'a2',
         authName: '北京版权保护中心',
         certNum: 'c2',
-        cert: pic
     },
     {
         authCode: 'a3',
         authName: '国家版权局',
         certNum: 'c3',
-        cert: pic
     }
 ];
 
-const tokenName = 'test1'
+const rightTokenName = 'rightToken';
+const approveTokenName = 'approveToken';
 
 const ipfsConf = {
-    host: '127.0.0.1',
+    host: '39.102.93.47',
     port: '5001',
     protocol: 'http'
 }
 
 const mysqlConf = {
-    host: '127.0.0.1',       
-    user: 'root',              
-    password: 'bykyl626',       
-    port: '3306',                   
+    host: '39.102.93.47',
+    user: 'root',
+    password: 'bykyl626',
+    port: '3306',
     database: 'jingtum'
 }
 
-const debugMode = false;
+const debugMode = true;
 
-export {chains, userMemo, authMemo, tokenName, ipfsConf, mysqlConf, debugMode};
+const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd';
+
+// OLD Version : uint256
+const sellOrderContractAddr = 'jDamHMfeuENdNDzyQciGjojGLuMmRnhifU';
+// New Version : bytes32
+// const sellOrderContractAddr = 'jBwQZiCXWj3k8vphoxx8xGWXMYpPrHYgKn';
+// Version : Test Byte32
+// const sellOrderContractAddr = 'jpwCwEskfRiiedH8zqLroPWgu4qiBJtuPU';//Test Byte32
+
+export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr};

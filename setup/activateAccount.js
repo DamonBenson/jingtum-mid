@@ -14,7 +14,7 @@ for(let i = chains.length - 1; i >= 0; i--) {
     let sr = chain.account.root.secret;
     let ac = chain.account.charge.address;
     let ai = chain.account.issuer.address;
-    let ag = chain.account.gate.address;
+    let ag = chain.account.gate.address; // 可能没有银关账号
 
     let r = new Remote({server: chain.server[0], local_sign: true});
     r.connect(async function(err, result) {
@@ -35,7 +35,7 @@ for(let i = chains.length - 1; i >= 0; i--) {
     
         await tx.buildPaymentTx(ar, sr, r, seq++, ac, 100000000, 'setup', true);
         await tx.buildPaymentTx(ar, sr, r, seq++, ai, 100000000, 'setup', true);
-        await tx.buildPaymentTx(ar, sr, r, seq++, ag, 100000000, 'setup', true);
+        await tx.buildPaymentTx(ar, sr, r, seq++, ag, 100000000, 'setup', true); // 可能没有银关账号
     
         r.disconnect();
     

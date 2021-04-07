@@ -45,11 +45,10 @@ r.connect(async function(err, result) {
         let ledgerIndex = msg.ledger_index;
         let ledger = await requestInfo.requestLedger(r, ledgerIndex, true, false);
         let txHashs = ledger.transactions;
-        const txLoopConter = txHashs.length - 1;
 
         // 获取所有交易信息
         let txPromises = [];
-        for(let i = txLoopConter; i >= 0; i--) {
+        for(let i = txHashs.length - 1; i >= 0; i--) {
             let txHash = txHashs[i];
             txPromises.push(requestInfo.requestTx(r, txHash, false));
         }
@@ -57,7 +56,7 @@ r.connect(async function(err, result) {
 
         // 筛选存证交易
         let uploadTxs = [];
-        for(let i = txLoopConter; i >= 0; i--) {
+        for(let i = txs.length - 1; i >= 0; i--) {
             let tx = txs[i];
             let txType = tx.TransactionType;
             /* 存证交易：
@@ -68,38 +67,32 @@ r.connect(async function(err, result) {
                 uploadTxs.push(tx);
             }
         }
-        const uploadCount = uploadTxs.length;
-        const uploadLoopCounter = uploadCount - 1;
         
         // 获取交易中存储的存证信息
-        // [0]=n
-        let uploadMemosArr = new Array(uploadCount);
-        for(let i = uploadLoopCounter; i >= 0; i--) {
+        let uploadMemosArr = new Array(uploadTxs.length);
+        for(let i = uploadTxs.length - 1; i >= 0; i--) {
             let tx = uploadTxs[i];
             uploadMemosArr[i] = JSON.parse(u.hexToString(tx.Memos[0].Memo.MemoData).slice(2));
         }
 
         // 从ipfs上获取作品信息
-        // [0]=0
-        let workInfoGetPromises = new Array(uploadCount);
-        for(let i = uploadLoopCounter; i >= 0; i--) {
+        let workInfoGetPromises = new Array(uploadMemosArr.length);
+        for(let i = uploadMemosArr.length - 1; i >= 0; i--) {
             let memos = uploadMemosArr[i];
             workInfoGetPromises[i] = ipfsUtils.get(ipfs, memos.workInfoHash);
         }
         let workInfoJsonArr = await Promise.all(workInfoGetPromises);
 
         // 解析作品信息
-        // [0]=n
-        let workInfoArr = new Array(uploadCount);
-        for(let i = uploadLoopCounter; i >= 0; i--) {
+        let workInfoArr = new Array(workInfoJsonArr.length);
+        for(let i = workInfoJsonArr.length - 1; i >= 0; i--) {
             let workInfoJson = workInfoJsonArr[i];
             workInfoArr[i] = JSON.parse(workInfoJson);
         }
 
         // 存证信息存入数据库
-        // [0]=0
-        let postWorkInfoPromises = new Array(uploadCount);
-        for(let i = uploadLoopCounter; i >= 0; i--) {
+        let postWorkInfoPromises = new Array(uploadTxs.length);
+        for(let i = uploadTxs.length - 1; i >= 0; i--) {
             let tx = uploadTxs[i];
             let uploadMemos = uploadMemosArr[i];
             let workInfo =  workInfoArr[i];
@@ -108,9 +101,6 @@ r.connect(async function(err, result) {
             uploadInfo.workId = tx.hash;
             uploadInfo.uploadTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
             uploadInfo.addr = tx.Destination;
-            // uploadInfo.createdTime = localUtils.toMysqlDate(uploadInfo.createdTime); // 通用时间戳转换为数据库date格式
-            // uploadInfo.publishedTime = localUtils.toMysqlDate(uploadInfo.publishedTime);
-            // uploadInfo.uploadTime = localUtils.toMysqlDate(uploadInfo.uploadTime);
             localUtils.toMysqlObj(uploadInfo);
             if(debugMode) {
                 console.log('on upload', uploadInfo);

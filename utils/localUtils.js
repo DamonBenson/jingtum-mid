@@ -7,6 +7,12 @@ export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/*----------生成区间[min, max)的随机整数---------*/
+
+export function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
 /*----------生成随机len位字符串----------*/
 
 export function randomString(len) {
@@ -22,14 +28,17 @@ export function randomString(len) {
 /*----------按prob概率分布从res中随机选择----------*/
 
 export function randomSelect(res, prob) {
-    var sum = 0;
+    if(!prob) {
+        prob = (new Array(res.length)).fill(1);
+    }
+    let sum = 0;
     let factor = 0;
     let random = Math.random();
-    for(var i = prob.length - 1; i >= 0; i--) {
+    for(let i = prob.length - 1; i >= 0; i--) {
         sum += prob[i];
     };
     random *= sum;
-    for(var i = prob.length - 1; i >= 0; i--) {
+    for(let i = prob.length - 1; i >= 0; i--) {
         factor += prob[i];
         if(random <= factor) {
             return res[i];
@@ -99,7 +108,7 @@ export function memos2obj(arr) {
         obj[k] = v;
     }
     obj['rightType'] = Number(obj['rightType']);
-    obj['state'] = Number(obj['state']);
+    // obj['state'] = Number(obj['state']);
     return obj;
 }
 
@@ -133,3 +142,13 @@ export function toMysqlObj(obj) {
 // export function toMysqlDate(ts) {
 //     return (new Date(ts * 1000)).toJSON().slice(0, 19).replace('/T.*/', ' ');
 // }
+
+/*----------拼接函数表达式----------*/
+
+export function generateFuncStr(funcName, funcArgs) {
+
+    let funcStr = funcName + "('" + funcArgs.join("','") + "')";
+    console.log(funcStr);
+    return funcStr;
+
+}

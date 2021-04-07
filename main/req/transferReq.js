@@ -13,6 +13,7 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // 数据库连接
 
 const tokenChain = chains[1];
+//-----账号待修改-----
 const a1 = tokenChain.account.a[1].address; // 买/卖方账号(存证链帐号1)
 const a2 = tokenChain.account.a[2].address; // 买/卖方账号(存证链帐号2)
 

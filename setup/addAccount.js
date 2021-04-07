@@ -1,18 +1,13 @@
 import jlib, { Wallet } from 'jingtum-lib';
 import mysql from 'mysql';
-import sqlText from 'node-transform-mysql';
 
 import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as tx from '../utils/jingtum/tx.js';
-import * as mysqlUtils from '../utils/mysqlUtils.js';
 
-import {chains, mysqlConf} from '../utils/info.js';
+import {chains} from '../utils/info.js';
 
-const addAmount = 3;
+const addAmount = 10;
 const addLoopCounter = addAmount - 1;
-
-const c = mysql.createConnection(mysqlConf);
-c.connect(); // 数据库连接
 
 const Remote = jlib.Remote;
 
@@ -24,17 +19,17 @@ console.log('generate wallets:', walletArr);
 
 /*----------账号信息存入数据库----------*/
 
-let postAccountInfoPromises = new Array(addAmount);
-for(let j = addLoopCounter; j >= 0; j--) {
-    let accountInfo = {
-        user_id: 'null',
-        addr: walletArr[j].address,
-        secret: walletArr[j].secret,
-    };
-    let sql = sqlText.table('account_info').data(accountInfo).insert();
-    postAccountInfoPromises[j] = mysqlUtils.sql(c, sql);
-}
-await Promise.all(postAccountInfoPromises);
+// let postAccountInfoPromises = new Array(addAmount);
+// for(let j = addLoopCounter; j >= 0; j--) {
+//     let accountInfo = {
+//         user_id: 'null',
+//         addr: walletArr[j].address,
+//         secret: walletArr[j].secret,
+//     };
+//     let sql = sqlText.table('account_info').data(accountInfo).insert();
+//     postAccountInfoPromises[j] = mysqlUtils.sql(c, sql);
+// }
+// await Promise.all(postAccountInfoPromises);
 
 for(let i = chains.length - 1; i >= 0; i--) {
 
