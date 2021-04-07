@@ -168,6 +168,22 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
         func: func,
     });
 
+    // testBytes32(asset_id_1);
+    // testBytes32Array([asset_id_0,asset_id_1])
+    // testBytes32Write(order_id_0,1)
+    // 构造交易
+    // let func1 = "testBytes32([" + assetId + "])";
+    // let func2 = "testBytes32Array([" + assetId + "])";
+    // let func3 = "testBytes32Write([" + sellOrderId + "],'"+ 1 +"')";
+    // console.log(func);
+    // let unsignedTx = contractRemote.invokeContract({
+    //     account: platformAddr, 
+    //     destination: contractAddr, // 待部署
+    //     abi: abi, // 待部署
+    //     func: func1,
+    // });
+
+
     console.timeEnd('handleSellOrder');
     console.log('--------------------');
 
