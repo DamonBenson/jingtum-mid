@@ -1,16 +1,12 @@
 import ipfsAPI from 'ipfs-api';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
-import sha256 from 'crypto-js/sha256.js';
 
 import * as tx from '../../../utils/jingtum/tx.js'
-import * as erc721 from '../../../utils/jingtum/erc721.js';
-import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
-import * as localUtils from '../../../utils/localUtils.js';
 
-import {pic, chains, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode} from '../../../utils/info.js';
+import {chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
@@ -48,16 +44,18 @@ export async function handleBuyOrder(contractRemote, seqObj, req, res) {
     let platformAddr = body.platformAddr;
 
     // 所有买单信息存入IPFS
-    let buyOrderInfo = Buffer.from(JSON.stringify(body, ['subBuyOrderList', 'limitPrice', 'tradeStrategy', 'authorizationInfo', 'side', 'buyerAddr', 'contact']));
-    let buyOrderInfoHash = await ipfsUtils.add(ipfs, buyOrderInfo); // 直接存数据不需要这行
+    delete body.platformAddr;
+    delete body.contractAddr;
+    delete body.buyOrderId;
+    let buyOrderInfo = Buffer.from(JSON.stringify(body)); //JSON.stringify()第二个参数问题，暂用delete
+    let buyOrderInfoHash = await ipfsUtils.add(ipfs, buyOrderInfo);
     
     // 构造交易
     let unsignedTx = contractRemote.invokeContract({
         account: platformAddr, 
         destination: contractAddr, // 待部署
         abi: abi, // 待部署
-        func: "makeOrder('" + buyOrderId + "','" + buyOrderInfoHash + "')", // 存索引
-        // func: makeOrder(orderId, orderInfo), // 直接存数据
+        func: "makeOrder('" + buyOrderId + "','" + buyOrderInfoHash + "')",
     });
 
     console.timeEnd('handleBuyOrder');
@@ -78,7 +76,6 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
     console.time('handleSignedBuyOrder');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    console.log("body:",body);
     let blob = body;
 
     // 提交交易
@@ -140,13 +137,18 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
+    console.log(body);
+
     // 获取合约元数据
     let contractAddr = body.contractAddr;
     let abi = await getAbi(contractAddr);
-
+    
     // 解析需要存入合约的卖单信息
-    let sellOrderId = body.sellOrderId;
+    let sellOrderId = '0x' + body.sellOrderId;
     let assetId = body.assetId;
+    assetId = assetId.map(id => {
+        return '0x' + id;
+    })
     let assetType = body.assetType;
     let consumable = body.consumable;
     let expireTime = body.expireTime;
@@ -155,18 +157,27 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     let platformAddr = body.platformAddr;
 
     // 卖单次要信息（标签、授权价格、联系方式）存入IPFS
-    let otherClauses = Buffer.from(JSON.stringify(body, ['labelSet', 'expectedPrice', 'sellerAddr', 'contact']));
+    delete body.assetId;
+    delete body.assetType;
+    delete body.consumable;
+    delete body.expireTime;
+    delete body.platformAddr;
+    delete body.contractAddr;
+    delete body.sellOrderId;
+    let otherClauses = Buffer.from(JSON.stringify(body));
     let otherClausesHash = await ipfsUtils.add(ipfs, otherClauses);
     
     // 构造交易
-    let func = "makeOrder([" + sellOrderId + "],[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
+    let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
     console.log(func);
     let unsignedTx = contractRemote.invokeContract({
         account: platformAddr, 
-        destination: contractAddr, // 待部署
-        abi: abi, // 待部署
+        destination: contractAddr,
+        abi: abi,
         func: func,
     });
+
+    console.log(unsignedTx.tx_json);
 
     console.timeEnd('handleSellOrder');
     console.log('--------------------');

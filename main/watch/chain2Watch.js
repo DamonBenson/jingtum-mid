@@ -58,8 +58,6 @@ r.connect(async function(err, result) {
         }
         let txs = await Promise.all(txPromises);
 
-        console.log(txs);
-
         // 筛选通证买单提交、卖单提交、匹配结果、买方确认、卖方确认5类交易
         let buyOrderTxs = [];
         let sellOrderTxs = [];
@@ -137,7 +135,6 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
         let contractAddr = buyOrderTx.destination;
         
         let buyOrderInfoHash = buyOrderTx.func_parms[1].replace(/\'/g,"");
-        console.log(buyOrderId, buyOrderInfoHash);
         let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
         let buyOrderInfo = JSON.parse(buyOrderInfoJson);
         buyOrderInfo.buyOrderId = buyOrderId;
@@ -159,11 +156,11 @@ async function processSellOrder(sellOrderTxs, loopConter) {
 
     sellOrderTxs.forEach(async(sellOrderTx) => {
 
-        let sellOrderId = sellOrderTx.func_parms[0];
-        let workId = sellOrderTx.func_parms[1];
-        let contractAddr = buyOrderTx.destination;
+        let sellOrderId = sellOrderTx.func_parms[0].replace(/\'/g,"");
+        let workId = sellOrderTx.func_parms.toString().match(/(.*)\[(.*)\](.*)/)[2].replace(/\'/g,"").split(',');
+        let contractAddr = sellOrderTx.destination;
         
-        let sellOrderInfoHash = sellOrderTx.func_parms[1];
+        let sellOrderInfoHash = sellOrderTx.func_parms.pop().replace(/\'/g,"");
         let sellOrderInfoJson = await ipfsUtils.get(ipfs, sellOrderInfoHash);
         let sellOrderInfo = JSON.parse(sellOrderInfoJson);
         delete sellOrderInfo.sellerAddr;

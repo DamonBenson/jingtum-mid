@@ -85,17 +85,35 @@ uploadRemote.connect(async function(err, res) {
                 res.send(workId);
             });
 
+            /*----------信息查询请求路由配置----------*/
+
+            const infoRouter = express.Router();
+
+            infoRouter.post('/activateAccount', async function(req, res) {
+                infoMid.handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req, res);
+                res.send('success');
+            });
+
+            infoRouter.post('/work', async function(req, res) {
+                let workInfo = await infoMid.handleWorkInfo(uploadRemote, seqObj, req, res);
+                res.send(workInfo);
+            });
+
+            infoRouter.post('/copyright', async function(req, res) {
+                let copyrightInfo = await infoMid.handleCopyrightInfo(tokenRemote, seqObj, req, res);
+                res.send(copyrightInfo);
+            });
+
+            infoRouter.post('/approve', async function(req, res) {
+                let approveInfo = await infoMid.handleApproveInfo(tokenRemote, seqObj, req, res);
+                res.send(approveInfo);
+            });
+
             /*----------服务合约请求路由配置----------*/
 
             const contractRouter = express.Router();
 
-            // 部署服务合约：
-            // -	应用层——请求路由模块: deployService(contractCode, abi, platformId, serviceType)
-            // -	请求处理模块——应用层: remote.initContract(contractCode, abi) 
-            // -	应用层——请求路由模块: tx.sign()
-            // -	请求处理模块: remote.buildSignTx(blob)
-            // -	请求处理模块: remote.invokeContract(manageAddr, abi, ‘register(addr, platformId, serviceType)’)
-
+            // 部署服务合约
             contractRouter.post('/deploy', async function(req, res) {
                 let unsignedTx = await contractMid.handleInitContract(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
@@ -107,10 +125,6 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 查询服务合约
-            // -	应用层——请求路由模块: getServiceInfo(platformId, serviceType)
-            // -	请求处理模块——应用层: mysql.select(platfromId, serviceType)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘getInfo()’)
-
             contractRouter.get('/info', async function(req, res) {
                 let contractAddr = await contractMid.handleContractQuery(contractRemote, seqObj, req, res);
                 let contractInfo = await contractMid.handleContractInfo(contractRemote, seqObj, contractAddr, req, res);
@@ -122,11 +136,6 @@ uploadRemote.connect(async function(err, res) {
             const transactionRouter = express.Router();
 
             // 提交买单
-            // -	应用层——请求路由模块: postServiceReq(serviceAddr, platformId, contact, orderInfo)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘postOrder(platformId, contact, orderInfo)’)
-            // -	应用层——请求路由模块: tx.sign()
-            // -	请求处理模块: remote.buildSignTx(blob)
-
             transactionRouter.post('/buy', async function(req, res) {
                 let unsignedTx = await transactionMid.handleBuyOrder(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
@@ -148,11 +157,6 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 提交卖单
-            // -	应用层——请求路由模块: postServiceReq(serviceAddr, platformId, contact, orderInfo)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘postOrder(platformId, contact, orderInfo)’)
-            // -	应用层——请求路由模块: tx.sign()
-            // -	请求处理模块: remote.buildSignTx(blob)
-
             transactionRouter.post('/sell', async function(req, res) {
                 let unsignedTx = await transactionMid.handleSellOrder(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
@@ -174,11 +178,6 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 提交交易服务结果
-            // -	应用层——请求路由模块: postServiceRes(serviceAddr, platformId, orderId, matchInfo)
-            // -	(对所有买/卖单合约)请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘matchOrder(platformId, orderId, matchInfo)’)
-            // -	应用层——请求路由模块: tx.sign()
-            // -	请求处理模块: remote.buildSignTx(blob)
-
             transactionRouter.post('/match', async function(req, res) {
                 let unsignedTx = await transactionMid.handleMatch(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
@@ -190,21 +189,12 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 获取交易服务结果
-            // -	应用层——请求路由模块: getSeviceInfo (serviceAddr, orderId)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘getOrderInfo(orderId)’) q
-
             transactionRouter.get('/matchInfo', async function(req, res) {
                 let matchInfo = await transactionMid.handleMatchInfo(contractRemote, seqObj, req, res);
                 res.send(matchInfo);
             });
 
             // 提交买方确认
-            // -	应用层——请求路由模块: postBuyerConfirm(serviceAddr, platformId, orderId)
-            // -	请求处理模块: remote.invokeContract(serviceAddr, abi, ‘getOrderInfo(orderId)’)
-            // -	(对所有买/卖单合约)请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘buyerConfirm(platformId, orderId)’)
-            // -	(对所有买/卖单合约)应用层——请求路由模块: tx.sign()
-            // -	(对所有买/卖单合约)请求处理模块: remote.buildSignTx(blob)
-
             transactionRouter.post('/buyerConfirm', async function(req, res) {
                 let unsignedTxs = await transactionMid.handleBuyerConfirm(contractRemote, seqObj, req, res); // 返回的是需要签名的交易数组，因为需要将买方的确认写入所有相关合约
                 res.send(unsignedTxs);
@@ -221,12 +211,6 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 卖方转让确认
-            // -	应用层——请求路由模块: postSellerConfirm(serviceAddr, platformId, tokenId, buyerAddr)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘sellerConfirm(platformId, orderId)’)
-            // -	请求处理模块——应用层: remote.buildTransferTokenTx(tokenId, buyerAddr)
-            // -	应用层——请求路由模块: 2个tx.sign()
-            // -	请求处理模块: 2个remote.buildSignTx(blob)
-
             transactionRouter.post('/sellerTransferConfirm', async function(req, res) {
                 let unsignedTxs = await transactionMid.handleSellerTransferConfirm(tokenRemote, contractRemote, seqObj, req, res);
                 res.send(unsignedTxs);
@@ -243,12 +227,6 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 卖方许可确认
-            // -	应用层——请求路由模块: postSellerConfirm(serviceAddr, platformId, tokenId, buyerAddr)
-            // -	请求处理模块——应用层: remote.invokeContract(serviceAddr, abi, ‘sellerConfirm(platformId, orderId)’)
-            // -	请求处理模块——应用层: remote.buildTransferTokenTx(tokenId, buyerAddr)
-            // -	应用层——请求路由模块: tx.sign()
-            // -	请求处理模块: remote.buildSignTx(blob)
-
             transactionRouter.post('/sellerApproveConfirm', async function(req, res) {
                 let unsignedTx = await transactionMid.handleSellerApproveConfirm(tokenRemote, contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
@@ -259,8 +237,6 @@ uploadRemote.connect(async function(err, res) {
                 res.send(orderId);
             });
 
-
-
             /*----------http服务器配置----------*/
 
             const app = express();
@@ -270,6 +246,7 @@ uploadRemote.connect(async function(err, res) {
             app.use(bodyParser.json());
 
             app.use('/upload', uploadRouter);
+            app.use('/info', infoRouter);
             app.use('/contract', contractRouter);
             app.use('/transaction', transactionRouter);
 
