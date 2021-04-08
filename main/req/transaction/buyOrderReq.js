@@ -56,7 +56,9 @@ async function postBuyOrderReq() {
     jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
-    await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+    let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+    let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
+    console.log('res:', resInfo);
     console.timeEnd('buyOrderReq');
     console.log('--------------------');
 
@@ -98,8 +100,7 @@ function generateLabelDemand() {
 
     let labelDemand = {};
     for(let i = 0; i < 5; i++) {
-        // labelDemand[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
-        labelDemand[i] = [0];
+        labelDemand[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
     }
     return labelDemand;
 
@@ -116,7 +117,7 @@ function generateLabelWeight() {
     }
     for(let i = 0; i < 5; i++) {
         for(let j = 0; j < 5; j++) {
-            labelWeight[i][j] = [localUtils.randomSelect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])];  //跟generateLabelDemand冲突？
+            labelWeight[i][j] = localUtils.randomSelect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);  //跟generateLabelDemand冲突？
         }
     }
     return labelWeight;

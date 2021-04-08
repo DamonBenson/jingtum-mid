@@ -143,8 +143,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuy', async function(req, res) {
-                await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             transactionRouter.post('/buyOrderConfirm', async function(req, res) {
@@ -153,8 +153,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) {
-                await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交卖单
@@ -164,18 +164,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedSell', async function(req, res) {
-                await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
-                res.send('success');
-            });
-
-            transactionRouter.post('/sellOrderConfirm', async function(req, res) {
-                let unsignedTx = await transactionMid.handleSellOrderConfirm(contractRemote, seqObj, req, res);
-                res.send(unsignedTx);
-            });
-
-            transactionRouter.post('/signedSellOrderConfirm', async function(req, res) {
-                await transactionMid.handleSignedSellOrderComfirm(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交交易服务结果
@@ -185,8 +175,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedMatch', async function(req, res) {
-                let orderId = await transactionMid.handleSignedMatch(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                let resInfo = await transactionMid.handleSignedMatch(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 获取交易服务结果
