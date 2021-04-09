@@ -50,7 +50,7 @@ async function postSellOrderReq() {
         let addrFilter = {
             addr: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9',
         };
-        let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();
+        let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();//Rand Select 2 work to sell
         let workInfoArr = await mysqlUtils.sql(c, sql);
 
         let workIds = workInfoArr.map(workInfo => {
@@ -82,39 +82,7 @@ async function postSellOrderReq() {
     console.log('--------------------');
 
 }
-/**
- * LONGLONG Decimal
- *
- * @param s the input string as HexNumber
- */
-// function Hex2decimal(s) {
 
-//     var dec = BigInt(0);
-//     function pow(a,x) {
-//         var temp = BigInt(1);
-//         var cheng = BigInt(a)
-//         while(x>0){
-//             temp = temp * cheng;
-//             x --;
-//         }
-//         return temp;
-//     }
-//     function add(dec ,n ,chrn) {
-//         var temp = BigInt(pow(16,n) * BigInt(chrn));
-//         dec = dec + temp;
-//         return dec;
-//     }
-//     var n = 0;
-//     s.split('').forEach(function(chr) {
-//         // console.log(chr)
-//         var chrn = parseInt(chr, 16);
-//         dec = add(dec, n, chrn);
-//         n ++;
-//     });
-//     var result = "";
-//     result = dec.toString();
-//     return result;
-// }
 
 function generateSellOrder(wrokIds, sellerAddr) {
     let labelSet = generateLabelSet();

@@ -18,7 +18,7 @@ setInterval(async function() {
     let sTs = (new Date()).valueOf();
 
     // 从mysql获取未确权作品id
-    let sql = sqlText.table('work_info').field('work_id').where('auth_id is Null').select();
+    let sql = sqlText.table('work_info').field('work_id').where('auth_id is Null').select()
     let uncheckIdArr = await mysqlUtils.sql(c, sql);
 
     // 发送确权请求至http服务器mainMid.js

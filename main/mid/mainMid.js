@@ -9,9 +9,9 @@ import * as uploadMid from './processFunction/uploadMid.js';
 import * as contractMid from './processFunction/contractMid.js';
 import * as transactionMid from './processFunction/transactionMid.js';
 
-const uploadChain = chains[0];
-const tokenChain = chains[0];
-const contractChain = chains[1];
+const uploadChain = chains[0]; // 存证链
+const tokenChain = chains[0]; // 交易链 复用
+const contractChain = chains[1]; // 权益链
 
 const upload_a0 = uploadChain.account.a[0].address;
 const token_a0 = tokenChain.account.a[0].address;

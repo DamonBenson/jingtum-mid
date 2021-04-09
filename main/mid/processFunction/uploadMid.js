@@ -46,6 +46,7 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
         workForm: 0,
         workField: 0
     } */
+    // 元数据Hash
     let workInfoHash = await ipfsUtils.add(ipfs, workInfo);
     
     // 上传存证交易
