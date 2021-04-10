@@ -30,7 +30,10 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
 
     // 获取作品内容，存入IPFS
     // let work = await getWorkByUrl();
-    let work = pic;
+    // let work = pic;
+
+    //for test work = body instead of pic
+    let work = Buffer.from(JSON.stringify(body));
     let workHash = await ipfsUtils.add(ipfs, work);
 
     // 作品信息存入ipfs，获取哈希标识
