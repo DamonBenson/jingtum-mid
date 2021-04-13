@@ -8,9 +8,9 @@ import util from 'util';
 
 import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
 import { exit, kill } from 'process';
-// const MidIP = '39.102.93.47';// 中间层服务器IP
-const MidIP = 'localhost';// 中间层服务器IP
-const msPerBuyOrder = 10000;
+const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = 'localhost';// 中间层服务器IP
+const msPerBuyOrder = 2000;
 const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
 const platformSecret = userAccount[5].secret;
@@ -33,8 +33,8 @@ contractRemote.connect(async function(err, res) {
     }
     global.seq = (await requestInfo.requestAccountInfo(platformAddr, contractRemote, false)).account_data.Sequence;
 
-    // setInterval(postBuyOrderReq, msPerBuyOrder);
-    postBuyOrderReq();
+    setInterval(postBuyOrderReq, msPerBuyOrder);
+    // postBuyOrderReq();
     // localUtils.sleep(5000)
     // exit();
 
@@ -56,9 +56,7 @@ async function postBuyOrderReq() {
     jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
-    let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
-    let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
-    console.log('res:', resInfo);
+    await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
     console.timeEnd('buyOrderReq');
     console.log('--------------------');
 
@@ -100,7 +98,8 @@ function generateLabelDemand() {
 
     let labelDemand = {};
     for(let i = 0; i < 5; i++) {
-        labelDemand[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
+        // labelDemand[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
+        labelDemand[i] = [0];
     }
     return labelDemand;
 
@@ -117,7 +116,7 @@ function generateLabelWeight() {
     }
     for(let i = 0; i < 5; i++) {
         for(let j = 0; j < 5; j++) {
-            labelWeight[i][j] = localUtils.randomSelect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);  //跟generateLabelDemand冲突？
+            labelWeight[i][j] = [localUtils.randomSelect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])];  //跟generateLabelDemand冲突？
         }
     }
     return labelWeight;

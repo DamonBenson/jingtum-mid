@@ -8,7 +8,7 @@ const randonBuyorder_KafkaClient = await getClient.getClient();
 let ConsumerQueue = [];
 randonBuyorder_KafkaClient.SetupClient(ConsumerQueue);
 
-const msPerBuyOrder = 10000;
+const msPerBuyOrder = 60000;
 const subBuyOrderAmount = 3;
 const platformAddr = userAccount[5].address;
 const buyerAddr = userAccount[9].address;
@@ -24,6 +24,19 @@ async function produceBuyOrderReq(KafkaClient) {
     //mashall
     //unmashall
     // order by 权衡版本推送接口
+    // let buyOrderInfo = {
+    //     SubBuyOrderList : buyOrder.subBuyOrder,
+    //     LimitPrice : buyOrder.limitPrice,
+    //     TradeStrategy : buyOrder.tradeStrategy,
+    //     AuthorizationInfo : buyOrder.authorizationInfo,
+    //     TimeStamp : 0,
+    //     Side : buyOrder.side,
+    //     BuyOrderID :  buyOrder.orderId,//origin as sha256  
+    //     BuyOrderHash : '0', 
+    //     BuyerAddr : buyOrder.buyerAddr,
+    //     Contact: 'phoneNumber', // 联系方式
+    //     ContractAddr: buyOrder.contractAddr, // 待部署
+    // }
     let buyOrderInfo = {
         SubBuyOrderList : buyOrder.subBuyOrder,
         LimitPrice : buyOrder.limitPrice,
@@ -86,9 +99,9 @@ function generateBuyOrder() {
 function generateLabelDemand() {
 
     let labelDemand = {};
-    for(let i = 0; i < 5; i++) {
-        // labelDemand[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
-        labelDemand[i] = [0];
+    for(let i = 0; i < 2; i++) {//max 5
+        labelDemand[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
+        // labelDemand[i] = [0];
     }
     return labelDemand;
 
