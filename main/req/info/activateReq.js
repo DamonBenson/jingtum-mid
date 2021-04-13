@@ -4,8 +4,8 @@ import * as fetch from '../../../utils/fetch.js';
 
 const addAmount = 3;
 
-let walletArr = new Array();
-let addressArr = new Array();
+let walletArr = new Array(addAmount);
+let addressArr = new Array(addAmount);
 for(let i = 0; i < addAmount; i++) {
     let w = Wallet.generate();
     walletArr.push(w);

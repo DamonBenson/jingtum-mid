@@ -1,7 +1,7 @@
 import ipfsAPI from 'ipfs-api';
 import sha256 from 'crypto-js/sha256.js';
 
-import * as tx from '../../../utils/jingtum/tx.js'
+import * as tx from '../../../utils/jingtum/tx.js';
 import * as erc721 from '../../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
@@ -30,7 +30,10 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
 
     // 获取作品内容，存入IPFS
     // let work = await getWorkByUrl();
-    let work = pic;
+    // let work = pic;
+
+    //for test work = body instead of pic
+    let work = Buffer.from(JSON.stringify(body));
     let workHash = await ipfsUtils.add(ipfs, work);
 
     // 作品信息存入ipfs，获取哈希标识
@@ -46,6 +49,7 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
         workForm: 0,
         workField: 0
     } */
+    // 元数据Hash
     let workInfoHash = await ipfsUtils.add(ipfs, workInfo);
     
     // 上传存证交易

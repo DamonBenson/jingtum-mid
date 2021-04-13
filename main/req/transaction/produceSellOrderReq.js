@@ -8,7 +8,7 @@ const randonSellorder_KafkaClient = await getClient.getClient();
 let ConsumerQueue = [];
 randonSellorder_KafkaClient.SetupClient(ConsumerQueue);
 
-const msPerSellOrder = 10000;
+const msPerSellOrder = 60000;
 const platformAddr = userAccount[4].address; // 平台账号
 const sellerAddr = userAccount[5].address;
 

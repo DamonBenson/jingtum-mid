@@ -3,7 +3,6 @@ import ipfsAPI from 'ipfs-api';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
-import * as validateUtils from '../../utils/validateUtils.js';
 //kafka消费者
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
 
@@ -139,26 +138,21 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
         let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
         let buyOrderInfo = JSON.parse(buyOrderInfoJson);
         buyOrderInfo.buyOrderId = buyOrderId;
-
-        // 格式验证
-        let [validateRes, validateInfo] = await validateUtils.validateBuyOrderWatch(buyOrderInfo);
-        if(!validateRes) {
-            return validateInfo;
-        }
-
         buyOrderInfo.buyOrderHash = '0';
         buyOrderInfo.contractAddr = contractAddr;
         buyOrderInfo.timeStamp = 0;
 
         console.log(buyOrderInfo);
         // 推送买单信息
-        KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_BuyOrder', buyOrderInfo);
+        // KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_BuyOrder', buyOrderInfo);
+        KafkaClient_Watch2.ProducerSend('BuyOrder', buyOrderInfo.buyOrderId);
+
 
     });
     
 }
 
-async function processSellOrder(sellOrderTxs, loopConter) { // 如果京东平台层一定通过中间层上传卖单，则不需要数据格式验证
+async function processSellOrder(sellOrderTxs, loopConter) {
 
     console.log('sellOrderTxs:', sellOrderTxs);
 
@@ -181,15 +175,17 @@ async function processSellOrder(sellOrderTxs, loopConter) { // 如果京东平�
         sellOrderInfo.matchScore = 0;
         sellOrderInfo.contractAddr = contractAddr;
 
-        console.log(sellOrderInfo);
+        console.log(sellOrderInfo.sellOrderId);
         // 推送卖单信息
-        KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellOrder', sellOrderInfo);
+        // KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellOrder', sellOrderInfo);
+        KafkaClient_Watch2.ProducerSend('SellOrder', sellOrderInfo);
+
 
     });
 
 }
 
-async function processMatch(matchTxs, loopConter) { // 如果智能交易系统一定通过中间层写入匹配结果，则不需要数据格式验证
+async function processMatch(matchTxs, loopConter) {
 
     console.log('matchTxs:', matchTxs);
 
