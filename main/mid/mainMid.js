@@ -14,12 +14,22 @@ const uploadChain = chains[0];
 const tokenChain = chains[0];
 const contractChain = chains[1];
 
+// 智能预警系统发币账号
 const upload_a0 = uploadChain.account.a[0].address;
 const token_a0 = tokenChain.account.a[0].address;
 const contract_a0 = contractChain.account.a[0].address;
+
+// 智能授权系统发币账号
 const upload_a1 = uploadChain.account.a[1].address;
 const token_a1 = tokenChain.account.a[1].address;
 const contract_a1 = contractChain.account.a[1].address;
+
+// 中间层
+const upload_a5 = uploadChain.account.a[5].address;
+const token_a5 = tokenChain.account.a[5].address;
+const contract_a5 = contractChain.account.a[5].address;
+
+// 中间层
 const upload_a9 = uploadChain.account.a[9].address;
 const token_a9 = tokenChain.account.a[9].address;
 const contract_a9 = contractChain.account.a[9].address;
@@ -72,6 +82,9 @@ uploadRemote.connect(async function(err, res) {
             // seqObj.a1.upload = (await requestInfo.requestAccountInfo(upload_a1, uploadRemote, false)).account_data.Sequence;
             seqObj.a1.token = (await requestInfo.requestAccountInfo(token_a1, tokenRemote, false)).account_data.Sequence;
             seqObj.a1.contract = (await requestInfo.requestAccountInfo(contract_a1, contractRemote, false)).account_data.Sequence;
+            // seqObj.a5.upload = (await requestInfo.requestAccountInfo(upload_a5, uploadRemote, false)).account_data.Sequence;
+            seqObj.a5.token = (await requestInfo.requestAccountInfo(token_a5, tokenRemote, false)).account_data.Sequence;
+            seqObj.a5.contract = (await requestInfo.requestAccountInfo(contract_a5, contractRemote, false)).account_data.Sequence;
             // seqObj.a9.upload = (await requestInfo.requestAccountInfo(upload_a9, uploadRemote, false)).account_data.Sequence;
             seqObj.a9.token = (await requestInfo.requestAccountInfo(token_a9, tokenRemote, false)).account_data.Sequence;
             seqObj.a9.contract = (await requestInfo.requestAccountInfo(contract_a9, contractRemote, false)).account_data.Sequence;

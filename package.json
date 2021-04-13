@@ -19,6 +19,7 @@
     "jingtum-lib": "^2.4.3",
     "joi": "^17.4.0",
     "kafka-node": "^5.0.0",
+    "lodash": "^4.17.21",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.1",
     "node-transform-mysql": "0.0.4",
