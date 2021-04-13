@@ -192,6 +192,8 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
         seq: signedTxRes.tx_json.Sequence,
         message: signedTxRes.engine_result_message,
     };
+    console.timeEnd('handleSellOrder');
+    console.log('--------------------');
     return resInfo;
 
     console.log(unsignedTx.tx_json);
