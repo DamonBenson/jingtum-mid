@@ -24,7 +24,12 @@ const upload_a1 = uploadChain.account.a[1].address;
 const token_a1 = tokenChain.account.a[1].address;
 const contract_a1 = contractChain.account.a[1].address;
 
-// 中间层
+// 卖方平台账号（模拟京东平台层）
+const upload_a4 = uploadChain.account.a[4].address;
+const token_a4 = tokenChain.account.a[4].address;
+const contract_a4 = contractChain.account.a[4].address;
+
+// 智能交易系统
 const upload_a5 = uploadChain.account.a[5].address;
 const token_a5 = tokenChain.account.a[5].address;
 const contract_a5 = contractChain.account.a[5].address;
@@ -82,6 +87,9 @@ uploadRemote.connect(async function(err, res) {
             // seqObj.a1.upload = (await requestInfo.requestAccountInfo(upload_a1, uploadRemote, false)).account_data.Sequence;
             seqObj.a1.token = (await requestInfo.requestAccountInfo(token_a1, tokenRemote, false)).account_data.Sequence;
             seqObj.a1.contract = (await requestInfo.requestAccountInfo(contract_a1, contractRemote, false)).account_data.Sequence;
+            // seqObj.a4.upload = (await requestInfo.requestAccountInfo(upload_a4, uploadRemote, false)).account_data.Sequence;
+            seqObj.a4.token = (await requestInfo.requestAccountInfo(token_a4, tokenRemote, false)).account_data.Sequence;
+            seqObj.a4.contract = (await requestInfo.requestAccountInfo(contract_a4, contractRemote, false)).account_data.Sequence;
             // seqObj.a5.upload = (await requestInfo.requestAccountInfo(upload_a5, uploadRemote, false)).account_data.Sequence;
             seqObj.a5.token = (await requestInfo.requestAccountInfo(token_a5, tokenRemote, false)).account_data.Sequence;
             seqObj.a5.contract = (await requestInfo.requestAccountInfo(contract_a5, contractRemote, false)).account_data.Sequence;
@@ -176,7 +184,7 @@ uploadRemote.connect(async function(err, res) {
                 res.send(unsignedTx);
             });
 
-            transactionRouter.post('/signedSell', async function(req, res) {
+            transactionRouter.post('/signedSell', async function(req, res) { // 京东平台签名由中间层模拟，暂时不需要
                 let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
                 res.send(resInfo);
             });
@@ -187,7 +195,7 @@ uploadRemote.connect(async function(err, res) {
                 res.send(unsignedTx);
             });
 
-            transactionRouter.post('/signedMatch', async function(req, res) {
+            transactionRouter.post('/signedMatch', async function(req, res) { // 智能交易系统签名由中间层模拟，暂时不需要
                 let resInfo = await transactionMid.handleSignedMatch(contractRemote, seqObj, req, res);
                 res.send(resInfo);
             });

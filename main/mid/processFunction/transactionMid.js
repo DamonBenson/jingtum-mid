@@ -3,6 +3,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as tx from '../../../utils/jingtum/tx.js'
+import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as validateUtils from '../../../utils/validateUtils.js';
@@ -17,6 +18,10 @@ const tokenChain = chains[0]; // 交易链
 // 智能授权系统发币账号
 const a1 = tokenChain.account.a[1].address;
 const s1 = tokenChain.account.a[1].secret;
+
+// 卖方平台账号（模拟京东平台层）
+const a4 = tokenChain.account.a[4].address;
+const s4 = tokenChain.account.a[4].secret;
 
 // 智能交易系统账号
 const a5 = tokenChain.account.a[5].address;
@@ -193,12 +198,21 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     
     // 构造交易
     let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
-    let unsignedTx = contractRemote.invokeContract({
-        account: platformAddr, 
-        destination: contractAddr,
-        abi: abi,
-        func: func,
-    });
+    // let unsignedTx = contractRemote.invokeContract({
+    //     account: platformAddr, 
+    //     destination: contractAddr,
+    //     abi: abi,
+    //     func: func,
+    // });
+
+    // 暂时由中间层代替
+    let signedTxRes = await contract.invokeContract(platformAddr, s4, contractRemote, seqObj.a4.contract++, abi, contractAddr, func, true);
+    let resInfo = {
+        result: signedTxRes.engine_result,
+        seq: signedTxRes.tx_json.Sequence,
+        message: signedTxRes.engine_result_message,
+    };
+    return resInfo;
 
     console.timeEnd('handleSellOrder');
     console.log('--------------------');
@@ -285,11 +299,12 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
         let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
 
         // 构造交易
+        let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
         let unsignedTx = contractRemote.invokeContract({
             account: matchSystemAddr, 
             destination: contractAddr,
             abi: abi,
-            func: updateMatches(buyerAddr, buyOrderHash, matchResultsHash),
+            func: func,
         });
         // 暂时由中间层代替
         unsignedTx.setSequence(seqObj.a5.contract++);
@@ -304,8 +319,6 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
         });
 
     })
-
-    
 
     console.timeEnd('handleMatch');
     console.log('--------------------');
