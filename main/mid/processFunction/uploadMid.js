@@ -1,7 +1,7 @@
 import ipfsAPI from 'ipfs-api';
 import sha256 from 'crypto-js/sha256.js';
 
-import * as tx from '../../../utils/jingtum/tx.js'
+import * as tx from '../../../utils/jingtum/tx.js';
 import * as erc721 from '../../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';

@@ -260,7 +260,7 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     console.time('handleMatch');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-
+    console.log(body);
     // 获取合约元数据
     let contractAddr = body.contractAddr;
     let abi = await getAbi(contractAddr);
