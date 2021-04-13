@@ -142,10 +142,10 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
         buyOrderInfo.contractAddr = contractAddr;
         buyOrderInfo.timeStamp = 0;
 
-        console.log(buyOrderInfo);
+        console.log(buyOrderInfo.buyOrderId);
         // 推送买单信息
         // KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_BuyOrder', buyOrderInfo);
-        KafkaClient_Watch2.ProducerSend('BuyOrder', buyOrderInfo);
+        KafkaClient_Watch2.ProducerSend('BuyOrder', buyOrderInfo.buyOrderId);
 
 
     });
@@ -175,7 +175,7 @@ async function processSellOrder(sellOrderTxs, loopConter) {
         sellOrderInfo.matchScore = 0;
         sellOrderInfo.contractAddr = contractAddr;
 
-        console.log(sellOrderInfo);
+        console.log(sellOrderInfo.sellOrderId);
         // 推送卖单信息
         // KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellOrder', sellOrderInfo);
         KafkaClient_Watch2.ProducerSend('SellOrder', sellOrderInfo);

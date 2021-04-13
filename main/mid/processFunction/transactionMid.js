@@ -32,7 +32,7 @@ export async function handleBuyOrder(contractRemote, seqObj, req, res) {
     console.time('handleBuyOrder');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-
+    console.log(body.buyOrderId)
     // 获取合约元数据
     let contractAddr = body.contractAddr;
     let abi = await getAbi(contractAddr);
@@ -137,7 +137,7 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
-    console.log(body);
+    console.log(body.sellOrderId);
 
     // 获取合约元数据
     let contractAddr = body.contractAddr;
@@ -169,7 +169,7 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     
     // 构造交易
     let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
-    console.log(func);
+    // console.log(func);
     let unsignedTx = contractRemote.invokeContract({
         account: platformAddr, 
         destination: contractAddr,
@@ -177,7 +177,7 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
         func: func,
     });
 
-    console.log(unsignedTx.tx_json);
+    // console.log(unsignedTx.tx_json);
 
     console.timeEnd('handleSellOrder');
     console.log('--------------------');
