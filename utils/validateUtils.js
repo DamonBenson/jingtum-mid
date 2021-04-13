@@ -570,7 +570,6 @@ export async function validateBuyOrderWatch(data) {
         await buyOrderWatchSchema.validateAsync(data);
     }
     catch(e) {
-        console.log(e);
         e.details.map((detail, index) => {
             console.log('error message ' + index + ':', detail.message);
         });
@@ -583,7 +582,6 @@ export async function validateBuyOrderWatch(data) {
 
 function delJoiKeys(schema, props) {
     let newSchema = _.cloneDeep(schema);
-    console.log(newSchema);
     props.forEach(prop => {
         newSchema._ids._byKey.delete(prop);
         let l = newSchema['$_terms'].keys.length;

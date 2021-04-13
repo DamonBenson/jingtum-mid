@@ -63,20 +63,20 @@ async function postSellOrderReq() {
         }
         
         let sellOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
-        let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);
-        // if(debugMode) console.log('buf.toString():', buf.toString());
-        let txJson = JSON.parse(buf.toString());
-        let unsignedTx = {
-            tx_json: txJson,
-        };
-        jlib.Transaction.prototype.setSequence.call(unsignedTx, seq++);
-        jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
-        jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
-        let blob = unsignedTx.tx_json.blob;
+        // let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);
+        // // if(debugMode) console.log('buf.toString():', buf.toString());
+        // let txJson = JSON.parse(buf.toString());
+        // let unsignedTx = {
+        //     tx_json: txJson,
+        // };
+        // jlib.Transaction.prototype.setSequence.call(unsignedTx, seq++);
+        // jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
+        // jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
+        // let blob = unsignedTx.tx_json.blob;
         
-        let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
-        let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
-        console.log('res:', resInfo);
+        // let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
+        // let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
+        // console.log('res:', resInfo);
 
     }
     

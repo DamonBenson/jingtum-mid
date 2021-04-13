@@ -78,6 +78,8 @@ uploadRemote.connect(async function(err, res) {
             let seqObj = {
                 a0: {},
                 a1: {},
+                a4: {},
+                a5: {},
                 a9: {},
             };
             // 目前upload同token，不能分开计数

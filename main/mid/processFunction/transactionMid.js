@@ -268,12 +268,16 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     console.time('handleMatch');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(body);
-    // if(!validateRes) {
-    //     return validateInfo;
-    // }
 
-    body.map(data => {
+    let resInforr = [];
+
+    body.map(async data => {
+
+        // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(data);
+        // if(!validateRes) {
+        //     resInforr.push(validateInfo);
+        //     return;
+        // }
 
         // 获取合约元数据
         let contractAddr = data.contractAddr;
@@ -300,25 +304,25 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
 
         // 构造交易
         let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
-        let unsignedTx = contractRemote.invokeContract({
-            account: matchSystemAddr, 
-            destination: contractAddr,
-            abi: abi,
-            func: func,
-        });
-        // 暂时由中间层代替
-        unsignedTx.setSequence(seqObj.a5.contract++);
-        unsignedTx.setSecret(s5);
-        tx.submit(function(err, result) {
-            if(err) {
-                console.log('err:', err);
-            }
-            else if(result) {
-                console.log('invokeContract:', result);
-            }
-        });
+        // let unsignedTx = contractRemote.invokeContract({
+        //     account: matchSystemAddr, 
+        //     destination: contractAddr,
+        //     abi: abi,
+        //     func: func,
+        // });
 
-    })
+        // 暂时由中间层代替
+        let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
+        let resInfo = {
+            result: signedTxRes.engine_result,
+            seq: signedTxRes.tx_json.Sequence,
+            message: signedTxRes.engine_result_message,
+        };
+        resInforr.push(resInfo);
+
+    });
+
+    return resInforr;
 
     console.timeEnd('handleMatch');
     console.log('--------------------');
