@@ -14,7 +14,7 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const MidIP = '39.102.93.47';// 中间层服务器IP
 // const MidIP = 'localhost';// 中间层服务器IP
-const msPerSellOrder = 2000;
+const msPerSellOrder = 3000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
 const platformSecret = userAccount[4].secret;
