@@ -3,6 +3,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as tx from '../../../utils/jingtum/tx.js'
+import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 
@@ -17,6 +18,14 @@ const tokenChain = chains[0]; // 交易链
 
 const a1 = tokenChain.account.a[1].address;
 const s1 = tokenChain.account.a[1].secret;
+
+// 卖方平台账号（模拟京东平台层）
+const a4 = tokenChain.account.a[4].address;
+const s4 = tokenChain.account.a[4].secret;
+
+// 智能交易系统账号
+const a5 = tokenChain.account.a[5].address;
+const s5 = tokenChain.account.a[5].secret;
 
 /*----------构造上传买单的交易----------*/
 
@@ -169,13 +178,21 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     
     // 构造交易
     let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
-    console.log(func);
-    let unsignedTx = contractRemote.invokeContract({
-        account: platformAddr, 
-        destination: contractAddr,
-        abi: abi,
-        func: func,
-    });
+    // let unsignedTx = contractRemote.invokeContract({
+    //     account: platformAddr, 
+    //     destination: contractAddr,
+    //     abi: abi,
+    //     func: func,
+    // });
+
+    // 暂时由中间层代替
+    let signedTxRes = await contract.invokeContract(platformAddr, s4, contractRemote, seqObj.a4.contract++, abi, contractAddr, func, true);
+    let resInfo = {
+        result: signedTxRes.engine_result,
+        seq: signedTxRes.tx_json.Sequence,
+        message: signedTxRes.engine_result_message,
+    };
+    return resInfo;
 
     console.log(unsignedTx.tx_json);
 
@@ -260,10 +277,55 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     console.time('handleMatch');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    console.log(body);
-    // 获取合约元数据
-    let contractAddr = body.contractAddr;
-    let abi = await getAbi(contractAddr);
+    // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(body);
+    // if(!validateRes) {
+    //     return validateInfo;
+    // }
+
+    body.map(data => {
+
+        // 获取合约元数据
+        let contractAddr = data.contractAddr;
+        let abi = await getAbi(contractAddr);
+
+        // 获取智能交易系统账户地址
+        let matchSystemAddr = data.matchSystemAddr;
+
+        // 解析买方平台地址、买单ID、撮合信息
+        let buyOrderInfo = data.buyOrderInfo;
+        let buyOrderHash = data.buyOrderHash;
+        let buyerAddr = buyOrderInfo.buyerAddr;
+        let sellOrderInfo = data.sellOrderInfo;
+        let matchResults = {
+            buyOrderInfo: buyOrderInfo,
+            sellOrderInfo: sellOrderInfo,
+        }
+        /* {
+            买单: {买单信息}
+            卖单: [{合约地址，卖单ID}，……]
+        } */
+        let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
+        let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
+
+        // 构造交易
+        let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
+        let unsignedTx = contractRemote.invokeContract({
+            account: matchSystemAddr, 
+            destination: contractAddr,
+            abi: abi,
+            func: func,
+        });
+        // 暂时由中间层代替
+        unsignedTx.setSequence(seqObj.a5.contract++);
+        unsignedTx.setSecret(s5);
+        tx.submit(function(err, result) {
+            if(err) {
+                console.log('err:', err);
+            }
+            else if(result) {
+                console.log('invokeContract:', result);
+            }
+        });
 
     // 获取智能交易系统账户地址
     let matchSystemAddr = body.matchSystemAddr;
