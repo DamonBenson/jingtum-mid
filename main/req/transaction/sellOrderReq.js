@@ -74,7 +74,9 @@ async function postSellOrderReq() {
         jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         let blob = unsignedTx.tx_json.blob;
         
-        await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
+        let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
+        let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
+        console.log('res:', resInfo);
 
     }
     

@@ -6,6 +6,7 @@ import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 
 import {chains} from '../../utils/info.js';
 import * as uploadMid from './processFunction/uploadMid.js';
+import * as infoMid from './processFunction/infoMid.js';
 import * as contractMid from './processFunction/contractMid.js';
 import * as transactionMid from './processFunction/transactionMid.js';
 
@@ -13,12 +14,22 @@ const uploadChain = chains[0]; // 存证链
 const tokenChain = chains[0]; // 交易链 复用
 const contractChain = chains[1]; // 权益链
 
+// 智能预警系统发币账号
 const upload_a0 = uploadChain.account.a[0].address;
 const token_a0 = tokenChain.account.a[0].address;
 const contract_a0 = contractChain.account.a[0].address;
+
+// 智能授权系统发币账号
 const upload_a1 = uploadChain.account.a[1].address;
 const token_a1 = tokenChain.account.a[1].address;
 const contract_a1 = contractChain.account.a[1].address;
+
+// 中间层
+const upload_a5 = uploadChain.account.a[5].address;
+const token_a5 = tokenChain.account.a[5].address;
+const contract_a5 = contractChain.account.a[5].address;
+
+// 中间层
 const upload_a9 = uploadChain.account.a[9].address;
 const token_a9 = tokenChain.account.a[9].address;
 const contract_a9 = contractChain.account.a[9].address;
@@ -71,6 +82,9 @@ uploadRemote.connect(async function(err, res) {
             // seqObj.a1.upload = (await requestInfo.requestAccountInfo(upload_a1, uploadRemote, false)).account_data.Sequence;
             seqObj.a1.token = (await requestInfo.requestAccountInfo(token_a1, tokenRemote, false)).account_data.Sequence;
             seqObj.a1.contract = (await requestInfo.requestAccountInfo(contract_a1, contractRemote, false)).account_data.Sequence;
+            // seqObj.a5.upload = (await requestInfo.requestAccountInfo(upload_a5, uploadRemote, false)).account_data.Sequence;
+            seqObj.a5.token = (await requestInfo.requestAccountInfo(token_a5, tokenRemote, false)).account_data.Sequence;
+            seqObj.a5.contract = (await requestInfo.requestAccountInfo(contract_a5, contractRemote, false)).account_data.Sequence;
             // seqObj.a9.upload = (await requestInfo.requestAccountInfo(upload_a9, uploadRemote, false)).account_data.Sequence;
             seqObj.a9.token = (await requestInfo.requestAccountInfo(token_a9, tokenRemote, false)).account_data.Sequence;
             seqObj.a9.contract = (await requestInfo.requestAccountInfo(contract_a9, contractRemote, false)).account_data.Sequence;
@@ -95,17 +109,17 @@ uploadRemote.connect(async function(err, res) {
             });
 
             infoRouter.post('/work', async function(req, res) {
-                let workInfo = await infoMid.handleWorkInfo(uploadRemote, seqObj, req, res);
+                let workInfo = await infoMid.handleWorkInfo(req, res);
                 res.send(workInfo);
             });
 
             infoRouter.post('/copyright', async function(req, res) {
-                let copyrightInfo = await infoMid.handleCopyrightInfo(tokenRemote, seqObj, req, res);
+                let copyrightInfo = await infoMid.handleCopyrightInfo(req, res);
                 res.send(copyrightInfo);
             });
 
             infoRouter.post('/approve', async function(req, res) {
-                let approveInfo = await infoMid.handleApproveInfo(tokenRemote, seqObj, req, res);
+                let approveInfo = await infoMid.handleApproveInfo(req, res);
                 res.send(approveInfo);
             });
 
@@ -142,8 +156,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuy', async function(req, res) {
-                await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             transactionRouter.post('/buyOrderConfirm', async function(req, res) {
@@ -152,8 +166,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) {
-                await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交卖单
@@ -163,18 +177,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedSell', async function(req, res) {
-                await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
-                res.send('success');
-            });
-
-            transactionRouter.post('/sellOrderConfirm', async function(req, res) {
-                let unsignedTx = await transactionMid.handleSellOrderConfirm(contractRemote, seqObj, req, res);
-                res.send(unsignedTx);
-            });
-
-            transactionRouter.post('/signedSellOrderConfirm', async function(req, res) {
-                await transactionMid.handleSignedSellOrderComfirm(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交交易服务结果
@@ -184,8 +188,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedMatch', async function(req, res) {
-                let orderId = await transactionMid.handleSignedMatch(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                let resInfo = await transactionMid.handleSignedMatch(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 获取交易服务结果
