@@ -12,9 +12,9 @@ import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-// const MidIP = '39.102.93.47';// 中间层服务器IP
-const MidIP = 'localhost';// 中间层服务器IP
-const msPerSellOrder = 1000;
+const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = 'localhost';// 中间层服务器IP
+const msPerSellOrder = 5000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
 const platformSecret = userAccount[4].secret;
@@ -106,7 +106,7 @@ function generateSellOrder(wrokIds, sellerAddr) {
         contractAddr: sellOrderContractAddr,
     }
 
-    sellOrder.sellOrderId = sha256((seq++).toString()).toString();
+    sellOrder.sellOrderId = sha256((seq++).toString() + 'a').toString();
     console.log(seq);
     return sellOrder;
 

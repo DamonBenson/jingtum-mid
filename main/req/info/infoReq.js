@@ -9,7 +9,7 @@ import {mysqlConf} from '../../../utils/info.js';
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
-const queryMode = 'copyright';
+const queryMode = 'work';
 const queryAmount = 3;
 
 switch(queryMode) {
@@ -20,8 +20,10 @@ switch(queryMode) {
         let workIds = workInfoArr.map(workInfo => {
             return workInfo.work_id;
         });
-        console.log(workIds);
-        fetch.postData('http://127.0.0.1:9001/info/work', workIds);
+        console.log('workIds:', workIds);
+        let res = await fetch.postData('http://127.0.0.1:9001/info/work', workIds);
+        let resInfo = JSON.parse(Buffer.from(res.body._readableState.buffer.head.data).toString());
+        console.log('worksInfo:', resInfo.data.worksInfo);
         break;
 
     case 'copyright':

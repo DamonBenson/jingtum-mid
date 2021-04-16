@@ -8,9 +8,9 @@ import util from 'util';
 
 import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
 import { exit, kill } from 'process';
-// const MidIP = '39.102.93.47';// 中间层服务器IP
-const MidIP = 'localhost';// 中间层服务器IP
-const msPerBuyOrder = 1000;
+const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = 'localhost';// 中间层服务器IP
+const msPerBuyOrder = 5000;
 const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
 const platformSecret = userAccount[5].secret;
