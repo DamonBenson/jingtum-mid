@@ -7,9 +7,8 @@ import * as fetch from '../../../utils/fetch.js';
 import util from 'util';
 
 import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
-import { exit, kill } from 'process';
-const MidIP = '39.102.93.47';// 中间层服务器IP
-// const MidIP = 'localhost';// 中间层服务器IP
+// const MidIP = '39.102.93.47';// 中间层服务器IP
+const MidIP = 'localhost';// 中间层服务器IP
 const msPerBuyOrder = 5000;
 const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
@@ -43,20 +42,32 @@ contractRemote.connect(async function(err, res) {
 async function postBuyOrderReq() {
 
     console.time('buyOrderReq');
+    
     let buyOrder = generateBuyOrder();
-    if(debugMode) console.log('buyOrder:', buyOrder);
-    let buyOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
-    let buf = Buffer.from(buyOrderRes.body._readableState.buffer.head.data);
-    // if(debugMode) console.log('buf.toString():', buf.toString());
-    let txJson = JSON.parse(buf.toString());
+    if(debugMode) {
+        console.log('buyOrder:', buyOrder);
+    }
+
+    let unsignedRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
+    let unsignedResInfo = JSON.parse(Buffer.from(unsignedRes.body._readableState.buffer.head.data).toString());
+    let txJson = unsignedResInfo.data.tx_json;
     let unsignedTx = {
         tx_json: txJson,
     };
+    if(debugMode) {
+        console.log('unsigned buy order:', unsignedResInfo);
+    }
     jlib.Transaction.prototype.setSequence.call(unsignedTx, seq++);
     jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
-    await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+
+    let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+    if(debugMode) {
+        let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
+        console.log('signed buy order:', resInfo);
+    }
+
     console.timeEnd('buyOrderReq');
     console.log('--------------------');
 
@@ -116,7 +127,7 @@ function generateLabelWeight() {
     }
     for(let i = 0; i < 5; i++) {
         for(let j = 0; j < 5; j++) {
-            labelWeight[i][j] = [localUtils.randomSelect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])];  //跟generateLabelDemand冲突？
+            labelWeight[i][j] = localUtils.randomSelect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);  //跟generateLabelDemand冲突？
         }
     }
     return labelWeight;

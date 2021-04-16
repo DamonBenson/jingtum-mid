@@ -3,6 +3,7 @@ import ipfsAPI from 'ipfs-api';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
+import * as transactionValidate from '../../utils/validateUtils/transaction.js';
 //kafka消费者
 import * as getClient from '../../utils/KafkaUtils/getClient.js';
 
@@ -131,8 +132,11 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
 
     buyOrderTxs.forEach(async(buyOrderTx) => {
 
+        console.log(buyOrderTx);
+
         let buyOrderId = buyOrderTx.func_parms[0].replace(/\'/g,"");
         let contractAddr = buyOrderTx.destination;
+        let platformAddr = buyOrderTx.account;
         
         let buyOrderInfoHash = buyOrderTx.func_parms[1].replace(/\'/g,"");
         let buyOrderInfoJson = await ipfsUtils.get(ipfs, buyOrderInfoHash);
@@ -141,6 +145,12 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
         buyOrderInfo.buyOrderHash = '0';
         buyOrderInfo.contractAddr = contractAddr;
         buyOrderInfo.timeStamp = 0;
+        buyOrderInfo.platformAddr = platformAddr;
+
+        let [validateInfoRes, validateInfo] = await transactionValidate.validateBuyOrderWatch(buyOrderInfos);
+        if(!validateInfoRes) {
+            console.log(validateInfo);
+        }
 
         console.log(buyOrderInfo);
         // 推送买单信息
