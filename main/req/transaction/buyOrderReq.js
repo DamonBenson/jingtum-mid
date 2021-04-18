@@ -10,7 +10,7 @@ import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../../uti
 import { exit, kill } from 'process';
 const MidIP = '39.102.93.47';// 中间层服务器IP
 // const MidIP = 'localhost';// 中间层服务器IP
-const msPerBuyOrder = 2000;
+const msPerBuyOrder = 10000;
 const subBuyOrderListAmount = 3;
 const platformAddr = userAccount[5].address;
 const platformSecret = userAccount[5].secret;
@@ -44,7 +44,7 @@ async function postBuyOrderReq() {
 
     console.time('buyOrderReq');
     let buyOrder = generateBuyOrder();
-    if(debugMode) console.log('buyOrder:', buyOrder);
+    if(debugMode) console.log('buyOrder:', buyOrder.buyOrderId);
     let buyOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
     let buf = Buffer.from(buyOrderRes.body._readableState.buffer.head.data);
     // if(debugMode) console.log('buf.toString():', buf.toString());

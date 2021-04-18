@@ -19,14 +19,15 @@ c.connect(); // mysql连接
  */
 export async function handleAuthRightRate(req, res) {
 
-    console.time('handleBuyOrder');
+    console.time('handleAuthRightRate');
     // 获取AuthRightRate
     let [WorkAmount,RightAmount] = await getAuthRightRate();
+    let resJson = JSON.stringify({'WorkAmount':WorkAmount,"RightAmount":RightAmount});
+    // res.send({        resJson    });
+    res.send({"WorkAmount":WorkAmount,"RightAmount":RightAmount});
+
     
-    res.send({'WorkAmount':WorkAmount,"RightAmount":RightAmount});
-    
-    
-    console.timeEnd('handleBuyOrder');
+    console.timeEnd('handleAuthRightRate');
     console.log('--------------------');
 }
 

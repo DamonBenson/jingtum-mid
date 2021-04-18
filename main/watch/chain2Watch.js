@@ -142,7 +142,7 @@ async function processBuyOrder(buyOrderTxs, loopConter) {
         buyOrderInfo.contractAddr = contractAddr;
         buyOrderInfo.timeStamp = 0;
 
-        console.log(buyOrderInfo);
+        console.log(buyOrderInfo.buyOrderId);
         // 推送买单信息
         // KafkaClient_Watch2.ProducerSend(buyOrderContractAddr + '_BuyOrder', buyOrderInfo);
         KafkaClient_Watch2.ProducerSend('BuyOrder', buyOrderInfo.buyOrderId);

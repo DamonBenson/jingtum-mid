@@ -14,7 +14,7 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const MidIP = '39.102.93.47';// 中间层服务器IP
 // const MidIP = 'localhost';// 中间层服务器IP
-const msPerSellOrder = 2000;
+const msPerSellOrder = 10000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
 const platformSecret = userAccount[4].secret;
@@ -61,7 +61,7 @@ async function postSellOrderReq() {
         let sellerAddr = addrFilter.addr;
         let sellOrder = generateSellOrder(workIds, sellerAddr);
         if(debugMode) {
-            console.log('sellOrder:', sellOrder);
+            console.log('sellOrder:', sellOrder.sellOrderId);
         }
         
         let sellOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
