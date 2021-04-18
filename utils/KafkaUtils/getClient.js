@@ -118,6 +118,14 @@ export class Client {
     //@para msg Str(json)       msg use the json in stringing
     ProducerSend(selTopic,msg){
             
+        try{
+            this.mq_producer.createTopics([selTopic], function (){
+            console.log("主题造一下",selTopic);});
+        }
+        catch{
+            console.log("主题已经存在",selTopic);
+        }
+
         var _msg = {
             topic:[selTopic], 
             messages:[JSON.stringify(msg)],

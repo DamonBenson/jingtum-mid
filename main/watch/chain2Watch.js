@@ -175,7 +175,7 @@ async function processSellOrder(sellOrderTxs, loopConter) {
         sellOrderInfo.matchScore = 0;
         sellOrderInfo.contractAddr = contractAddr;
 
-        console.log(sellOrderInfo.sellOrderId);
+        console.log(sellOrderInfo);
         // 推送卖单信息
         // KafkaClient_Watch2.ProducerSend(sellOrderContractAddr + '_SellOrder', sellOrderInfo);
         KafkaClient_Watch2.ProducerSend('SellOrder', sellOrderInfo);

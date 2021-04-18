@@ -1,6 +1,18 @@
-import * as tx from '../../../utils/jingtum/tx.js';
+import jlib, { Wallet } from 'jingtum-lib';
+import mysql from 'mysql';
+import sqlText from 'node-transform-mysql';
 
-import {userAccount} from '../../../utils/info.js';
+import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
+import * as tx from '../../../utils/jingtum/tx.js';
+import * as mysqlUtils from '../../../utils/mysqlUtils.js';
+import * as infoValidate from '../../../utils/validateUtils/info.js';
+
+import {userAccount, chains, mysqlConf} from '../../../utils/info.js';
+
+const Remote = jlib.Remote;
+
+const c = mysql.createConnection(mysqlConf);
+c.connect(); // mysql连接
 
 // 中间层账号
 const a9 = userAccount[9].address;
@@ -12,72 +24,160 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
 
     console.time('handleActivateAccount');
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-    body.map(addr => {
-        await tx.buildPaymentTx(a9, s9, uploadRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, tokenRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, contractRemote, seqObj.a9.contract++, addr, 10000, 'Activate account.', true);
-    })
+    let body = JSON.parse(Object.keys(req.body)[0]);
+    let addAmount = body;
+    let [validateInfoRes, validateInfo] = await infoValidate.validateActivate(addAmount);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
+
+    let walletArr = new Array(addAmount);
+    for(let i = addAmount - 1; i >= 0; i--) {
+        walletArr[i] = Wallet.generate()
+    }
+
+    /*----------生成账号----------*/
+
+    let activatePromises = [];
+    for(let j = addAmount - 1; j >= 0; j--) {
+        let a = walletArr[j].address;
+        // 转账激活账号
+        activatePromises.push(tx.buildPaymentTx(a9, s9, uploadRemote, seqObj.a9.token++, a, 10000, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(a9, s9, tokenRemote, seqObj.a9.token++, a, 10000, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(a9, s9, contractRemote, seqObj.a9.contract++, a, 10000, 'Activate account', true));
+    }
+    await Promise.all(activatePromises);
 
     console.timeEnd('handleActivateAccount');
     console.log('--------------------');
+
+    resInfo.data.wallets = walletArr;
+    return resInfo;
 
 }
 
 /*----------查询作品信息----------*/
 
-export async function handleWorkInfo(uploadRemote, seqObj, req, res) {
+export async function handleWorkInfo(req, res) {
 
     console.time('handleWorkInfo');
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-    body.map(addr => {
-        await tx.buildPaymentTx(a9, s9, uploadRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, tokenRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, contractRemote, seqObj.a9.contract++, addr, 10000, 'Activate account.', true);
+    let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await infoValidate.validateQuery(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters';
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
+
+    let sqlPromises = body.map(async workId => {
+        let filter = {
+            work_id: workId,
+        }
+        let sql = sqlText.table('work_info').where(filter).select();
+        return mysqlUtils.sql(c, sql);
     })
+    let worksInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
 
     console.timeEnd('handleWorkInfo');
     console.log('--------------------');
+
+    resInfo.data.worksInfo = worksInfo;
+
+    return resInfo;
 
 }
 
 /*----------查询版权通证信息----------*/
 
-export async function handleCopyrightInfo(tokenRemote, seqObj, req, res) {
+export async function handleWorkInfo(req, res) {
 
-    console.time('handleCopyrightInfo');
+    console.time('handleWorkInfo');
+
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
     let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await infoValidate.validateQuery(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters';
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
-    body.map(addr => {
-        await tx.buildPaymentTx(a9, s9, uploadRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, tokenRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, contractRemote, seqObj.a9.contract++, addr, 10000, 'Activate account.', true);
+    let sqlPromises = body.map(async workId => {
+        let filter = {
+            work_id: workId,
+        }
+        let sql = sqlText.table('work_info').where(filter).select();
+        return mysqlUtils.sql(c, sql);
     })
+    let worksInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
 
-    console.timeEnd('handleCopyrightInfo');
+    console.timeEnd('handleWorkInfo');
     console.log('--------------------');
+
+    resInfo.data.worksInfo = worksInfo;
+
+    return resInfo;
 
 }
 
 /*----------查询许可通证信息----------*/
 
-export async function handleApproveInfo(tokenRemote, seqObj, req, res) {
+export async function handleWorkInfo(req, res) {
 
-    console.time('handleApproveInfo');
+    console.time('handleWorkInfo');
+
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
     let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await infoValidate.validateQuery(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters';
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
-    body.map(addr => {
-        await tx.buildPaymentTx(a9, s9, uploadRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, tokenRemote, seqObj.a9.token++, addr, 10000, 'Activate account.', true);
-        await tx.buildPaymentTx(a9, s9, contractRemote, seqObj.a9.contract++, addr, 10000, 'Activate account.', true);
+    let sqlPromises = body.map(async workId => {
+        let filter = {
+            work_id: workId,
+        }
+        let sql = sqlText.table('work_info').where(filter).select();
+        return mysqlUtils.sql(c, sql);
     })
+    let worksInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
 
-    console.timeEnd('handleApproveInfo');
+    console.timeEnd('handleWorkInfo');
     console.log('--------------------');
+
+    resInfo.data.worksInfo = worksInfo;
+
+    return resInfo;
 
 }

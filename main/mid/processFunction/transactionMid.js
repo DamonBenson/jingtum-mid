@@ -6,6 +6,7 @@ import * as tx from '../../../utils/jingtum/tx.js'
 import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
+import * as transactionValidate from '../../../utils/validateUtils/transaction.js';
 
 import {chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
 
@@ -40,8 +41,21 @@ export async function handleBuyOrder(contractRemote, seqObj, req, res) {
 
     console.time('handleBuyOrder');
 
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
+
     let body = JSON.parse(Object.keys(req.body)[0]);
-    console.log(body.buyOrderId)
+    let [validateInfoRes, validateInfo] = await transactionValidate.validateBuyOrderReq(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
+
     // 获取合约元数据
     let contractAddr = body.contractAddr;
     let abi = await getAbi(contractAddr);
@@ -70,7 +84,8 @@ export async function handleBuyOrder(contractRemote, seqObj, req, res) {
     console.timeEnd('handleBuyOrder');
     console.log('--------------------');
 
-    return unsignedTx.tx_json;
+    resInfo.data.tx_json = unsignedTx.tx_json;
+    return resInfo;
 
 }
 
@@ -84,7 +99,21 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
 
     console.time('handleSignedBuyOrder');
 
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
+
     let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await transactionValidate.validateSignedTx(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
+
     let blob = body;
 
     // 提交交易
@@ -92,6 +121,8 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
 
     console.timeEnd('handleSignedBuyOrder');
     console.log('--------------------');
+
+    return resInfo;
 
 }
 
@@ -186,13 +217,15 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     });
 
     // 暂时由中间层代替
-    // let signedTxRes = await contract.invokeContract(platformAddr, s4, contractRemote, seqObj.a4.contract++, abi, contractAddr, func, true);
-    // let resInfo = {
-    //     result: signedTxRes.engine_result,
-    //     seq: signedTxRes.tx_json.Sequence,
-    //     message: signedTxRes.engine_result_message,
-    // };
-    // return resInfo;
+    let signedTxRes = await contract.invokeContract(platformAddr, s4, contractRemote, seqObj.a4.contract++, abi, contractAddr, func, true);
+    let resInfo = {
+        result: signedTxRes.engine_result,
+        seq: signedTxRes.tx_json.Sequence,
+        message: signedTxRes.engine_result_message,
+    };
+    console.timeEnd('handleSellOrder');
+    console.log('--------------------');
+    return resInfo;
 
     // console.log(unsignedTx.tx_json);
 
@@ -277,58 +310,106 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     console.time('handleMatch');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(body);
+
+    // let resInforr = [];
+
+    // body.map(async data => {
+
+    //     // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(data);
+    //     // if(!validateRes) {
+    //     //     resInforr.push(validateInfo);
+    //     //     return;
+    //     // }
+
+    //     // 获取合约元数据
+    //     let contractAddr = data.contractAddr;
+    //     let abi = await getAbi(contractAddr);
+
+    //     // 获取智能交易系统账户地址
+    //     let matchSystemAddr = data.matchSystemAddr;
+
+    //     // 解析买方平台地址、买单ID、撮合信息
+    //     let buyOrderInfo = data.buyOrderInfo;
+    //     let buyOrderHash = data.buyOrderHash;
+    //     let buyerAddr = buyOrderInfo.buyerAddr;
+    //     let sellOrderInfo = data.sellOrderInfo;
+    //     let matchResults = {
+    //         buyOrderInfo: buyOrderInfo,
+    //         sellOrderInfo: sellOrderInfo,
+    //     }
+    //     /* {
+    //         买单: {买单信息}
+    //         卖单: [{合约地址，卖单ID}，……]
+    //     } */
+    //     let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
+    //     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
+
+    //     // 构造交易
+    //     let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
+    //     // let unsignedTx = contractRemote.invokeContract({
+    //     //     account: matchSystemAddr, 
+    //     //     destination: contractAddr,
+    //     //     abi: abi,
+    //     //     func: func,
+    //     // });
+
+    //     // 暂时由中间层代替
+    //     let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
+    //     let resInfo = {
+    //         result: signedTxRes.engine_result,
+    //         seq: signedTxRes.tx_json.Sequence,
+    //         message: signedTxRes.engine_result_message,
+    //     };
+    //     resInforr.push(resInfo);
+
+    // });
+
+    // return resInforr;
+
+    // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(data);
     // if(!validateRes) {
-    //     return validateInfo;
+    //     resInforr.push(validateInfo);
+    //     return;
     // }
 
-    body.map(async data => {
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let abi = await getAbi(contractAddr);
 
-        // 获取合约元数据
-        let contractAddr = data.contractAddr;
-        let abi = await getAbi(contractAddr);
+    // 获取智能交易系统账户地址
+    let matchSystemAddr = body.matchSystemAddr;
 
-        // 获取智能交易系统账户地址
-        let matchSystemAddr = data.matchSystemAddr;
+    // 解析买方平台地址、买单ID、撮合信息
+    let buyOrderInfo = body.buyOrderInfo;
+    let buyOrderHash = body.buyOrderHash;
+    let buyerAddr = buyOrderInfo.buyerAddr;
+    let sellOrderInfo = body.sellOrderInfo;
+    let matchResults = {
+        buyOrderInfo: buyOrderInfo,
+        sellOrderInfo: sellOrderInfo,
+    }
+    let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
+    let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
 
-        // 解析买方平台地址、买单ID、撮合信息
-        let buyOrderInfo = data.buyOrderInfo;
-        let buyOrderHash = data.buyOrderHash;
-        let buyerAddr = buyOrderInfo.buyerAddr;
-        let sellOrderInfo = data.sellOrderInfo;
-        let matchResults = {
-            buyOrderInfo: buyOrderInfo,
-            sellOrderInfo: sellOrderInfo,
-        }
-        /* {
-            买单: {买单信息}
-            卖单: [{合约地址，卖单ID}，……]
-        } */
-        let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
-        let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
+    // 构造交易
+    let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
+    // let unsignedTx = contractRemote.invokeContract({
+    //     account: matchSystemAddr, 
+    //     destination: contractAddr,
+    //     abi: abi,
+    //     func: func,
+    // });
 
-        // 构造交易
-        let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
-        let unsignedTx = contractRemote.invokeContract({
-            account: matchSystemAddr, 
-            destination: contractAddr,
-            abi: abi,
-            func: func,
-        });
-        // 暂时由中间层代替
-        unsignedTx.setSequence(seqObj.a5.contract++);
-        unsignedTx.setSecret(s5);
-        tx.submit(function(err, result) {
-            if(err) {
-                console.log('err:', err);
-            }
-            else if(result) {
-                console.log('invokeContract:', result);
-            }
-        });
+    // 暂时由中间层代替
+    let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
+    let resInfo = {
+        result: signedTxRes.engine_result,
+        seq: signedTxRes.tx_json.Sequence,
+        message: signedTxRes.engine_result_message,
+    };
 
-    });
-    
+    return resInfo;
+
     console.timeEnd('handleMatch');
     console.log('--------------------');
 

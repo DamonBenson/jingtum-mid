@@ -6,6 +6,7 @@ import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 
 import {chains} from '../../utils/info.js';
 import * as uploadMid from './processFunction/uploadMid.js';
+import * as infoMid from './processFunction/infoMid.js';
 import * as contractMid from './processFunction/contractMid.js';
 import * as transactionMid from './processFunction/transactionMid.js';
 
@@ -110,23 +111,23 @@ uploadRemote.connect(async function(err, res) {
             const infoRouter = express.Router();
 
             infoRouter.post('/activateAccount', async function(req, res) {
-                infoMid.handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await infoMid.handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             infoRouter.post('/work', async function(req, res) {
-                let workInfo = await infoMid.handleWorkInfo(uploadRemote, seqObj, req, res);
-                res.send(workInfo);
+                let resInfo = await infoMid.handleWorkInfo(req, res);
+                res.send(resInfo);
             });
 
             infoRouter.post('/copyright', async function(req, res) {
-                let copyrightInfo = await infoMid.handleCopyrightInfo(tokenRemote, seqObj, req, res);
-                res.send(copyrightInfo);
+                let resInfo = await infoMid.handleCopyrightInfo(req, res);
+                res.send(resInfo);
             });
 
             infoRouter.post('/approve', async function(req, res) {
-                let approveInfo = await infoMid.handleApproveInfo(tokenRemote, seqObj, req, res);
-                res.send(approveInfo);
+                let resInfo = await infoMid.handleApproveInfo(req, res);
+                res.send(resInfo);
             });
 
             /*----------服务合约请求路由配置----------*/
@@ -157,21 +158,21 @@ uploadRemote.connect(async function(err, res) {
 
             // 提交买单
             transactionRouter.post('/buy', async function(req, res) {
-                let unsignedTx = await transactionMid.handleBuyOrder(contractRemote, seqObj, req, res);
-                res.send(unsignedTx);
+                let resInfo = await transactionMid.handleBuyOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             transactionRouter.post('/signedBuy', async function(req, res) {
-                await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
-            transactionRouter.post('/buyOrderConfirm', async function(req, res) {
+            transactionRouter.post('/buyOrderConfirm', async function(req, res) { // 智能交易系统签名由中间层模拟，暂时不需要
                 let unsignedTx = await transactionMid.handleBuyOrderConfirm(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
             });
 
-            transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) {
+            transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) { 
                 await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
                 res.send('success');
             });
@@ -182,19 +183,9 @@ uploadRemote.connect(async function(err, res) {
                 res.send(unsignedTx);
             });
 
-            transactionRouter.post('/signedSell', async function(req, res) {
-                await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
-                res.send('success');
-            });
-
-            transactionRouter.post('/sellOrderConfirm', async function(req, res) {
-                let unsignedTx = await transactionMid.handleSellOrderConfirm(contractRemote, seqObj, req, res);
-                res.send(unsignedTx);
-            });
-
-            transactionRouter.post('/signedSellOrderConfirm', async function(req, res) {
-                await transactionMid.handleSignedSellOrderComfirm(contractRemote, seqObj, req, res);
-                res.send('success');
+            transactionRouter.post('/signedSell', async function(req, res) { // 京东平台签名由中间层模拟，暂时不需要
+                let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交交易服务结果
@@ -262,8 +253,13 @@ uploadRemote.connect(async function(err, res) {
             const app = express();
             const port = 9001;
 
-            app.use(bodyParser.urlencoded({extended:false}));
-            app.use(bodyParser.json());
+            app.use(bodyParser.urlencoded({
+                extended:false,
+                limit: '50mb',
+            }));
+            app.use(bodyParser.json({
+                limit: '50mb',
+            }));
 
             app.use('/upload', uploadRouter);
             app.use('/info', infoRouter);
