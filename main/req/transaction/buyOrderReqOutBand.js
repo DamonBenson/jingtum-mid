@@ -179,8 +179,9 @@ function generateLabelDemand_AND_LabeWeight() {
         for(let j = 0; j < 5; j++) {
             if(labelWeight[i][j] == null){
                 if(localUtils.randomSelect([0,1]) == 1)// 喜欢
-                    labelWeight[i][j] = localUtils.randomNumber(5,10);  
-                labelWeight[i][j] = localUtils.randomNumber(0,5);  
+                    labelWeight[i][j] = localUtils.randomNumber(5,10);
+                else
+                    labelWeight[i][j] = localUtils.randomNumber(0,5);
             }
         }
     }
