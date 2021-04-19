@@ -263,12 +263,12 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     
     // 构造交易
     let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
-    // let unsignedTx = contractRemote.invokeContract({
-    //     account: platformAddr, 
-    //     destination: contractAddr,
-    //     abi: abi,
-    //     func: func,
-    // });
+    let unsignedTx = contractRemote.invokeContract({
+        account: platformAddr, 
+        destination: contractAddr,
+        abi: abi,
+        func: func,
+    });
 
     // 暂时由中间层代替
     let tempSecret;
@@ -289,7 +289,7 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     resInfo.data.contractRes = contractRes;
     return resInfo;
 
-    console.log(unsignedTx.tx_json);
+    // console.log(unsignedTx.tx_json);
 
     console.timeEnd('handleSellOrder');
     console.log('--------------------');

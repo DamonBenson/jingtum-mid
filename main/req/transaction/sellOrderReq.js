@@ -60,7 +60,7 @@ async function postSellOrderReq() {
         let sellerAddr = addrFilter.addr;
         let sellOrder = generateSellOrder(workIds, sellerAddr);
         if(debugMode) {
-            console.log('sellOrder:', sellOrder);
+            console.log('sellOrder:', sellOrder.sellOrderId);
         }
         
         let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
