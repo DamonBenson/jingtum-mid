@@ -2,7 +2,24 @@ import fs from 'fs';
 
 const picPath = './resource/test.jpg'; // 相对于当前命令行所在目录的相对位置
 const pic = fs.readFileSync(picPath);
-
+const userAccountIndex = {
+    '智能预警系统发币账号': 0,
+    '智能授权系统发币账号': 1,
+    '版权局确权账号': 2,
+    '买方平台账号': 3,
+    '卖方平台账号': 4,
+    '智能交易系统账号': 5,
+    '用户1': 6,
+    '用户2': 7,
+    '用户3': 8,
+    '中间层': 9,
+    '用户4': 10,
+    '用户5': 11,
+    '用户6': 12,
+    '买方平台2': 13,
+    '卖方平台2': 14
+    
+};
 const userAccount = [
     {
       secret: 'ssyYuua1z4J312TNVrz4pqaZLs7yG',
@@ -204,4 +221,15 @@ const buyOrderContractAddrs = ['jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd'];
 
 const sellOrderContractAddrs = ['jDamHMfeuENdNDzyQciGjojGLuMmRnhifU', 'jBYqBLnr43Giqk7rZGN4fvvFXNW1yU1LcV'];
 
-export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs};
+const availableSellAddrIndex = {
+    "中间层":0,
+    "用户3":1,
+    "用户1":2,
+};
+
+const availableSellAddr = {
+    0 : "jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3",
+    1 : "jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan",
+    2 : "jw382C55JLbLbUJNu8iJtisaqb4TAoQDGC",
+};
+export {pic, chains, userAccount, userAccountIndex, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs, availableSellAddr};

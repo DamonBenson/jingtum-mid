@@ -8,16 +8,16 @@ import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import * as fetch from '../../../utils/fetch.js';
 
-import {chains, userAccount, mysqlConf, sellOrderContractAddrs, debugMode} from '../../../utils/info.js';
+import {chains, userAccount, userAccountIndex, mysqlConf, sellOrderContractAddrs, debugMode, availableSellAddr} from '../../../utils/info.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-// const MidIP = '39.102.93.47';// 中间层服务器IP
-const MidIP = 'localhost';// 中间层服务器IP
+const MidIP = '39.102.93.47';// 中间层服务器IP
+// const MidIP = 'localhost';// 中间层服务器IP
 const msPerSellOrder = 5000;
 const sellOrderAmount = 1;
-const platformAddr = userAccount[4].address; // 平台账号
-const platformSecret = userAccount[4].secret;
+const platformAddr = userAccount[userAccountIndex['卖方平台账号']].address; // 平台账号
+const platformSecret = userAccount[userAccountIndex['卖方平台账号']].secret;
 // const sellerAddr = userAccount[5].address;
 
 // setInterval(postSellOrderReq, msPerSellOrder);
@@ -44,13 +44,12 @@ contractRemote.connect(async function(err, res) {
 });
 
 async function postSellOrderReq() {
-
     console.time('sellOrderReq');
 
     for(let i = 0; i < sellOrderAmount; i++) {
 
-        let addrFilter = {
-            addr: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9',
+        let addrFilter = {// 为什么只有买方
+            addr: availableSellAddr[localUtils.randomNumber(0,2)],//目前只有三个
         };
         let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();
         let workInfoArr = await mysqlUtils.sql(c, sql);
@@ -58,9 +57,22 @@ async function postSellOrderReq() {
             return workInfo.work_id;
         });
         let sellerAddr = addrFilter.addr;
-        let sellOrder = generateSellOrder(workIds, sellerAddr);
+
+        // let sql = sqlText.table('work_info').field('work_id,addr').order('RAND()').limit(localUtils.randomNumber(1,5)).select();
+        // let workInfoArr = await mysqlUtils.sql(c, sql);
+        // let workIds = [];
+        // let Addr = [];
+        // workInfoArr.map(workInfoArr => {
+        //     workIds.push(workInfoArr.work_id);
+        //     Addr.push(workInfoArr.addr);
+        // });
+        // let [workIds,sellerAddr] = workInfoArr.map(workInfo => {
+        //     return [workInfo.work_id,workInfo.addr];
+        // });
+        let sellOrder = generateSellOrder(workIds, sellerAddr[0]);
         if(debugMode) {
-            console.log('sellOrder:', sellOrder.sellOrderId);
+            console.log('sellOrder:', sellOrder);
+            // console.log('sellOrder:', sellOrder.sellOrderId);
         }
         
         let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
@@ -118,9 +130,17 @@ function generateSellOrder(wrokIds, sellerAddr) {
 function generateLabelSet() {
 
     let labelSet = {};
+    //作品大类标签 5
     for(let i = 0; i < 5; i++) {
-        labelSet[i] = [localUtils.randomSelect([0, 1, 2, 3, 4])];
+        let Demand =[];
+        for(let j = 0; j < 5; j++) {
+            if(localUtils.randomSelect([0,1,2,3]) == 1){// 增加标签
+                Demand.push(j);  
+            }
+        }
+        labelSet[i] = Demand;
     }
+    
     return labelSet;
 
 }
