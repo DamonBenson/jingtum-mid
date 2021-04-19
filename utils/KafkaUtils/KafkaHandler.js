@@ -61,7 +61,7 @@ export async function postBuyerConfirmReq(msg) {
     let sellOrderInfo = msg.value.sellOrderInfo;
     let sellOrderAmount = sellOrderInfo.length;
     //  继续提取合约地址、卖单ID
-    let contractAddrs = (new Array(sellOrderAmount)).fill(sellOrderContractAddr);
+    let contractAddrs = (new Array(sellOrderAmount)).fill(sellOrderContractAddrs[0]);
     let sellOrderIds = sellOrderInfo.map(order => {
         return order.orderId;
     })

@@ -36,6 +36,11 @@ const upload_a9 = uploadChain.account.a[9].address;
 const token_a9 = tokenChain.account.a[9].address;
 const contract_a9 = contractChain.account.a[9].address;
 
+// 卖方平台2
+const upload_a14 = uploadChain.account.a[14].address;
+const token_a14 = tokenChain.account.a[14].address;
+const contract_a14 = contractChain.account.a[14].address;
+
 const Remote = jlib.Remote;
 const uploadRemote = new Remote({server: uploadChain.server[0], local_sign: true});
 const tokenRemote = new Remote({server: tokenChain.server[0], local_sign: true});
@@ -78,6 +83,7 @@ uploadRemote.connect(async function(err, res) {
                 a4: {},
                 a5: {},
                 a9: {},
+                a14: {},
             };
             // 目前upload同token，不能分开计数
             // seqObj.a0.upload = (await requestInfo.requestAccountInfo(upload_a0, uploadRemote, false)).account_data.Sequence;
@@ -95,6 +101,9 @@ uploadRemote.connect(async function(err, res) {
             // seqObj.a9.upload = (await requestInfo.requestAccountInfo(upload_a9, uploadRemote, false)).account_data.Sequence;
             seqObj.a9.token = (await requestInfo.requestAccountInfo(token_a9, tokenRemote, false)).account_data.Sequence;
             seqObj.a9.contract = (await requestInfo.requestAccountInfo(contract_a9, contractRemote, false)).account_data.Sequence;
+            // seqObj.a14.upload = (await requestInfo.requestAccountInfo(upload_a14, uploadRemote, false)).account_data.Sequence;
+            seqObj.a14.token = (await requestInfo.requestAccountInfo(token_a14, tokenRemote, false)).account_data.Sequence;
+            seqObj.a14.contract = (await requestInfo.requestAccountInfo(contract_a14, contractRemote, false)).account_data.Sequence;
 
             /*----------存证请求路由配置----------*/
 
