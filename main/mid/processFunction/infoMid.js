@@ -106,9 +106,9 @@ export async function handleWorkInfo(req, res) {
 
 /*----------查询版权通证信息----------*/
 
-export async function handleWorkInfo(req, res) {
+export async function handleCopyrightInfo(req, res) {
 
-    console.time('handleWorkInfo');
+    console.time('handleCopyrightInfo');
 
     let resInfo = {
         msg: 'success',
@@ -125,19 +125,19 @@ export async function handleWorkInfo(req, res) {
         return resInfo;
     }
 
-    let sqlPromises = body.map(async workId => {
+    let sqlPromises = body.map(async copyrightId => {
         let filter = {
-            work_id: workId,
+            token_id: copyrightId,
         }
-        let sql = sqlText.table('work_info').where(filter).select();
+        let sql = sqlText.table('right_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     })
-    let worksInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
+    let copyrightsInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
 
-    console.timeEnd('handleWorkInfo');
+    console.timeEnd('handleCopyrightInfo');
     console.log('--------------------');
 
-    resInfo.data.worksInfo = worksInfo;
+    resInfo.data.copyrightsInfo = copyrightsInfo;
 
     return resInfo;
 
@@ -145,9 +145,9 @@ export async function handleWorkInfo(req, res) {
 
 /*----------查询许可通证信息----------*/
 
-export async function handleWorkInfo(req, res) {
+export async function handleApproveInfo(req, res) {
 
-    console.time('handleWorkInfo');
+    console.time('handleApproveInfo');
 
     let resInfo = {
         msg: 'success',
@@ -164,19 +164,19 @@ export async function handleWorkInfo(req, res) {
         return resInfo;
     }
 
-    let sqlPromises = body.map(async workId => {
+    let sqlPromises = body.map(async approveId => {
         let filter = {
-            work_id: workId,
+            appr_token_id: approveId,
         }
-        let sql = sqlText.table('work_info').where(filter).select();
+        let sql = sqlText.table('appr_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     })
-    let worksInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
+    let approvesInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
 
-    console.timeEnd('handleWorkInfo');
+    console.timeEnd('handleApproveInfo');
     console.log('--------------------');
 
-    resInfo.data.worksInfo = worksInfo;
+    resInfo.data.approvesInfo = approvesInfo;
 
     return resInfo;
 

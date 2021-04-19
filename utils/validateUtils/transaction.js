@@ -13,8 +13,6 @@ const subClassAmount = 5;
 const maxWeight = 10;
 const minLimitPrice = 100;
 const maxLimitPrice = 100000;
-const minAuthPrice = 1;
-const maxAuthPrice = 1000;
 const tradeStrategyAmount = 2;
 const maxAssetAmout = 100;
 const minExpireTime = 3600;
@@ -22,58 +20,6 @@ const maxExpireTime = 2592000;
 const assetTypeAmount = 3;
 const minTs = 1609430400;
 const maxTs = 1924963200;
-
-const authChannelAmount = {
-    '0': 2,
-    '1': 1,
-    '2': 1,
-    '3': 3,
-    '4': 2,
-    '5': 2,
-    '6': 1,
-    '7': 1,
-    '8': 2,
-    '9': 1,
-};
-
-const authAreaAmount = {
-    '0': 3,
-    '1': 3,
-    '2': 3,
-    '3': 3,
-    '4': 3,
-    '5': 3,
-    '6': 3,
-    '7': 3,
-    '8': 3,
-    '9': 3,
-};
-
-const authTimeAmount = {
-    '0': 4,
-    '1': 4,
-    '2': 4,
-    '3': 4,
-    '4': 1,
-    '5': 1,
-    '6': 1,
-    '7': 4,
-    '8': 4,
-    '9': 4,
-};
-
-const authSubTypeAmount = {
-    '0': 24,
-    '1': 12,
-    '2': 12,
-    '3': 36,
-    '4': 6,
-    '5': 6,
-    '6': 3,
-    '7': 12,
-    '8': 24,
-    '9': 12,
-};
 
 const sideConst = 0;
 // const contact = ''; // 如何验证？
@@ -135,6 +81,20 @@ const buyOrderReqSchema = Joi.object().keys({
     buyOrderId:
         Joi.string().hex().required(),
 }).id('buyOrderReqSchema');
+
+// 买单确认接收格式
+const buyOrderConfirmSchema = Joi.object().keys({
+    buyOrderId:
+        Joi.string().hex().required(),
+    buyOrderHash:
+        Joi.string().hex().required(),
+    platformAddr:
+        jingtumCustom.jingtum().address().required(),
+    matchSystemAddr:
+        jingtumCustom.jingtum().address().required(),
+    contractAddr:
+        jingtumCustom.jingtum().address().required(),
+}).id('buyOrderConfirmSchema');
 
 // 卖单上传请求格式
 const sellOrderReqSchema = Joi.object().keys({
@@ -399,6 +359,23 @@ export async function validateBuyOrderReq(body) {
 
     return [true, 'valid req.'];
     
+}
+
+// 买单确认接收
+export async function validateBuyOrderConfirm(body) {
+
+    try {
+        await buyOrderConfirmSchema.validateAsync(body);
+    }
+    catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        return [false, e];
+    }
+
+    return [true, 'valid req.'];
+
 }
 
 // 上传卖单请求验证

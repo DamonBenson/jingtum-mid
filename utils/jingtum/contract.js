@@ -54,9 +54,8 @@ export function invokeContract(a, s, r, seq, abi, d, func, showRes) {
             }
             else if(result) {
                 if(showRes) {
-                    console.log('invokeContract:', result);
+                    console.log('invokeContract:', result.engine_result + " " + result.func + " " + result.func_parms + " " + result.tx_json.Sequence);
                 }
-                console.log('invokeContract:', result.engine_result + " " + result.func + " " + result.func_parms + " " + result.tx_json.Sequence);
                 resolve(result);
             }
         });

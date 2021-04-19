@@ -1,5 +1,5 @@
 import * as localUtils from '../../../utils/localUtils.js';
-import {userAccount, sellOrderContractAddr, debugMode} from '../../../utils/info.js';
+import {userAccount, sellOrderContractAddrs, debugMode} from '../../../utils/info.js';
 import * as getClient from '../../../utils/KafkaUtils/getClient.js';
 
 /*----------消息队列----------*/
@@ -66,7 +66,7 @@ function generateSellOrder(wrokId, sellerAddr) {
         consumable: false,
         expireTime: 86400,
         addr: platformAddr,
-        contractAddr: sellOrderContractAddr, // 待部署
+        contractAddr: sellOrderContractAddrs[0], // 待部署
         orderId:localUtils.randomNumber(100, 100000).toString(),
     }
     if(debugMode) {

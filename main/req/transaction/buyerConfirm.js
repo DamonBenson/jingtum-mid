@@ -4,7 +4,7 @@ import * as requestInfo from '../../../../utils/jingtum/requestInfo.js';
 import * as fetch from '../../../../utils/fetch.js';
 import {getConsumer} from '../../../../utils/kafkaUtils/getConsumer.js';
 
-import {chains, userAccount, sellOrderContractAddr, debugMode} from '../../../../utils/info.js';
+import {chains, userAccount, sellOrderContractAddrs, debugMode} from '../../../../utils/info.js';
 
 const platformAddr = userAccount[5].address;
 const platformSecret = userAccount[5].secret;
@@ -38,7 +38,7 @@ async function postBuyerConfirmReq(msg) {
     let sellOrderInfo = msg.value.sellOrderInfo;
     let sellOrderAmount = sellOrderInfo.length;
     //  继续提取合约地址、卖单ID
-    let contractAddrs = (new Array(sellOrderAmount)).fill(sellOrderContractAddr);
+    let contractAddrs = (new Array(sellOrderAmount)).fill(sellOrderContractAddrs[0]);
     let sellOrderIds = sellOrderInfo.map(order => {
         return order.sellOrderId;
     })

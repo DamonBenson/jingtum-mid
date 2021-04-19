@@ -8,12 +8,12 @@ import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import * as fetch from '../../../utils/fetch.js';
 
-import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '../../../utils/info.js';
+import {chains, userAccount, mysqlConf, sellOrderContractAddrs, debugMode} from '../../../utils/info.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-const MidIP = '39.102.93.47';// 中间层服务器IP
-// const MidIP = 'localhost';// 中间层服务器IP
+// const MidIP = '39.102.93.47';// 中间层服务器IP
+const MidIP = 'localhost';// 中间层服务器IP
 const msPerSellOrder = 5000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[4].address; // 平台账号
@@ -52,9 +52,8 @@ async function postSellOrderReq() {
         let addrFilter = {
             addr: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9',
         };
-        let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();//Rand Select 2 work to sell
+        let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();
         let workInfoArr = await mysqlUtils.sql(c, sql);
-
         let workIds = workInfoArr.map(workInfo => {
             return workInfo.work_id;
         });
@@ -64,7 +63,11 @@ async function postSellOrderReq() {
             console.log('sellOrder:', sellOrder.sellOrderId);
         }
         
-        let sellOrderRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
+        let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
+        if(debugMode) {
+            let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
+            console.log('signed buy order:', resInfo);
+        }
         // let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);
         // // if(debugMode) console.log('buf.toString():', buf.toString());
         // let txJson = JSON.parse(buf.toString());
@@ -103,7 +106,7 @@ function generateSellOrder(wrokIds, sellerAddr) {
         consumable: false,
         expireTime: 86400,
         platformAddr: platformAddr,
-        contractAddr: sellOrderContractAddr,
+        contractAddr: sellOrderContractAddrs[0],
     }
 
     sellOrder.sellOrderId = sha256((seq++).toString() + 'a').toString();

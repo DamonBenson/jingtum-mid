@@ -44,6 +44,26 @@ const userAccount = [
       secret: 'shegH3jnyxLFFtCiZBgEALTkwvBjy',
       address: 'jGcNi9Bs4eddeeYZJfQMhXqgcyGYK5n8N9'
     }, // a[9]--中间层
+    {
+        secret: 'ssPFANF164Z84ua53bzbDZZJZKEXg',     
+        address: 'jjhUAVFP9KSd743e4rT9dqDdxvBz6UDiEr'
+    }, // a[10]--用户4
+    {
+        secret: 'sh8dSbthkQ44PYdX4avG4YbmBPucf',     
+        address: 'j4azUzVJrwxyMfJLF4iWukNsNdCCijyzCX'
+    }, // a[11]--用户5
+    {
+        secret: 'ssdP7cTLMs8psVJ6bQBee9HU5Fi5Y',
+        address: 'jME7AuaJG2BSr91H5EUdtvAtMTU1zmDT4F'
+    }, // a[12]--用户6
+    {
+        secret: 'snHD7qERQShUZFcKrspXDgMTX9e3L',
+        address: 'jQDafXm7h7ajxVsuCDSeDFLg8EUgU4huXv'
+    }, // a[13]--买方平台2
+    {
+        secret: 'ssws8fbpXADXyWPXq2szRrL2pntAG',
+        address: 'jhQd4fAujjwyCQMpiMssUStRKgaaarYYFg'
+    } // a[14]--卖方平台2
 ]
 
 const chains = [
@@ -180,13 +200,8 @@ const mysqlConf = {
 
 const debugMode = true;
 
-const buyOrderContractAddr = 'jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd';
+const buyOrderContractAddrs = ['jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd'];
 
-// OLD Version : uint256
-const sellOrderContractAddr = 'jDamHMfeuENdNDzyQciGjojGLuMmRnhifU';
-// New Version : bytes32
-// const sellOrderContractAddr = 'jBwQZiCXWj3k8vphoxx8xGWXMYpPrHYgKn';
-// Version : Test Byte32
-// const sellOrderContractAddr = 'jpwCwEskfRiiedH8zqLroPWgu4qiBJtuPU';//Test Byte32
+const sellOrderContractAddrs = ['jDamHMfeuENdNDzyQciGjojGLuMmRnhifU', 'jBYqBLnr43Giqk7rZGN4fvvFXNW1yU1LcV'];
 
-export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddr, sellOrderContractAddr};
+export {pic, chains, userAccount, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs};

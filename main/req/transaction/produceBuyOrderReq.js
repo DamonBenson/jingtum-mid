@@ -1,6 +1,6 @@
 import * as localUtils from '../../../utils/localUtils.js';
 import * as getClient from '../../../utils/KafkaUtils/getClient.js';
-import {userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
+import {userAccount, buyOrderContractAddrs, debugMode} from '../../../utils/info.js';
 
 /*----------消息队列----------*/
 /*创建KafkaClient,且ConsumerQueue为所有消费者的接收队列，队列中存的是解析后的json结构对象*/
@@ -85,7 +85,7 @@ function generateBuyOrder() {
         buyerAddr: buyerAddr,
         contact: 'phoneNumber', // 联系方式
         addr: platformAddr,
-        contractAddr: buyOrderContractAddr, // 待部署
+        contractAddr: buyOrderContractAddrs[0], // 待部署
         orderId :  localUtils.randomNumber(100, 100000).toString(),//origin as sha256  
     }
     if(debugMode) {

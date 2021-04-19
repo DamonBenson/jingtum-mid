@@ -8,7 +8,8 @@ import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as transactionValidate from '../../../utils/validateUtils/transaction.js';
 
-import {chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
+import {userAccount, chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
+import _ from 'lodash';
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
@@ -106,15 +107,14 @@ export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
     }
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    let [validateInfoRes, validateInfo] = await transactionValidate.validateSignedTx(body);
+    let blob = body;
+    let [validateInfoRes, validateInfo] = await transactionValidate.validateSignedTx(blob);
     if(!validateInfoRes) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = validateInfo;
         return resInfo;
     }
-
-    let blob = body;
 
     // 提交交易
     await tx.buildSignedTx(contractRemote, blob, true);
@@ -132,13 +132,54 @@ export async function handleBuyOrderConfirm(contractRemote, seqObj, req, res) {
 
     console.time('handleBuyOrderConfirm');
 
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
+
     let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await transactionValidate.validateBuyOrderConfirm(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
     // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let abi = await getAbi(contractAddr);
+    
+    // 解析需要存入合约的卖单信息
+    let buyOrderId = body.buyOrderId;
+    let buyOrderHash = body.buyOrderHash;
+    let platformAddr = body.platformAddr;
 
-    // 获取新旧订单标识
+    let matchSystemAddr = body.matchSystemAddr;
     
     // 构造交易
+    let func = "acceptOrder('" + buyOrderId + "','" + platformAddr + "','" + buyOrderHash + "')";
+    // let unsignedTx = contractRemote.invokeContract({
+    //     account: platformAddr, 
+    //     destination: contractAddr,
+    //     abi: abi,
+    //     func: func,
+    // });
+
+    // 暂时由中间层代替
+    let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
+    let contractRes = {
+        result: signedTxRes.engine_result,
+        seq: signedTxRes.tx_json.Sequence,
+        message: signedTxRes.engine_result_message,
+    };
+    
+    console.timeEnd('handleBuyOrderConfirm');
+    console.log('--------------------');
+
+    resInfo.data.contractRes = contractRes;
+    return resInfo;
 
     console.timeEnd('handleBuyOrderConfirm');
     console.log('--------------------');
@@ -175,9 +216,20 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
 
     console.time('handleSellOrder');
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-    console.log(body.sellOrderId);
+    let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await transactionValidate.validateSellOrderReq(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
     // 获取合约元数据
     let contractAddr = body.contractAddr;
@@ -195,6 +247,8 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
 
     // 解析平台地址
     let platformAddr = body.platformAddr;
+    let platformIndex = userAccount.map(user => user.address).indexOf(platformAddr).toString();
+    console.log(platformIndex);
 
     // 卖单次要信息（标签、授权价格、联系方式）存入IPFS
     delete body.assetId;
@@ -217,14 +271,22 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     });
 
     // 暂时由中间层代替
-    let signedTxRes = await contract.invokeContract(platformAddr, s4, contractRemote, seqObj.a4.contract++, abi, contractAddr, func, true);
-    let resInfo = {
+    let tempSecret;
+    let tempSeq;
+    eval("tempSecret = s" + platformIndex);
+    eval("tempSeq = seqObj.a" + platformIndex + ".contract");
+    let signedTxRes = await contract.invokeContract(platformAddr, tempSecret, contractRemote, tempSeq, abi, contractAddr, func, true);
+    let contractRes = {
         result: signedTxRes.engine_result,
         seq: signedTxRes.tx_json.Sequence,
         message: signedTxRes.engine_result_message,
     };
+    eval("seqObj.a" + platformIndex + ".contract++");
+
     console.timeEnd('handleSellOrder');
     console.log('--------------------');
+
+    resInfo.data.contractRes = contractRes;
     return resInfo;
 
     // console.log(unsignedTx.tx_json);
@@ -260,42 +322,6 @@ export async function handleSignedSellOrder(contractRemote, seqObj, req, res) {
 
 }
 
-/*----------构造卖单确认接收的交易----------*/
-
-export async function handleSellOrderConfirm(contractRemote, seqObj, req, res) {
-
-    console.time('handleSellOrderConfirm');
-
-    let body = JSON.parse(Object.keys(req.body)[0]);
-
-    // 获取合约元数据
-
-    // 获取新旧订单标识
-    
-    // 构造交易
-
-    console.timeEnd('handleSellOrderConfirm');
-    console.log('--------------------');
-
-    return unsignedTx.tx_json;
-
-}
-
-/*----------构造已签名买单确认接收的交易----------*/
-
-export async function handleSignedSellOrderConfirm(contractRemote, seqObj, req, res) {
-
-    console.time('handleSignedSellOrderConfirm');
-
-    let body = JSON.parse(Object.keys(req.body)[0]);
-    
-    // 构造交易
-
-    console.timeEnd('handleSignedSellOrderConfirm');
-    console.log('--------------------');
-
-}
-
 /*----------构造写入交易匹配结果的交易----------*/
 
 /**
@@ -309,7 +335,20 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
 
     console.time('handleMatch');
 
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
+
     let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await transactionValidate.validateMatchReq(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
     // let resInforr = [];
 
@@ -402,12 +441,16 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
 
     // 暂时由中间层代替
     let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
-    let resInfo = {
+    let contractRes = {
         result: signedTxRes.engine_result,
         seq: signedTxRes.tx_json.Sequence,
         message: signedTxRes.engine_result_message,
     };
 
+    console.timeEnd('handleMatch');
+    console.log('--------------------');
+
+    resInfo.data.contractRes = contractRes;
     return resInfo;
 
     console.timeEnd('handleMatch');
