@@ -6,7 +6,7 @@ import * as localUtils from '../../../utils/localUtils.js';
 import * as fetch from '../../../utils/fetch.js';
 import util from 'util';
 
-import {chains, userAccount, buyOrderContractAddr, debugMode} from '../../../utils/info.js';
+import {chains, userAccount, buyOrderContractAddrs, debugMode} from '../../../utils/info.js';
 // const MidIP = '39.102.93.47';// 中间层服务器IP
 const MidIP = 'localhost';// 中间层服务器IP
 const msPerBuyOrder = 5000;
@@ -97,7 +97,7 @@ function generateBuyOrder() {
         buyerAddr: buyerAddr,
         contact: 'phoneNumber', // 联系方式
         platformAddr: platformAddr,
-        contractAddr: buyOrderContractAddr, // 待部署
+        contractAddr: buyOrderContractAddrs[0], // 待部署
     }
     buyOrder.buyOrderId = sha256(seq.toString()).toString();
 

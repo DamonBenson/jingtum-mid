@@ -322,7 +322,7 @@ const matchReqSchema = Joi.object().keys({
 }).id('matchReqSchema');
 
 // 买单监听格式
-const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['contractAddr']);
+const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['platformAddr', 'contractAddr']);
 
 /*----------数据格式验证函数----------*/
 

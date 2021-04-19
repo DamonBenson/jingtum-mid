@@ -8,7 +8,8 @@ import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as transactionValidate from '../../../utils/validateUtils/transaction.js';
 
-import {chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
+import {userAccount, chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
+import _ from 'lodash';
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
@@ -246,6 +247,8 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
 
     // 解析平台地址
     let platformAddr = body.platformAddr;
+    let platformIndex = userAccount.map(user => user.address).indexOf(platformAddr).toString();
+    console.log(platformIndex);
 
     // 卖单次要信息（标签、授权价格、联系方式）存入IPFS
     delete body.assetId;
@@ -268,12 +271,17 @@ export async function handleSellOrder(contractRemote, seqObj, req, res) {
     // });
 
     // 暂时由中间层代替
-    let signedTxRes = await contract.invokeContract(platformAddr, s4, contractRemote, seqObj.a4.contract++, abi, contractAddr, func, true);
+    let tempSecret;
+    let tempSeq;
+    eval("tempSecret = s" + platformIndex);
+    eval("tempSeq = seqObj.a" + platformIndex + ".contract");
+    let signedTxRes = await contract.invokeContract(platformAddr, tempSecret, contractRemote, tempSeq, abi, contractAddr, func, true);
     let contractRes = {
         result: signedTxRes.engine_result,
         seq: signedTxRes.tx_json.Sequence,
         message: signedTxRes.engine_result_message,
     };
+    eval("seqObj.a" + platformIndex + ".contract++");
 
     console.timeEnd('handleSellOrder');
     console.log('--------------------');

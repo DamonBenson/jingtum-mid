@@ -8,7 +8,7 @@ import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import * as fetch from '../../../utils/fetch.js';
 
-import {chains, userAccount, mysqlConf, sellOrderContractAddr, debugMode} from '../../../utils/info.js';
+import {chains, userAccount, mysqlConf, sellOrderContractAddrs, debugMode} from '../../../utils/info.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -106,7 +106,7 @@ function generateSellOrder(wrokIds, sellerAddr) {
         consumable: false,
         expireTime: 86400,
         platformAddr: platformAddr,
-        contractAddr: sellOrderContractAddr,
+        contractAddr: sellOrderContractAddrs[0],
     }
 
     sellOrder.sellOrderId = sha256((seq++).toString() + 'a').toString();

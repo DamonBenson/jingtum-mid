@@ -4,7 +4,7 @@ import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as fetch from '../../../utils/fetch.js';
 import {getConsumer} from '../../../utils/kafkaUtils/getConsumer.js';
 
-import {chains, userAccount, sellOrderContractAddr, debugMode} from '../../../utils/info.js';
+import {chains, userAccount, sellOrderContractAddrs, debugMode} from '../../../utils/info.js';
 
 const platformAddr = userAccount[5].address;
 const platformSecret = userAccount[5].secret;
@@ -38,7 +38,7 @@ async function postSellerConfirmReq(msg) {
     let buyOrderInfo = msg.value.buyOrderInfo;
 
     let confirmMsg = {
-        contractAddr: sellOrderContractAddr,
+        contractAddr: sellOrderContractAddrs[0],
         platformAddr: platformAddr,
         sellOrderId: sellOrderId,
         buyOrderInfo: buyOrderInfo,

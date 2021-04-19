@@ -1,5 +1,5 @@
 import * as kafka from 'kafka-node';
-import {buyOrderContractAddr, sellOrderContractAddr, debugMode} from '../info.js';
+import {buyOrderContractAddrs, sellOrderContractAddrs, debugMode} from '../info.js';
 const kafkaHostIP = ["39.102.93.47:9092",
 "39.102.91.224:9092",
 "39.102.92.249:9092",
@@ -51,7 +51,7 @@ export class Client {
     /*  生产者  */
     ConProducer(options, handler){
         let producer = new kafka.Producer(this.client,options);
-        if (debugMode){console.log('增加生产者',this.conn);}; //debugMode
+        // if (debugMode){console.log('增加生产者',this.conn);}; //debugMode
         producer.on('ready', function(){
             if(!!handler){
                 console.log('生产者工作啦┏(｀ー´)┛');
@@ -153,21 +153,21 @@ export class Client {
     Watch2WithKafkaInit(ConsumerQueue)
     {
         this.producers = [
-            buyOrderContractAddr + '_BuyOrder',
-            sellOrderContractAddr + '_SellOrder',
-            buyOrderContractAddr + '_Match',
-            sellOrderContractAddr + '_BuyerConfirmTxs',
-            sellOrderContractAddr + '_SellerConfirmTxs'
+            buyOrderContractAddrs[0] + '_BuyOrder',
+            sellOrderContractAddrs[0] + '_SellOrder',
+            buyOrderContractAddrs[0] + '_Match',
+            sellOrderContractAddrs[0] + '_BuyerConfirmTxs',
+            sellOrderContractAddrs + '_SellerConfirmTxs'
         ];
         // this.consumers = new Map([[
         //     'consumers',
         //     {
         //         topic: [
-        //             {'topic': buyOrderContractAddr + '_BuyOrder', 'partition': 0},
-        //             {'topic': sellOrderContractAddr + '_SellOrder', 'partition': 0},
-        //             {'topic': buyOrderContractAddr + '_Match', 'partition': 0},
-        //             {'topic': sellOrderContractAddr + '_BuyerConfirmTxs', 'partition': 0},
-        //             {'topic': sellOrderContractAddr + '_SellerConfirmTxs', 'partition': 0}
+        //             {'topic': buyOrderContractAddrs[0] + '_BuyOrder', 'partition': 0},
+        //             {'topic': sellOrderContractAddrs[0] + '_SellOrder', 'partition': 0},
+        //             {'topic': buyOrderContractAddrs[0] + '_Match', 'partition': 0},
+        //             {'topic': sellOrderContractAddrs[0] + '_BuyerConfirmTxs', 'partition': 0},
+        //             {'topic': sellOrderContractAddrs[0] + '_SellerConfirmTxs', 'partition': 0}
         //         ],
         //         options: {'autoCommit': true }
         //     }
@@ -181,7 +181,7 @@ export class Client {
 export function getClient(conn = {'kafkaHost':'39.102.93.47:9092'}, options = null){
     if(debugMode){console.log('我动了')};//debugMode
     const client = new Client(conn);
-    if(debugMode){console.log('Client init',client)};//debugMode
+    // if(debugMode){console.log('Client init',client)};//debugMode
     if(debugMode){console.log('Client init Finished,\n..........\n')};//debugMode
 
     return client;
