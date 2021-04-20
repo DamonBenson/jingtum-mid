@@ -38,8 +38,8 @@ contractRemote.connect(async function(err, res) {
     }
     global.seq = (await requestInfo.requestAccountInfo(platformAddr, contractRemote, false)).account_data.Sequence;
 
-    setInterval(postBuyOrderReq, msPerBuyOrder);
-    // postBuyOrderReq();
+    // setInterval(postBuyOrderReq, msPerBuyOrder);
+    postBuyOrderReq();
     // localUtils.sleep(5000)
     // exit();
 
@@ -96,7 +96,7 @@ function generateBuyOrder() {
         buyerAddr: buyerAddr[localUtils.randomNumber(0,5)],//6个用户
         contact: 'phoneNumber', // 联系方式
         platformAddr: platformAddr,
-        contractAddr: buyOrderContractAddrs[0], 
+        contractAddr: "未部署的外部合约地址",//buyOrderContractAddrs[0], 
     };
     buyOrder.buyOrderId = sha256(seq.toString()).toString();
 
