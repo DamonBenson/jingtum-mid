@@ -217,7 +217,7 @@ const mysqlConf = {
 
 const debugMode = true;
 
-const buyOrderContractAddrs = ['jETytq5zJ8fvdUHiFsb79EKpg997DHKxXd'];
+const buyOrderContractAddrs = ['jPV4U2huLRaqw9nV7QAkg5oCLb5iEmyZUF'];
 
 const sellOrderContractAddrs = ['jDamHMfeuENdNDzyQciGjojGLuMmRnhifU', 'jBYqBLnr43Giqk7rZGN4fvvFXNW1yU1LcV'];
 
