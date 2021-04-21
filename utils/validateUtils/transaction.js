@@ -26,10 +26,10 @@ const sideConst = 0;
 
 /*----------数据验证格式定义----------*/
 
-// 已签名交易格式
-const signedTxSchema = Joi.string().hex().required().id('signedTxSchema');
+// 已签名交易
+const signedTxReqSchema = Joi.string().hex().required().id('signedTxSchema');
 
-// 买单上传请求格式
+// 买单上传
 const buyOrderReqSchema = Joi.object().keys({
     subBuyOrderList: 
         Joi.array().min(minSubBuyOrderListLength).max(maxSubBuyOrderListLength).items(
@@ -82,7 +82,7 @@ const buyOrderReqSchema = Joi.object().keys({
         Joi.string().hex().required(),
 }).id('buyOrderReqSchema');
 
-// 买单确认接收格式
+// 买单确认接收
 const buyOrderConfirmSchema = Joi.object().keys({
     buyOrderId:
         Joi.string().hex().required(),
@@ -96,7 +96,7 @@ const buyOrderConfirmSchema = Joi.object().keys({
         jingtumCustom.jingtum().address().required(),
 }).id('buyOrderConfirmSchema');
 
-// 卖单上传请求格式
+// 卖单上传
 const sellOrderReqSchema = Joi.object().keys({
     labelSet:
         Joi.object().length(mainClassAmount).and('0', '1', '2', '3', '4').pattern(
@@ -259,7 +259,7 @@ const sellOrderReqSchema = Joi.object().keys({
         Joi.string().hex().required(),
 }).id('sellOrderReqSchema');
 
-// 写入匹配结果格式
+// 写入匹配结果
 const matchReqSchema = Joi.object().keys({
     buyOrderInfo:
         Joi.object().keys({
@@ -321,16 +321,25 @@ const matchReqSchema = Joi.object().keys({
         jingtumCustom.jingtum().address().required(),
 }).id('matchReqSchema');
 
-// 买单监听格式
+// 买方确认
+const buyerConfrimReqSchema = Joi.any();
+
+// 卖方转让确认
+const sellerTransferConfrimReqSchema = Joi.any();
+
+// 卖方许可确认
+const sellerApproveConfrimReqSchema = Joi.any();
+
+// 买单监听
 const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['platformAddr', 'contractAddr']);
 
 /*----------数据格式验证函数----------*/
 
-// 已签名交易验证
-export async function validateSignedTx(blob) {
+// 已签名交易
+export async function validateSignedTx(body) {
 
     try {
-        await signedTxSchema.validateAsync(blob);
+        await signedTxReqSchema.validateAsync(body);
     }
     catch(e) {
         e.details.map((detail, index) => {
@@ -343,7 +352,7 @@ export async function validateSignedTx(blob) {
 
 }
 
-// 上传买单请求验证
+// 上传买单
 export async function validateBuyOrderReq(body) {
 
     try {
@@ -378,7 +387,7 @@ export async function validateBuyOrderConfirm(body) {
 
 }
 
-// 上传卖单请求验证
+// 上传卖单
 export async function validateSellOrderReq(body) {
 
     try {
@@ -395,7 +404,7 @@ export async function validateSellOrderReq(body) {
     
 }
 
-// 写入匹配结果验证
+// 写入匹配结果
 export async function validateMatchReq(body) {
 
     try {
@@ -412,7 +421,58 @@ export async function validateMatchReq(body) {
     
 }
 
-// 买单监听验证
+// 买方确认
+export async function validateBuyerConfirmReq(body) {
+
+    try {
+        await buyerConfrimReqSchema.validateAsync(body);
+    }
+    catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        return [false, e];
+    }
+
+    return [true, 'valid req.'];
+    
+}
+
+// 卖方转让确认
+export async function validateSellerTransferConfirmReq(body) {
+
+    try {
+        await sellerTransferConfrimReqSchema.validateAsync(body);
+    }
+    catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        return [false, e];
+    }
+
+    return [true, 'valid req.'];
+    
+}
+
+// 卖方许可确认
+export async function validateSellerApproveConfirmReq(body) {
+
+    try {
+        await sellerApproveConfrimReqSchema.validateAsync(body);
+    }
+    catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        return [false, e];
+    }
+
+    return [true, 'valid req.'];
+    
+}
+
+// 买单监听
 export async function validateBuyOrderWatch(data) {
 
     try {
