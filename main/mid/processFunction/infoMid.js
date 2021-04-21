@@ -32,7 +32,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
 
     let body = JSON.parse(Object.keys(req.body)[0]);
     let addAmount = body;
-    let [validateInfoRes, validateInfo] = await infoValidate.validateActivate(addAmount);
+    let [validateInfoRes, validateInfo] = await infoValidate.validateActivateReq(addAmount);
     if(!validateInfoRes) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
@@ -77,8 +77,8 @@ export async function handleWorkInfo(req, res) {
         data: {},
     }
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
-    let [validateInfoRes, validateInfo] = await infoValidate.validateQuery(body);
+    let body = req.query;
+    let [validateInfoRes, validateInfo] = await infoValidate.validateQueryReq(body);
     if(!validateInfoRes) {
         resInfo.msg = 'invalid parameters';
         resInfo.code = 1;
@@ -116,8 +116,8 @@ export async function handleCopyrightInfo(req, res) {
         data: {},
     }
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
-    let [validateInfoRes, validateInfo] = await infoValidate.validateQuery(body);
+    let body = req.query;
+    let [validateInfoRes, validateInfo] = await infoValidate.validateQueryReq(body);
     if(!validateInfoRes) {
         resInfo.msg = 'invalid parameters';
         resInfo.code = 1;
@@ -155,8 +155,8 @@ export async function handleApproveInfo(req, res) {
         data: {},
     }
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
-    let [validateInfoRes, validateInfo] = await infoValidate.validateQuery(body);
+    let body = req.query;
+    let [validateInfoRes, validateInfo] = await infoValidate.validateQueryReq(body);
     if(!validateInfoRes) {
         resInfo.msg = 'invalid parameters';
         resInfo.code = 1;

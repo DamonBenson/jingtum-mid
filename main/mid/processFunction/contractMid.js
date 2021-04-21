@@ -1,20 +1,4 @@
-import ipfsAPI from 'ipfs-api';
-import sha256 from 'crypto-js/sha256.js';
-
-import * as tx from '../../../utils/jingtum/tx.js'
-import * as erc721 from '../../../utils/jingtum/erc721.js';
-import * as ipfsUtils from '../../../utils/ipfsUtils.js';
-import * as localUtils from '../../../utils/localUtils.js';
-
-import {pic, chains, rightTokenName, ipfsConf, debugMode} from '../../../utils/info.js';
-
-const ipfs = ipfsAPI(ipfsConf); // ipfs连接
-const uploadChain = chains[0]; // 存证链
-
-/*----------中间层账号(存证/交易链账号0)----------*/
-
-const a0 = uploadChain.account.a[0].address;
-const s0 = uploadChain.account.a[0].secret;
+import * as contractValidate from '../../../utils/validateUtils/contract.js';
 
 /*----------构造部署合约的交易----------*/
 
@@ -24,18 +8,32 @@ const s0 = uploadChain.account.a[0].secret;
  * @param {args} 合约初始化参数
  * @return {unsignedTx} 用以在链上部署合约的待签名交易
  */
-export async function handleInitContract(contractRemote, seqObj, req, res) {
+export async function handleDeployContract(contractRemote, seqObj, req, res) {
 
-    console.time('handleInitContract');
+    console.time('handleDeployContract');
+
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
     let body = JSON.parse(Object.keys(req.body)[0]);
+    let [validateInfoRes, validateInfo] = await contractValidate.validateDeployContractReq(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
-    // 构造交易
+    resInfo.data = body;
+    console.log('resInfo:', resInfo);
 
-    console.timeEnd('handleInitContract');
+    console.timeEnd('handleDeployContract');
     console.log('--------------------');
 
-    return unsignedTx;
+    return resInfo;
 
 }
 
@@ -47,16 +45,16 @@ export async function handleInitContract(contractRemote, seqObj, req, res) {
  * @param {serviceType} 服务类型（确权类、交易类、监测维权类等）
  * @return {contractAddr} 部署的合约地址
  */
-export async function handleSignedInitContract(contractRemote, seqObj, req, res) {
+export async function handleSignedDeployContract(contractRemote, seqObj, req, res) {
 
-    console.time('handleSignedInitContract');
+    console.time('handleSignedDeployContract');
 
     let body = JSON.parse(Object.keys(req.body)[0]);
 
     // 提交交易
     // 在管理合约中注册
 
-    console.timeEnd('handleSignedInitContract');
+    console.timeEnd('handleSignedDeployContract');
     console.log('--------------------');
 
     return contractAddr;
@@ -70,18 +68,32 @@ export async function handleSignedInitContract(contractRemote, seqObj, req, res)
  * @param {serviceType} 服务类型（确权类、交易类、监测维权类等）
  * @return {contractAddr} 合约地址
  */
-export async function handleContractQuery(contractRemote, seqObj, req, res) {
+export async function handleContractAddr(contractRemote, seqObj, req, res) {
 
-    console.time('handleContractQuery');
+    console.time('handleContractAddr');
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-    // 从数据库中查找合约地址
+    let body = req.query;
+    let [validateInfoRes, validateInfo] = await contractValidate.validateContractAddrReq(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
 
-    console.timeEnd('handleContractQuery');
+    resInfo.data = body;
+    console.log('resInfo:', resInfo);
+
+    console.timeEnd('handleContractAddr');
     console.log('--------------------');
 
-    return contractAddr;
+    return resInfo;
 
 }
 
@@ -91,17 +103,31 @@ export async function handleContractQuery(contractRemote, seqObj, req, res) {
  * @param {contractAddr} 服务合约地址
  * @return {contractInfo} 服务详细信息
  */
-export async function handleContractInfo(contractRemote, seqObj, contractAddr, req, res) {
+export async function handleContractInfo(contractRemote, seqObj, req, res) {
 
     console.time('handleContractInfo');
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-    // 获取服务的详细信息
+    let body = req.query;
+    let [validateInfoRes, validateInfo] = await contractValidate.validateContractInfoReq(body);
+    if(!validateInfoRes) {
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = validateInfo;
+        return resInfo;
+    }
+
+    resInfo.data = body;
+    console.log('resInfo:', resInfo);
 
     console.timeEnd('handleContractInfo');
     console.log('--------------------');
 
-    return contractInfo;
+    return resInfo;
 
 }
