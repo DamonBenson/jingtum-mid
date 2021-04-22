@@ -7,8 +7,8 @@ import * as fetch from '../../../utils/fetch.js';
 import util from 'util';
 
 import {chains, userAccount, userAccountIndex, buyOrderContractAddrs, debugMode} from '../../../utils/info.js';
-const MidIP = '39.102.93.47';// 中间层服务器IP
-// const MidIP = 'localhost';// 本地IP
+// const MidIP = '39.102.93.47';// 中间层服务器IP
+const MidIP = 'localhost';// 本地IP
 const msPerBuyOrder = 5000;
 // const subBuyOrderListAmount = 3; 随机个数
 const platformAddr = userAccount[userAccountIndex['买方平台账号']].address; // 平台账号

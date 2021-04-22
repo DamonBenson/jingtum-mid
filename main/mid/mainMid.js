@@ -7,8 +7,11 @@ import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 import {chains} from '../../utils/info.js';
 import * as uploadMid from './processFunction/uploadMid.js';
 import * as infoMid from './processFunction/infoMid.js';
-import * as contractMid from './processFunction/contractMid.js';
+import * as authMid from './processFunction/authMid.js';
 import * as transactionMid from './processFunction/transactionMid.js';
+import * as contractMid from './processFunction/contractMid.js';
+import * as serviceMid from './processFunction/serviceMid.js';
+import * as signedTxMid from './processFunction/signedTxMid.js';
 
 const uploadChain = chains[0]; // 存证链
 const tokenChain = chains[0]; // 交易链 复用
@@ -76,6 +79,17 @@ uploadRemote.connect(async function(err, res) {
                 console.log('connect: ', res);
             }
 
+            const app = express();
+            const port = 9001;
+
+            app.use(bodyParser.urlencoded({
+                extended:false,
+                limit: '50mb',
+            }));
+            app.use(bodyParser.json({
+                limit: '50mb',
+            }));
+
             // 获取中间层账号在每条链上的序列号
             let seqObj = {
                 a0: {},
@@ -124,41 +138,51 @@ uploadRemote.connect(async function(err, res) {
                 res.send(resInfo);
             });
 
-            infoRouter.post('/work', async function(req, res) {
+            infoRouter.get('/work', async function(req, res) {
                 let resInfo = await infoMid.handleWorkInfo(req, res);
                 res.send(resInfo);
             });
 
-            infoRouter.post('/copyright', async function(req, res) {
+            infoRouter.get('/copyright', async function(req, res) {
                 let resInfo = await infoMid.handleCopyrightInfo(req, res);
                 res.send(resInfo);
             });
 
-            infoRouter.post('/approve', async function(req, res) {
+            infoRouter.get('/approve', async function(req, res) {
                 let resInfo = await infoMid.handleApproveInfo(req, res);
                 res.send(resInfo);
             });
 
-            /*----------服务合约请求路由配置----------*/
+            /*----------确权请求路由配置----------*/
 
-            const contractRouter = express.Router();
+            const authRouter = express.Router();
 
-            // 部署服务合约
-            contractRouter.post('/deploy', async function(req, res) {
-                let unsignedTx = await contractMid.handleInitContract(contractRemote, seqObj, req, res);
+            // 作品确权请求
+            authRouter.post('/work', async function(req, res) {
+                let unsignedTx = await authMid.handleWorkAuth(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
             });
 
-            contractRouter.post('/signedDeploy', async function(req, res) {
-                let contractAddr = await contractMid.handleSignedInitContract(contractRemote, seqObj, req, res);
-                res.send(contractAddr);
+            authRouter.post('/signedWork', async function(req, res) {
+                let resInfo = await authMid.handleSignedWorkAuth(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
-            // 查询服务合约
-            contractRouter.get('/info', async function(req, res) {
-                let contractAddr = await contractMid.handleContractQuery(contractRemote, seqObj, req, res);
-                let contractInfo = await contractMid.handleContractInfo(contractRemote, seqObj, contractAddr, req, res);
-                res.send(contractInfo);
+            // 版权确权请求
+            authRouter.post('/copyright', async function(req, res) {
+                let unsignedTx = await authMid.handleCopyrightAuth(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
+            });
+
+            authRouter.post('/signedCopyright', async function(req, res) {
+                let resInfo = await authMid.handleSignedCopyrightAuth(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            // 确权状态查询
+            authRouter.get('/state', async function(req, res) {
+                let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             /*----------交易请求路由配置----------*/
@@ -167,8 +191,8 @@ uploadRemote.connect(async function(err, res) {
 
             // 提交买单
             transactionRouter.post('/buy', async function(req, res) {
-                let resInfo = await transactionMid.handleBuyOrder(contractRemote, seqObj, req, res);
-                res.send(resInfo);
+                let unsignedTx = await transactionMid.handleBuyOrder(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
             });
 
             transactionRouter.post('/signedBuy', async function(req, res) {
@@ -182,8 +206,8 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) { 
-                await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
-                res.send('success');
+                let resInfo = await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交卖单
@@ -210,8 +234,8 @@ uploadRemote.connect(async function(err, res) {
 
             // 获取交易服务结果
             transactionRouter.get('/matchInfo', async function(req, res) {
-                let matchInfo = await transactionMid.handleMatchInfo(contractRemote, seqObj, req, res);
-                res.send(matchInfo);
+                let resInfo = await transactionMid.handleMatchInfo(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 提交买方确认
@@ -221,13 +245,13 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedBuyerConfirm/buyOrder', async function(req, res) {
-                let orderId = await transactionMid.handleSignedBuyerConfirmForBuyOrder(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                let resInfo = await transactionMid.handleSignedBuyerConfirmForBuyOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             transactionRouter.post('/signedBuyerConfirm/sellOrder', async function(req, res) {
-                let orderId = await transactionMid.handleSignedBuyerConfirmForSellOrder(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                let resInfo = await transactionMid.handleSignedBuyerConfirmForSellOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 卖方转让确认
@@ -237,13 +261,13 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedSellerTransferConfirm/sellOrder', async function(req, res) {
-                let orderId = await transactionMid.handleSignedSellerTransferConfirmForSellOrder(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                let resInfo = await transactionMid.handleSignedSellerTransferConfirmForSellOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             transactionRouter.post('/signedSellerTransferConfirm/transfer', async function(req, res) {
-                let tokenId = await transactionMid.handleSignedSellerTransferConfirmForToken(tokenRemote, contractRemote, seqObj, req, res);
-                res.send(tokenId);
+                let resInfo = await transactionMid.handleSignedSellerTransferConfirmForToken(tokenRemote, contractRemote, seqObj, req, res);
+                res.send(resInfo);
             });
 
             // 卖方许可确认
@@ -253,27 +277,67 @@ uploadRemote.connect(async function(err, res) {
             });
 
             transactionRouter.post('/signedSellerApproveConfirm', async function(req, res) {
-                let orderId = await transactionMid.handleSignedSellerApproveConfirm(contractRemote, seqObj, req, res);
-                res.send(orderId);
+                let resInfo = await transactionMid.handleSignedSellerApproveConfirm(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            /*----------服务合约请求路由配置----------*/
+
+            const contractRouter = express.Router();
+
+            // 部署服务合约
+            contractRouter.post('/deploy', async function(req, res) {
+                let unsignedTx = await contractMid.handleDeployContract(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
+            });
+
+            contractRouter.post('/signedDeploy', async function(req, res) {
+                let resInfo = await contractMid.handleSignedDeployContract(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            // 查询服务合约地址
+            contractRouter.get('/addr', async function(req, res) {
+                let resInfo = await contractMid.handleContractAddr(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            // 查询服务合约信息
+            contractRouter.get('/info', async function(req, res) {
+                let resInfo = await contractMid.handleContractInfo(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            /*----------服务请求路由配置----------*/
+
+            const serviceRouter = express.Router();
+
+            // 服务调用
+            serviceRouter.post('/call', async function(req, res) {
+                let resInfo = await serviceMid.handleServiceCall(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            serviceRouter.post('/result', async function(req, res) {
+                let resInfo = await serviceMid.handleServiceResult(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
+
+            /*----------提交已签名交易----------*/
+
+            app.post('/signedTx', async function(req, res) {
+                let resInfo = await signedTxMid.handleSignedTx(uploadRemote, tokenRemote, contractRemote, req, res);
+                res.send(resInfo);
             });
 
             /*----------http服务器配置----------*/
 
-            const app = express();
-            const port = 9001;
-
-            app.use(bodyParser.urlencoded({
-                extended:false,
-                limit: '50mb',
-            }));
-            app.use(bodyParser.json({
-                limit: '50mb',
-            }));
-
             app.use('/upload', uploadRouter);
             app.use('/info', infoRouter);
-            app.use('/contract', contractRouter);
+            app.use('/auth', authRouter);
             app.use('/transaction', transactionRouter);
+            app.use('/contract', contractRouter);
+            app.use('/service', serviceRouter);
 
             /*----------启动http服务器----------*/
 

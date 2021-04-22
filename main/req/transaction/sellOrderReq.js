@@ -12,8 +12,8 @@ import {chains, userAccount, userAccountIndex, mysqlConf, sellOrderContractAddrs
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-const MidIP = '39.102.93.47';// 中间层服务器IP
-// const MidIP = 'localhost';// 中间层服务器IP
+// const MidIP = '39.102.93.47';// 中间层服务器IP
+const MidIP = 'localhost';// 中间层服务器IP
 const msPerSellOrder = 5000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[userAccountIndex['卖方平台账号']].address; // 平台账号
@@ -69,7 +69,7 @@ async function postSellOrderReq() {
         // let [workIds,sellerAddr] = workInfoArr.map(workInfo => {
         //     return [workInfo.work_id,workInfo.addr];
         // });
-        let sellOrder = generateSellOrder(workIds, sellerAddr[0]);
+        let sellOrder = generateSellOrder(workIds, sellerAddr);
         if(debugMode) {
             console.log('sellOrder:', sellOrder);
             // console.log('sellOrder:', sellOrder.sellOrderId);
