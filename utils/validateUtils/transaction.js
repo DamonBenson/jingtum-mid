@@ -307,13 +307,31 @@ const matchReqSchema = Joi.object().keys({
                 Joi.number().integer().min(minTs).max(maxTs).required(),
         }),
     sellOrderInfo:
-        Joi.array().min(minSubBuyOrderListLength * minLabelAmount).max(maxSubBuyOrderListLength * maxLabelAmount).items(
-            Joi.object().keys({
-                sellOrderId:
-                    Joi.string().hex().required(),
-                contractAddr:
-                    jingtumCustom.jingtum().address().required(),
-            }),
+        Joi.object().pattern(
+            /.*/,
+            Joi.array().min(minSubBuyOrderListLength * minLabelAmount).max(maxSubBuyOrderListLength * maxLabelAmount).items(
+                Joi.object().keys({
+                    sellOrderId:
+                        Joi.string().hex().required(),
+                    contractAddr:
+                        jingtumCustom.jingtum().address().required(),
+                }),
+            ),
+            {matches:
+                Joi.array().length(Joi.ref(
+                    'buyOrderInfo.subBuyOrderList', 
+                    {adjust: value => {
+                        return value.length;
+                    }}
+                )).items(
+                    Joi.number().integer().min(0).max(Joi.ref(
+                        'buyOrderInfo.subBuyOrderList', 
+                        {adjust: value => {
+                            return value.length;
+                        }}
+                    ))
+                )
+            }
         ).required(),
     matchSystemAddr:
         jingtumCustom.jingtum().address().required(),
@@ -359,7 +377,6 @@ export async function validateBuyOrderReq(body) {
         await buyOrderReqSchema.validateAsync(body);
     }
     catch(e) {
-        console.log(e);
         e.details.map((detail, index) => {
             console.log('error message ' + index + ':', detail.message);
         });
