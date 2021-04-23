@@ -25,6 +25,10 @@ const s1 = tokenChain.account.a[1].secret;
 const a4 = tokenChain.account.a[4].address;
 const s4 = tokenChain.account.a[4].secret;
 
+// 卖方平台账号（模拟外部平台）
+const a14 = tokenChain.account.a[14].address;
+const s14 = tokenChain.account.a[14].secret;
+
 // 智能交易系统账号
 const a5 = tokenChain.account.a[5].address;
 const s5 = tokenChain.account.a[5].secret;
@@ -431,7 +435,7 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
     buyerAddr = 'jjhUAVFP9KSd743e4rT9dqDdxvBz6UDiEr';
     // 构造交易
-    let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
+    let func = "updateMatches('" + buyerAddr + "','" + buyOrderHash + "','" + matchResultsHash + "')";
     // let unsignedTx = contractRemote.invokeContract({
     //     account: matchSystemAddr, 
     //     destination: contractAddr,
