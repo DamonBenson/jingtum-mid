@@ -342,7 +342,7 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     }
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    let [validateInfoRes, validateInfo] = await transactionValidate.validateMatchReq(body);
+    // let [validateInfoRes, validateInfo] = await transactionValidate.validateMatchReq(body);
     if(!validateInfoRes) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
@@ -429,7 +429,7 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     }
     let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
-
+    buyerAddr = 'jjhUAVFP9KSd743e4rT9dqDdxvBz6UDiEr';
     // 构造交易
     let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
     // let unsignedTx = contractRemote.invokeContract({

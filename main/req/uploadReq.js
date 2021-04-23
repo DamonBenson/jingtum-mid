@@ -1,10 +1,11 @@
 import * as localUtils from '../../utils/localUtils.js';
 import * as fetch from '../../utils/fetch.js';
 import sha256 from 'crypto-js/sha256.js';
+import util from 'util';
 
-import {userMemo, userAccount, debugMode} from '../../utils/info.js';
-
-const msPerUpload = 20000; // 上传作品间隔时间
+import {userMemo, userAccount, userAccountIndex, debugMode} from '../../utils/info.js';
+const MidIP = '39.102.93.47';// 中间层服务器IP
+const msPerUpload = 3000; // 上传作品间隔时间
 
 var count = 0;
 
@@ -14,28 +15,6 @@ async function postUploadReq() {
     console.time('uploadReq');
 
     // 发送上传请求至http服务器mainMid.js.
-
-    // @old_version
-    // let randFlag = localUtils.randomSelect([0, 1, 2, 3], [0.1, 0.2, 0.3, 0.4]); // 随机选择作品信息
-    // let uploadReq = {...userMemo[randFlag]};
-    // uploadReq.workName = uploadReq.workName + count++;
-    // if(debugMode) {
-    //     console.log('upload:', uploadReq);
-    // }
-    // else {
-    //     console.log('upload:', uploadReq.workName);
-    // }
-    /* upload: {
-    addr: 'jUy7sbmrwaphoPdACnZnxeKAAEqG46WkCC',     
-    workName: 'm1_0',
-    createdTime: 1579017600,
-    publishedTime: 1579017600,
-    workType: 0,
-    workForm: 0,
-    workField: 0
-    } */
-
-    // @new_version
     let randFlag = localUtils.randomSelect([0, 1, 2, 3], [0.1, 0.2, 0.3, 0.4]); // 作品越来越多
     let timeNow = 0;
     switch(randFlag){
@@ -54,8 +33,9 @@ async function postUploadReq() {
             default:
                 timeNow = Math.round((new Date())/ 1000);
     }
+    console.log(randFlag,timeNow);
     let upload ={
-        addr : userAccount[6].address,
+        addr : userAccount[userAccountIndex[localUtils.randomSelect(["用户1", "用户2"])]].address,
         work_name : sha256(localUtils.randomNumber(100, 100000).toString()).toString(),
         created_time : timeNow,
         published_time : Math.round((new Date())/ 1000),
@@ -83,7 +63,7 @@ async function postUploadReq() {
         //work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
         //upload_time: 1608517640
     } */
-    await fetch.postData('http://127.0.0.1:9001/upload/init', uploadReq);
+    await fetch.postData(util.format('http://%s:9001/upload/init', MidIP), uploadReq);
 
     // 结束计时
     console.timeEnd('uploadReq');

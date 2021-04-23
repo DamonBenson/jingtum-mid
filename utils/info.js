@@ -36,7 +36,7 @@ const userAccount = [
     {
       secret: 'snvrxFowqi2CbdsCAqRzqYnyUHkzU',
       address: 'jUXNAu8YrzNQ6Vf6EsJcJTjhHKgGzb29y4'
-    }, // a[3]--买方平台账号
+    }, // a[3]--买方平台账号 
     {
       secret: 'ssyfiS2TBDiJP5Vq7Lht7kityxuXz',
       address: 'jEY6Jr3qkDFnMcPZBig8jkdzTBt8ktMZA'
@@ -48,11 +48,11 @@ const userAccount = [
     {
       secret: 'ss6x7sLB6dVLKTnA2WHgAZUrkduZC',
       address: 'jw382C55JLbLbUJNu8iJtisaqb4TAoQDGC'
-    }, // a[6]--用户1
+    }, // a[6]--用户1 百度
     {
       secret: 'ssAHHWR2WUVEfyN5VUzcFkVmtsnBj',
       address: 'jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3'
-    }, // a[7]--用户2
+    }, // a[7]--用户2 京东
     {
       secret: 'shC3KW3vZFtRCpquGFtiXwQvtsXJw',
       address: 'jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan'

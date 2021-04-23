@@ -14,7 +14,7 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const MidIP = '39.102.93.47';// 中间层服务器IP
 // const MidIP = 'localhost';// 中间层服务器IP
-const msPerSellOrder = 5000;
+const msPerSellOrder = 10000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[userAccountIndex['卖方平台2']].address; // 平台账号
 const platformSecret = userAccount[userAccountIndex['卖方平台2']].secret;
@@ -69,7 +69,7 @@ async function postSellOrderReq() {
         // let [workIds,sellerAddr] = workInfoArr.map(workInfo => {
         //     return [workInfo.work_id,workInfo.addr];
         // });
-        let sellOrder = generateSellOrder(workIds, sellerAddr[0]);
+        let sellOrder = generateSellOrder(workIds, sellerAddr);
         if(debugMode) {
             console.log('sellOrder:', sellOrder);
             // console.log('sellOrder:', sellOrder.sellOrderId);
@@ -117,8 +117,8 @@ function generateSellOrder(wrokIds, sellerAddr) {
         assetType: 0,
         consumable: false,
         expireTime: 86400,
-        platformAddr: platformAddr,// 卖方平台2
-        contractAddr: sellOrderContractAddrs[2],// 卖方平台2
+        platformAddr: platformAddr,
+        contractAddr: sellOrderContractAddrs[1],
     }
 
     sellOrder.sellOrderId = sha256((seq++).toString() + 'a').toString();

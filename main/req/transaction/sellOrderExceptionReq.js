@@ -14,7 +14,7 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const MidIP = '39.102.93.47';// 中间层服务器IP
 // const MidIP = 'localhost';// 中间层服务器IP
-const msPerSellOrder = 5000;
+const msPerSellOrder = 10000;
 const sellOrderAmount = 1;
 const platformAddr = userAccount[userAccountIndex['卖方平台账号']].address; // 平台账号
 const platformSecret = userAccount[userAccountIndex['卖方平台账号']].secret;
@@ -59,24 +59,25 @@ async function postSellOrderReq() {
         let sellerAddr = addrFilter.addr;
 
         let [sellOrder,classErrorNum,ErrorNum] = generateSellOrder_Invalid(workIds, sellerAddr); 
-        try{
-            let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
-            if(debugMode) {
-                let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
-                // console.log('signed buy order:', resInfo);
-            }
+
+        let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
+        if(debugMode) {
+            console.log('Buffer:', Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
+
+            let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
+            // console.log('signed buy order:', resInfo);
             if(resInfo.code == 1){
                 IsError = true;
             }
         }
-        catch{
-            if(IsError){
-            console.log("ExceptionRemind");
-            }
-        }
+
+
     
         if(!IsError){
             console.log([sellOrder, sellOrder.assetId, sellOrder.labelSet, classErrorNum, ErrorNum]);
+        }
+        else{
+            console.log("ExceptionRemind");
         }
         
         // let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);

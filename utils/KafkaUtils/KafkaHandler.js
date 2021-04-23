@@ -1,7 +1,7 @@
 import * as kafka from 'kafka-node';
 import {debugMode} from '../info.js';
 export async function produceSellOrder(msg) {
-    if (debugMode){console.time('produceSellOrder',msg);}; //debugMode
+    // if (debugMode){console.time('produceSellOrder',msg);}; //debugMode
     try{
         var _msg = {
             topic:[produceTopic], 

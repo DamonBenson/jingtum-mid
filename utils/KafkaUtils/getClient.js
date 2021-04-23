@@ -117,7 +117,7 @@ export class Client {
     //@para selTopic string     selected Topic in string
     //@para msg Str(json)       msg use the json in stringing
     ProducerSend(selTopic,msg){
-            
+        // TODO 其他非重启方式创建主题
         try{
             this.mq_producer.createTopics([selTopic], function (){
             console.log("主题造一下",selTopic);});

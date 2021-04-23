@@ -9,7 +9,7 @@ import util from 'util';
 import {chains, userAccount, userAccountIndex, buyOrderContractAddrs, debugMode} from '../../../utils/info.js';
 const MidIP = '39.102.93.47';// 中间层服务器IP
 // const MidIP = 'localhost';// 本地IP
-const msPerBuyOrder = 5000;
+const msPerBuyOrder = 10000;
 // const subBuyOrderListAmount = 3; 随机个数
 const platformAddr = userAccount[userAccountIndex['买方平台2']].address; // 平台账号
 const platformSecret = userAccount[userAccountIndex['买方平台2']].secret;
@@ -52,6 +52,8 @@ async function postBuyOrderReq() {
     let buyOrder = generateBuyOrder();
     if(debugMode) {
         console.log('buyOrder:', buyOrder);
+        console.log('subBuyOrderList:', buyOrder.subBuyOrderList);
+
     }
 
     let unsignedRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);

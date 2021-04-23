@@ -307,14 +307,15 @@ const matchReqSchema = Joi.object().keys({
                 Joi.number().integer().min(minTs).max(maxTs).required(),
         }),
     sellOrderInfo:
-        Joi.array().min(minSubBuyOrderListLength * minLabelAmount).max(maxSubBuyOrderListLength * maxLabelAmount).items(
-            Joi.object().keys({
-                sellOrderId:
-                    Joi.string().hex().required(),
-                contractAddr:
-                    jingtumCustom.jingtum().address().required(),
-            }),
-        ).required(),
+        Joi.required(),
+        // Joi.array().min(minSubBuyOrderListLength * minLabelAmount).max(maxSubBuyOrderListLength * maxLabelAmount).items(
+        //     Joi.object().keys({
+        //         sellOrderId:
+        //             Joi.string().hex().required(),
+        //         contractAddr:
+        //             jingtumCustom.jingtum().address().required(),
+        //     }),
+        // ).required(),
     matchSystemAddr:
         jingtumCustom.jingtum().address().required(),
     contractAddr:

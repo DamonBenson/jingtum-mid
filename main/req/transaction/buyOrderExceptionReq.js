@@ -96,7 +96,7 @@ function generateBuyOrder() {
     
     let subBuyOrderList = generateSubBuyOrder();
     let limitPrice = localUtils.randomNumber(1000, 10000);
-    let tradeStrategy = localUtils.randomSelect([0,1]); // 0-性价比最高策略 1-价格最低策略
+    let tradeStrategy = localUtils.randomSelect([0,1]); // 0-性价比最高策略 1-价格最低策略  
     let authorizationType = localUtils.randomNumber(0,9); // 十个授权方式
     let authorizationInfo = generateAuthorizationInfo(authorizationType);
     let side = 0;
@@ -127,7 +127,7 @@ function generateBuyOrder_Invalid() {
     let buyOrder = {
         subBuyOrderList: subBuyOrderList,
         limitPrice: limitPrice,
-        tradeStrategy: tradeStrategy,
+        tradeStrategy: null,
         authorizationInfo: authorizationInfo,
         side: side,
         buyerAddr: buyerAddr[localUtils.randomNumber(0,5)],//6个用户
