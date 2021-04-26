@@ -95,7 +95,8 @@ async function getAuthByCompany() {
              GROUP BY\
                  right_token_info.addr\
              ORDER BY\
-                 work_info.created_time ASC',timeSlot[i+1],timeSlot[i]);
+                 work_info.created_time ASC'
+            ,timeSlot[i+1],timeSlot[i]);
         // console.log(sqlRight);
         sqlRes = await mysqlUtils.sql(c, sqlRight);
         // console.log(sqlRes);
@@ -119,10 +120,12 @@ async function getAuthByCompany() {
         catch{
             NeedRes[i]["JD"] = 0;
             NeedRes[i]["Baidu"] = 0;
+            NeedRes[i]["Month"] = i;
         }
         if(NeedRes[i]["JD"] == null){
             NeedRes[i]["JD"] = 0;
             NeedRes[i]["Baidu"] = 0;
+            NeedRes[i]["Month"] = i;
         }
     }
     console.log(NeedRes);

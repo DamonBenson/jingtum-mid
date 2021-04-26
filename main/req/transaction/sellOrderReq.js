@@ -7,6 +7,8 @@ import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import * as fetch from '../../../utils/fetch.js';
+import * as OrderGenerate from './OrderGenerate.js';
+
 
 import {chains, userAccount, userAccountIndex, mysqlConf, sellOrderContractAddrs, debugMode, availableSellAddr} from '../../../utils/info.js';
 
@@ -25,7 +27,7 @@ const platformSecret = userAccount[userAccountIndex['卖方平台账号']].secre
 const contractChain = chains[1];
 const Remote = jlib.Remote;
 const contractRemote = new Remote({server: contractChain.server[0], local_sign: true});
-
+const outband = false;
 // 连接到权益链
 contractRemote.connect(async function(err, res) {
 
@@ -69,7 +71,18 @@ async function postSellOrderReq() {
         // let [workIds,sellerAddr] = workInfoArr.map(workInfo => {
         //     return [workInfo.work_id,workInfo.addr];
         // });
-        let sellOrder = generateSellOrder(workIds, sellerAddr);
+        let sellOrder = null;
+        if (outband == true){
+            sellOrder = OrderGenerate.generateSellOrderOutBand(workIds, sellerAddr);
+
+            console.log("generateSellOrderOutBand");
+        }
+        else{
+            sellOrder = OrderGenerate.generateSellOrder(workIds, sellerAddr);
+
+            console.log("generateSellOrder");
+        }
+
         if(debugMode) {
             console.log('sellOrder:', sellOrder);
             // console.log('sellOrder:', sellOrder.sellOrderId);
@@ -99,140 +112,5 @@ async function postSellOrderReq() {
     
     console.timeEnd('sellOrderReq');
     console.log('--------------------');
-
-}
-
-
-function generateSellOrder(wrokIds, sellerAddr) {
-    let labelSet = generateLabelSet();
-    let basePrice = localUtils.randomNumber(100, 1000);
-    let expectedPrice = generateExpectedPrice(basePrice);
-
-    let sellOrder = {
-        labelSet: labelSet,
-        expectedPrice: expectedPrice,
-        sellerAddr: sellerAddr,
-        contact: 'phoneNumber', // 联系方式
-        assetId: wrokIds,
-        assetType: 0,
-        consumable: false,
-        expireTime: 86400,
-        platformAddr: platformAddr,
-        contractAddr: sellOrderContractAddrs[0],
-    }
-
-    sellOrder.sellOrderId = sha256((seq++).toString() + 'a').toString();
-    console.log(seq);
-    return sellOrder;
-
-}
-
-function generateLabelSet() {
-
-    let labelSet = {};
-    //作品大类标签 5
-    for(let i = 0; i < 5; i++) {
-        let Demand =[];
-        for(let j = 0; j < 5; j++) {
-            if(localUtils.randomSelect([0,1,2,3]) == 1){// 增加标签
-                Demand.push(j);  
-            }
-        }
-        labelSet[i] = Demand;
-    }
-    
-    return labelSet;
-
-}
-
-function generateExpectedPrice(basePrice) {
-
-    let expectedPrice = {
-        0: [],
-        1: [],
-        2: [],
-        3: [],
-        4: [],
-        5: [],
-        6: [],
-        7: [],
-        8: [],
-        9: [],
-    };
-    for(let i = 0; i < 10; i++) {
-        switch(i) {
-            case 0:
-            case 8:
-                for(let j = 0; j < 2; j++) {
-                    for(let k = 0; k < 3; k++) {
-                        for(let l = 0; l < 4; l++) {
-                            expectedPrice[i].push({
-                                authorizationChannel: j,
-                                authorizationArea: k,
-                                authorizationTime: l,
-                                authorizationPrice: basePrice,
-                            });
-                        }
-                    }
-                }
-                break;
-            case 1:
-            case 2:
-            case 7:
-            case 9:
-                for(let k = 0; k < 3; k++) {
-                    for(let l = 0; l < 4; l++) {
-                        expectedPrice[i].push({
-                            authorizationChannel: 0,
-                            authorizationArea: k,
-                            authorizationTime: l,
-                            authorizationPrice: basePrice,
-                        });
-                    }
-                }
-                break;
-            case 3:
-                for(let j = 0; j < 3; j++) {
-                    for(let k = 0; k < 3; k++) {
-                        for(let l = 0; l < 4; l++) {
-                            expectedPrice[i].push({
-                                authorizationChannel: j,
-                                authorizationArea: k,
-                                authorizationTime: l,
-                                authorizationPrice: basePrice,
-                            });
-                        }
-                    }
-                }
-                break;
-            case 4:
-            case 5:
-                for(let j = 0; j < 2; j++) {
-                    for(let k = 0; k < 3; k++) {
-                        expectedPrice[i].push({
-                            authorizationChannel: j,
-                            authorizationArea: k,
-                            authorizationTime: 0,
-                            authorizationPrice: basePrice,
-                        });
-                    }
-                }
-                break;
-            case 6:
-                for(let k = 0; k < 3; k++) {
-                    expectedPrice[i].push({
-                        authorizationChannel: 0,
-                        authorizationArea: k,
-                        authorizationTime: 0,
-                        authorizationPrice: basePrice,
-                    });
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    return expectedPrice;
 
 }
