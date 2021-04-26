@@ -424,8 +424,7 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
 
     // 解析买方平台地址、买单ID、撮合信息
     let buyOrderInfo = body.buyOrderInfo;
-    let buyOrderHash = body.buyOrderHash;
-    let buyerAddr = buyOrderInfo.buyerAddr;
+    let buyOrderHash = buyOrderInfo.buyOrderHash;
     let sellOrderInfo = body.sellOrderInfo;
     let matchResults = {
         buyOrderInfo: buyOrderInfo,
@@ -435,7 +434,7 @@ export async function handleMatch(contractRemote, seqObj, req, res) {
     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
 
     // 构造交易
-    let func = "updateMatches('" + buyerAddr + "','" + buyOrderHash + "','" + matchResultsHash + "')";
+    let func = "updateMatches('" + buyOrderHash + "','" + matchResultsHash + "')";
     // let unsignedTx = contractRemote.invokeContract({
     //     account: matchSystemAddr, 
     //     destination: contractAddr,

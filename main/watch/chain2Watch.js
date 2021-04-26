@@ -224,8 +224,11 @@ async function processSellOrder(sellOrderTxss, loopConter) {
 
         sellOrderTxs.forEach(async(sellOrderTx) => {
 
-            let sellOrderId = sellOrderTx.func_parms[0].replace(/\'/g,"");
+            let sellOrderId = sellOrderTx.func_parms[0].replace(/\'/g,"").replace(/0x/g,"");
             let workId = sellOrderTx.func_parms.toString().match(/(.*)\[(.*)\](.*)/)[2].replace(/\'/g,"").split(',');
+            workId = workId.map(id => {
+                return id.replace(/0x/g,"");
+            })
             let contractAddr = sellOrderTx.destination;
             
             let sellOrderInfoHash = sellOrderTx.func_parms.pop().replace(/\'/g,"");

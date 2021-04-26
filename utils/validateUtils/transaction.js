@@ -317,21 +317,21 @@ const matchReqSchema = Joi.object().keys({
                         jingtumCustom.jingtum().address().required(),
                 }),
             ),
-            {matches:
-                Joi.array().length(Joi.ref(
-                    'buyOrderInfo.subBuyOrderList', 
-                    {adjust: value => {
-                        return value.length;
-                    }}
-                )).items(
-                    Joi.number().integer().min(0).max(Joi.ref(
-                        'buyOrderInfo.subBuyOrderList', 
-                        {adjust: value => {
-                            return value.length;
-                        }}
-                    ))
-                )
-            }
+            // {matches:
+            //     Joi.array().length(Joi.ref(
+            //         'buyOrderInfo.subBuyOrderList', 
+            //         {adjust: value => {
+            //             return value.length;
+            //         }}
+            //     )).items(
+            //         Joi.number().integer().min(0).max(Joi.ref(
+            //             'buyOrderInfo.subBuyOrderList', 
+            //             {adjust: value => {
+            //                 return value.length;
+            //             }}
+            //         ))
+            //     )
+            // }
         ).required(),
     matchSystemAddr:
         jingtumCustom.jingtum().address().required(),
