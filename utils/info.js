@@ -232,4 +232,7 @@ const availableSellAddr = {
     1 : "jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan",
     2 : "jw382C55JLbLbUJNu8iJtisaqb4TAoQDGC",
 };
-export {pic, chains, userAccount, userAccountIndex, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs, availableSellAddr};
+
+const auditSystemAccount = userAccount[0];
+
+export {pic, chains, userAccount, userAccountIndex, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs, availableSellAddr, auditSystemAccount};

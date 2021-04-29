@@ -15,10 +15,10 @@ export class MQ {
         this.consumers = [
             {
                 'type': 'consumer',
-                'options': { 'autoCommit': true },
+                'options': { 'autoCommit': true, 'fromOffset': true },
                 'name': consumer,
                 'topic': [
-                    { 'topic': topic , 'partition': 0,'offset':0}
+                    { 'topic': topic , 'partition': 0,'offset': 0}
                 ]
             }
         ];  
@@ -40,11 +40,8 @@ export class MQ {
         });
     }
     
-    AddConsumer(conn = this.conn, topics = this.consumers[0].topic, options = this.consumers[0].options){
-        this.ConConsumer(conn, topics, options,  function (message){
-            message.value = JSON.parse(message.value)
-            if(debugMode){console.log(message.value)};//debugMode
-        });
+    AddConsumer(conn = this.conn, topics = this.consumers[0].topic, options = this.consumers[0].options, handler){
+        this.ConConsumer(conn, topics, options, handler);
     }
 }
 export function getConsumer(conn = {'kafkaHost':'39.102.93.47:9092'}, 

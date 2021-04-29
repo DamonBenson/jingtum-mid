@@ -1,6 +1,7 @@
 import jlib, { Wallet } from 'jingtum-lib';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
+import Joi from 'joi';
 
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as tx from '../../../utils/jingtum/tx.js';
@@ -32,11 +33,17 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
 
     let body = JSON.parse(Object.keys(req.body)[0]);
     let addAmount = body;
-    let [validateInfoRes, validateInfo] = await infoValidate.validateActivateReq(addAmount);
-    if(!validateInfoRes) {
+    try {
+        await infoValidate.activateReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
-        resInfo.data.validateInfo = validateInfo;
+        resInfo.data.validateInfo = e;
+        console.timeEnd('handleActivateAccount');
+        console.log('--------------------');
         return resInfo;
     }
 
@@ -60,7 +67,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
     console.timeEnd('handleActivateAccount');
     console.log('--------------------');
 
-    resInfo.data.wallets = walletArr;
+    resInfo.data.accounts = walletArr;
     return resInfo;
 
 }
@@ -78,15 +85,22 @@ export async function handleWorkInfo(req, res) {
     }
 
     let body = req.query;
-    let [validateInfoRes, validateInfo] = await infoValidate.validateQueryReq(body);
-    if(!validateInfoRes) {
-        resInfo.msg = 'invalid parameters';
+    try {
+        await infoValidate.workQueryReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
-        resInfo.data.validateInfo = validateInfo;
+        resInfo.data.validateInfo = e;
+        console.timeEnd('handleWorkInfo');
+        console.log('--------------------');
         return resInfo;
     }
 
-    let sqlPromises = body.map(async workId => {
+    let workIds = body.WorkIds.split(',');
+    let sqlPromises = workIds.map(async workId => {
         let filter = {
             work_id: workId,
         }
@@ -117,17 +131,24 @@ export async function handleCopyrightInfo(req, res) {
     }
 
     let body = req.query;
-    let [validateInfoRes, validateInfo] = await infoValidate.validateQueryReq(body);
-    if(!validateInfoRes) {
-        resInfo.msg = 'invalid parameters';
+    try {
+        await infoValidate.copyrightQueryReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
-        resInfo.data.validateInfo = validateInfo;
+        resInfo.data.validateInfo = e;
+        console.timeEnd('handleCopyrightInfo');
+        console.log('--------------------');
         return resInfo;
     }
 
-    let sqlPromises = body.map(async copyrightId => {
+    let copyrightIds = body.CopyrightIds.split(',');
+    let sqlPromises = copyrightIds.map(async copyrightId => {
         let filter = {
-            token_id: copyrightId,
+            right_token_id: copyrightId,
         }
         let sql = sqlText.table('right_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
@@ -156,15 +177,22 @@ export async function handleApproveInfo(req, res) {
     }
 
     let body = req.query;
-    let [validateInfoRes, validateInfo] = await infoValidate.validateQueryReq(body);
-    if(!validateInfoRes) {
-        resInfo.msg = 'invalid parameters';
+    try {
+        await infoValidate.approveQueryReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
-        resInfo.data.validateInfo = validateInfo;
+        resInfo.data.validateInfo = e;
+        console.timeEnd('handleApproveInfo');
+        console.log('--------------------');
         return resInfo;
     }
 
-    let sqlPromises = body.map(async approveId => {
+    let approveIds = body.ApproveIds.split(',');
+    let sqlPromises = approveIds.map(async approveId => {
         let filter = {
             appr_token_id: approveId,
         }

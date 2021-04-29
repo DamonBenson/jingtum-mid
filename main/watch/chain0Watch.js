@@ -8,7 +8,7 @@ import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode} from '../../utils/info.js';
+import {chains, ipfsConf, mysqlConf, debugMode, auditSystemAccount} from '../../utils/info.js';
 
 const u = jlib.utils;
 
@@ -39,96 +39,126 @@ r.connect(async function(err, result) {
 
         // 开始计时
         console.log('on ledger_closed: ' + msg.ledger_index);
-        let sTs = (new Date()).valueOf();
+        console.time('chain0Watch');
 
         // 获取所有交易哈希
         let ledgerIndex = msg.ledger_index;
         let ledger = await requestInfo.requestLedger(r, ledgerIndex, true, false);
         let txHashs = ledger.transactions;
+        const txLoopConter = txHashs.length - 1;
 
         // 获取所有交易信息
         let txPromises = [];
-        for(let i = txHashs.length - 1; i >= 0; i--) {
+        for(let i = txLoopConter; i >= 0; i--) {
             let txHash = txHashs[i];
             txPromises.push(requestInfo.requestTx(r, txHash, false));
         }
         let txs = await Promise.all(txPromises);
 
+        /* tx格式 {
+            Account: 'j9uudceu9gX3DyLcTL7czGgUnfzP9fQxko',
+            Amount: '100',
+            Destination: 'jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3',
+            Fee: '10000',
+            Flags: 0,
+            Memos: [ { Memo: [Object] } ],
+            Sequence: 12714,
+            SigningPubKey: '03A0D4DE99A47A0E9E7CD2A211FBF60C6094CFC7E4FFBC68D793920E7D86DCC720',
+            TransactionType: 'Payment',
+            TxnSignature: '3044022045483C234A56BD225C146AE62FD70015FEC774C59BBB3B2659D9962E629B69CC022047A9A7A144BD7D304DB60864A5EDB165EF963F5162C2031155D0996DD755D12D',   
+            date: 672979190,
+            hash: '21CC7F918E023BB5A7D4DD21DB17361397D08DD8DA81F6CB57706D61D74138A6',      
+            inLedger: 1305926,
+            ledger_index: 1305926,
+            meta: {
+              AffectedNodes: [ [Object], [Object], [Object] ],
+              TransactionIndex: 0,
+              TransactionResult: 'tesSUCCESS',
+              delivered_amount: 'unavailable'
+            },
+            validated: true
+        } */
+
+        /* jlib.utils.processTx格式 {
+            date: 1619664450,
+            hash: 'D60F0B86E7680C26058320ABEB6405636B3B1E7222A282CF71FB8C558DA12611',      
+            type: 'sent',
+            fee: '0.01',
+            result: 'tesSUCCESS',
+            memos: [ { MemoData: 'test' } ],
+            ledger_index: 1305972,
+            counterparty: 'jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3',
+            amount: { value: '0.0001', currency: 'SWT', issuer: '' },
+            effects: [],
+            balances: { SWT: 99999872.828593 },
+            balancesPrev: { SWT: 99999872.838693 }
+        } */
+
         // 筛选存证交易
         let uploadTxs = [];
-        for(let i = txs.length - 1; i >= 0; i--) {
+
+        for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
             let txType = tx.TransactionType;
-            /* 存证交易：
-                1、交易类型为支付
-                2、memos前两位为“0_”
-            */
-            if(txType == 'Payment' && u.hexToString(tx.Memos[0].Memo.MemoData).slice(0, 1) == 0) {
-                uploadTxs.push(tx);
+            let src = tx.Account;
+            let dst = tx.Destination;
+            let processedTx;
+            switch(txType) {
+                case 'Payment':
+                    if(src == auditSystemAccount.address) {
+                        processedTx = u.processTx(tx, src);
+                        processedTx.account = src;
+                        uploadTxs.push(processedTx);
+                    }
+                default:
+                    break;
             }
         }
-        
-        // 获取交易中存储的存证信息
-        let uploadMemosArr = new Array(uploadTxs.length);
-        for(let i = uploadTxs.length - 1; i >= 0; i--) {
-            let tx = uploadTxs[i];
-            uploadMemosArr[i] = JSON.parse(u.hexToString(tx.Memos[0].Memo.MemoData).slice(2));
-        }
-
-        // 从ipfs上获取作品信息
-        let workInfoGetPromises = new Array(uploadMemosArr.length);
-        for(let i = uploadMemosArr.length - 1; i >= 0; i--) {
-            let memos = uploadMemosArr[i];
-            workInfoGetPromises[i] = ipfsUtils.get(ipfs, memos.workInfoHash);
-        }
-        let workInfoJsonArr = await Promise.all(workInfoGetPromises);
-
-        // 解析作品信息
-        let workInfoArr = new Array(workInfoJsonArr.length);
-        for(let i = workInfoJsonArr.length - 1; i >= 0; i--) {
-            let workInfoJson = workInfoJsonArr[i];
-            workInfoArr[i] = JSON.parse(workInfoJson);
-        }
-
-        // 存证信息存入数据库
-        let postWorkInfoPromises = new Array(uploadTxs.length);
-        for(let i = uploadTxs.length - 1; i >= 0; i--) {
-            let tx = uploadTxs[i];
-            let uploadMemos = uploadMemosArr[i];
-            let workInfo =  workInfoArr[i];
-            delete uploadMemos.workInfoHash;
-            let uploadInfo = Object.assign(uploadMemos, workInfo);
-            uploadInfo.workId = tx.hash;
-            uploadInfo.uploadTime = tx.date + 946684800; // 井通链时间戳转换为通用时间戳
-            uploadInfo.addr = tx.Destination;
-            localUtils.toMysqlObj(uploadInfo);
-            if(debugMode) {
-                console.log('on upload', uploadInfo);
-            }
-            else {
-                console.log('on upload', uploadInfo.work_name);
-            }
-            /* upload {
-                addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
-                work_hash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
-                work_name: 'm1_',
-                created_time: 1579017600,
-                published_time: 1579017600,
-                work_type: 0,
-                work_form: 0,
-                work_field: 0,
-                work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
-                upload_time: 1608517640
-            } */
-            let sql = sqlText.table('work_info').data(uploadInfo).insert();
-            postWorkInfoPromises[i] = mysqlUtils.sql(c, sql);
-        }
-        await Promise.all(postWorkInfoPromises);
+        // 存证交易
+        await processUpload(uploadTxs, uploadTxs.length);
 
         // 结束计时
-        let eTs = (new Date()).valueOf();
-        console.log('----------' + (eTs - sTs) + 'ms----------');
+        console.timeEnd('chain0Watch');
+        console.log('--------------------');
 
     });
 
 });
+
+async function processUpload(uploadTxs, loopConter) {
+
+    console.log('uploadTxs:', uploadTxs);
+
+    let workInfoPromises = [];
+
+    uploadTxs.forEach(async(uploadTx) => {
+
+        let workInfo = JSON.parse(uploadTx.memos[0].MemoData);
+
+        workInfo.workId = uploadTx.hash;
+        workInfo.completionTime = uploadTx.date;
+        workInfo.address = uploadTx.counterparty;
+
+        let fileInfoListHash = workInfo.fileInfoListHash;
+        let fileInfoList = JSON.stringify(JSON.parse(await ipfsUtils.get(ipfs, fileInfoListHash)));
+        workInfo.fileInfoList = fileInfoList;
+        delete workInfo.fileInfoListHash;
+
+        if(workInfo.publishStatus == 1) {
+            let publishInfoHash = workInfo.publishInfoHash;
+            let publishInfo = JSON.parse(await ipfsUtils.get(ipfs, publishInfoHash));
+            Object.assign(workInfo, publishInfo);
+            delete workInfo.publishInfoHash;
+        }
+
+        localUtils.toMysqlObj(workInfo);
+        console.log(workInfo);
+
+        let sql = sqlText.table('work_info').data(workInfo).insert();
+        workInfoPromises.push(mysqlUtils.sql(c, sql));
+
+    });
+
+    await Promise.all(workInfoPromises);
+    
+}

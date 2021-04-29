@@ -103,12 +103,12 @@ export function obj2memos(obj) {
 export function memos2obj(arr) {
     let obj = new Object();
     for(let i = arr.length - 1; i >= 0; i--) {
-        let k = u.hexToString(arr[i].Memo.MemoType);
-        let v = u.hexToString(arr[i].Memo.MemoData);
+        let k = arr[i].MemoType;
+        let v = arr[i].MemoData;
         obj[k] = v;
     }
-    obj['rightType'] = Number(obj['rightType']);
-    // obj['state'] = Number(obj['state']);
+    obj['copyrightType'] = Number(obj['copyrightType']);
+    obj['idType'] = Number(obj['idType']);
     return obj;
 }
 
