@@ -10,7 +10,7 @@ const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
 const queryMode = 'copyright';
-const queryAmount = 3;
+const queryAmount = 2;
 
 switch(queryMode) {
 
@@ -25,7 +25,8 @@ switch(queryMode) {
             console.log('workIds:', workIds);
         }
         
-        let workRes = await fetch.postData('http://127.0.0.1:9001/info/work', workIds);
+        let workRes = await fetch.getData('http://127.0.0.1:9001/info/work', {WorkIds: workIds});
+        console.log(Buffer.from(workRes.body._readableState.buffer.head.data).toString());
         if(debugMode) {
             let workResInfo = JSON.parse(Buffer.from(workRes.body._readableState.buffer.head.data).toString());
             console.log('worksInfo:', workResInfo.data.worksInfo);
@@ -34,16 +35,16 @@ switch(queryMode) {
 
     case 'copyright':
 
-        let copyrightSql = sqlText.table('right_token_info').field('token_id').order('RAND()').limit(queryAmount).select();
+        let copyrightSql = sqlText.table('right_token_info').field('right_token_id').order('RAND()').limit(queryAmount).select();
         let rightTokenInfoArr = await mysqlUtils.sql(c, copyrightSql);
         let rightTokenIds = rightTokenInfoArr.map(rightTokenInfo => {
-            return rightTokenInfo.token_id;
+            return rightTokenInfo.right_token_id;
         });
         if(debugMode) {
             console.log('rightTokenIds', rightTokenIds);
         }
 
-        let rightRes = await fetch.postData('http://127.0.0.1:9001/info/copyright', rightTokenIds);
+        let rightRes = await fetch.getData('http://127.0.0.1:9001/info/copyright', {CopyrightIds: rightTokenIds});
         if(debugMode) {
             let rightResInfo = JSON.parse(Buffer.from(rightRes.body._readableState.buffer.head.data).toString());
             console.log('rightsInfo:', rightResInfo.data.copyrightsInfo);
@@ -61,7 +62,7 @@ switch(queryMode) {
             console.log('approveTokenIds', approveTokenIds);
         }
 
-        let approveRes = await fetch.postData('http://127.0.0.1:9001/info/approve', approveTokenIds);
+        let approveRes = await fetch.getData('http://127.0.0.1:9001/info/approve', {ApproveIds: approveTokenIds});
         if(debugMode) {
             let approveResInfo = JSON.parse(Buffer.from(approveRes.body._readableState.buffer.head.data).toString());
             console.log('approvesInfo:', approveResInfo.data.approvesInfo);

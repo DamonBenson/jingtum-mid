@@ -186,6 +186,35 @@ export const jingtumCustom = Joi.extend((joi) => {
     };
 });
 
+// 16进制数组格式验证
+export const idCustom = Joi.extend((joi) => {
+
+    return {
+        type: 'id',
+        base: joi.string(),
+        messages: {
+            'id.hex': '{{#label}} must be hexadecimal',
+            'id.length': '{{#label}} must be 64-character long',
+        },
+        rules: {
+            hash: {
+                validate(value, helpers, args, options) {
+                    let arr = value.split(',');
+                    for(let i = arr.length - 1; i >= 0; i--) {
+                        if(!/^[0-9a-fA-F]+$/.test(arr[i])) {
+                            return helpers.error('id.hex');
+                        }
+                        if(!/^.{64,64}$/.test(arr[i])) {
+                            return helpers.error('id.length');
+                        }
+                    }
+                }
+            },
+        }
+    };
+
+});
+
 /*----------工具类----------*/
 
 export function delJoiKeys(schema, props) {

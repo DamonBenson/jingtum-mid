@@ -9,7 +9,7 @@ import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName} from '../../utils/info.js';
+import {chains, ipfsConf, mysqlConf, debugMode, rightTokenName, approveTokenName, auditSystemAccount} from '../../utils/info.js';
 
 const u = jlib.utils;
 
@@ -50,7 +50,7 @@ r.connect(async function(err, result) {
 
         // 开始计时
         console.log('on ledger_closed: ' + msg.ledger_index);
-        let sTs = (new Date()).valueOf();
+        console.time('chain0Watch');
 
         // 获取所有交易哈希
         let ledgerIndex = msg.ledger_index;
@@ -66,54 +66,70 @@ r.connect(async function(err, result) {
         }
         let txs = await Promise.all(txPromises);
 
-        console.log(txs);
+        /* tx格式 {
+            Account: 'j9uudceu9gX3DyLcTL7czGgUnfzP9fQxko',
+            Destination: 'jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan',
+            Fee: '10000',
+            Flags: 0,
+            FundCode: '7269676874546F6B656E',
+            Memos: [ [Object], [Object] ],
+            Sequence: 12718,
+            SigningPubKey: '03A0D4DE99A47A0E9E7CD2A211FBF60C6094CFC7E4FFBC68D793920E7D86DCC720',
+            TokenID: '4EA5C508A6566E76240543F8FEB06FD457777BE39549C4016436AFDA65D2330E', 
+            TransactionType: 'TransferToken',
+            TxnSignature: '304402200FA702462F4E702A6FD58A4FB8B0415B056B36BC3DE54AC5775418133A62FF50022000AC6A2B6F0D34F65A1EF20DA0EA816E5AF18253BFFF4ADC40675FF496E8B51C', 
+            date: 672982150,
+            hash: 'DD9F7FBC803EFDCEC4E5149F818AAD9111C21FA898063EDDA9D94C09DF67DF25',    
+            inLedger: 1306222,
+            ledger_index: 1306222,
+            meta: {
+              AffectedNodes: [Array],
+              TransactionIndex: 0,
+              TransactionResult: 'tesSUCCESS'
+            },
+            validated: true
+        } */
 
-        // 筛选版权通证发行、版权通证转让、授权通证发行、授权通证转让
+        /* jlib.utils.processTx格式 {
+            date: 1619667080,
+            hash: '0E1E1839273F5915623E822923C84B01415EBD9484DAE9B07A1C704EED59D7E5',      
+            type: 'transfertoken',
+            fee: '0.01',
+            result: 'tesSUCCESS',
+            memos: [ { MemoData: 'a', MemoType: 'a' }, { MemoData: '', MemoType: 'b' } ],  
+            ledger_index: 1306235,
+            publisher: 'j9uudceu9gX3DyLcTL7czGgUnfzP9fQxko',
+            receiver: 'jUcCWXZAW9Pyg3vzmGcJ97qHghYE7Udqan',
+            token: 'rightToken',
+            tokenId: '961B6DD3EDE3CB8ECBAACBD68DE040CD78EB2ED5889130CCEB4C49268EA4D506',   
+            effects: [],
+            balances: { SWT: 99999872.808593 },
+            balancesPrev: { SWT: 99999872.818593 }
+        } */
+
+        // 筛选版权通证发行、版权通证转让
         let issueRightTokenTxs = [];
         let transferRightTokenTxs = [];
-        let issueApproveTokenTxs = [];
-        let transferApproveTokenTxs = [];
+
         for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
             let txType = tx.TransactionType;
             let src = tx.Account;
             let dst = tx.Destination;
-            /* 
-            权利项通证发行：
-                1、交易类型为通证转让
-                2、通证名称对应rightTokenName
-                3、源地址为智能预警系统发币账号、目标地址为用户
-            许可通证发行：
-                1、交易类型为通证转让
-                2、通证名称对应approveTokenName
-                3、源地址为智能授权系统发币账号、目标地址为用户
-            权利项通证转让：
-                1、交易类型为通证转让
-                2、通证名称对应rightTokenName
-                3、源地址为用户、目标地址为用户
-            许可通证转让：
-                1、交易类型为通证转让
-                2、通证名称对应approveTokenName
-                3、源地址为用户、目标地址为用户
-            */
+            let processedTx;
+            let txTokenName;
             switch(txType) {
                 case 'TransferToken':
-                    let txTokenName = u.hexToString(tx.FundCode);
+                    processedTx = u.processTx(tx, src);
+                    processedTx.account = src;
+                    txTokenName = processedTx.token;
                     switch(txTokenName) {
-                        case 'rightToken':
-                            if(src == a0 && dst != a0) {
-                                issueRightTokenTxs.push(tx);
+                        case rightTokenName:
+                            if(src == auditSystemAccount.address && dst != auditSystemAccount.address) {
+                                issueRightTokenTxs.push(processedTx);
                             }
-                            else if(src != a0 && dst != a0) {
-                                transferRightTokenTxs.push(tx);
-                            }
-                            break;
-                        case 'approveToken':
-                            if(src == a0 && dst != a0) {
-                                issueApproveTokenTxs.push(tx);
-                            }
-                            else if(src != a0 && dst != a0) {
-                                transferApproveTokenTxs.push(tx);
+                            else if(src != auditSystemAccount.address && dst != auditSystemAccount.address) {
+                                transferRightTokenTxs.push(processedTx);
                             }
                             break;
                         default:
@@ -127,12 +143,10 @@ r.connect(async function(err, result) {
 
         await processIssueRightToken(issueRightTokenTxs, issueRightTokenTxs.length);
         await processTransferRightToken(transferRightTokenTxs, transferRightTokenTxs.length);
-        // await processIssueApproveToken(issueApproveTokenTxs, issueApproveTokenTxs.length);
-        // await processTransferApproveToken(transferApproveTokenTxs, transferApproveTokenTxs.length);
 
         // 结束计时
-        let eTs = (new Date()).valueOf();
-        console.log('----------' + (eTs - sTs) + 'ms----------');
+        console.timeEnd('chain0Watch');
+        console.log('--------------------');
 
     });
 
@@ -140,48 +154,33 @@ r.connect(async function(err, result) {
 
 async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     
-    // 获取交易中的通证信息
-    let tokenInfoPromises = new Array(loopConter);
-    for(let i = loopConter - 1; i >= 0; i--) {
-        let tx = issueRightTokenTxs[i];
-        tokenInfoPromises[i] = erc721.requestTokenInfo(r, tx.TokenID, false);
-    }
-    let tokenInfoResArr = await Promise.all(tokenInfoPromises);
+    console.log('issueRightTokenTxs:', issueRightTokenTxs);
 
-    // 解析信息
-    let tokenInfoArr = new Array(loopConter);
-    for(let i = loopConter - 1; i >= 0; i--) {
-        let res = tokenInfoResArr[i];
-        tokenInfoArr[i] = localUtils.memos2obj(res.TokenInfo.Memos);
-    }
+    let rightInfoPromises = [];
 
-    // 通证信息存入数据库
-    let postTokenInfoPromises = new Array(loopConter);
-    for(let i = loopConter - 1; i >= 0; i--) {
-        let tx = issueRightTokenTxs[i];
-        let tokenInfoRes = tokenInfoResArr[i];
-        let tokenInfo = tokenInfoArr[i];
-        tokenInfo.tokenId = tx.TokenID;
-        tokenInfo.addr = tokenInfoRes.TokenInfo.TokenOwner;
-        localUtils.toMysqlObj(tokenInfo);
-        if(debugMode) {
-            console.log('on token:', tokenInfo);
-        }
-        else {
-            console.log('on token:', tokenInfo.work_id + '_' + tokenInfo.right_type);
-        }
-        /* on token: {
-            state: 2,
-            addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
-            work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
-            right_type: 8,
-            approve_arr: '',
-            token_id: 'C59209D11B745FF9903106E6339616CA15ABAA77E4AEC7306AB02D242048B4C5'       
-        } */
-        let sql = sqlText.table('right_token_info').data(tokenInfo).insert();
-        postTokenInfoPromises[i] = mysqlUtils.sql(c, sql);
-    }
-    await Promise.all(postTokenInfoPromises);
+    issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
+
+        let txMemos = issueRightTokenTx.memos;
+        let rightInfo = localUtils.memos2obj(txMemos);
+
+        rightInfo.rightTokenId = issueRightTokenTx.tokenId;
+        rightInfo.timestamp = issueRightTokenTx.date;
+        rightInfo.address = issueRightTokenTx.receiver;
+
+        let copyrightHolderHash = rightInfo.copyrightHolderHash;
+        let copyrightHolder = JSON.parse(await ipfsUtils.get(ipfs, copyrightHolderHash));
+        Object.assign(rightInfo, copyrightHolder);
+        delete rightInfo.copyrightHolderHash;
+
+        localUtils.toMysqlObj(rightInfo);
+        console.log(rightInfo);
+
+        let sql = sqlText.table('right_token_info').data(rightInfo).insert();
+        rightInfoPromises.push(mysqlUtils.sql(c, sql));
+
+    });
+
+    await Promise.all(rightInfoPromises);
 
 }
 
@@ -222,7 +221,3 @@ async function processTransferRightToken(transferRightTokenTxs, loopConter) {
     await Promise.all(postAddrChangePromises); // 更改token_info表中的拥有者地址
 
 }
-
-// async function processIssueApproveToken(issueRightTokenTxs, loopConter)
-
-// async function processTransferApproveToken(transferRightTokenTxs, loopConter)
