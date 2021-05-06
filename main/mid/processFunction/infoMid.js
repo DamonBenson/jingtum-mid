@@ -32,7 +32,6 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
     }
 
     let body = JSON.parse(Object.keys(req.body)[0]);
-    let addAmount = body;
     try {
         await infoValidate.activateReqSchema.validateAsync(body);
     } catch(e) {
@@ -47,6 +46,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
         return resInfo;
     }
 
+    let addAmount = body.amount;
     let walletArr = new Array(addAmount);
     for(let i = addAmount - 1; i >= 0; i--) {
         walletArr[i] = Wallet.generate()

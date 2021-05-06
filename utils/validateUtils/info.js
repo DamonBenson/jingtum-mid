@@ -10,7 +10,10 @@ const maxQueryAmount = 100;
 /*----------数据验证格式定义----------*/
 
 // 账号激活
-export const activateReqSchema = Joi.number().integer().min(minQueryAmount).max(maxQueryAmount).required();
+export const activateReqSchema = Joi.object().keys({
+    amount:
+        Joi.number().integer().min(minQueryAmount).max(maxQueryAmount).required(),
+})
 
 // 三类信息查询
 export const workQueryReqSchema = Joi.object().keys({
