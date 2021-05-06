@@ -47,19 +47,26 @@ contractRemote.connect(async function(err, res) {
 
 });
 
-async function postBuyOrderReq() {
+async function postBuyOrderReq(BUYORDER = null) {
 
     console.time('buyOrderReq');
+    
     let buyOrder = null;
-    if(outband == true){
-        buyOrder = OrderGenerate.generateBuyOrderOutBand();
-
-        console.log('generateBuyOrderOutBand');
+    if(BUYORDER != null){
+        buyOrder = BUYORDER;
     }
+    // 无参时：构造
     else{
-        buyOrder = OrderGenerate.generateBuyOrder();
-        
-        console.log('generateBuyOrder');
+        if(outband == true){
+            buyOrder = OrderGenerate.generateBuyOrderOutBand();
+
+            console.log('generateBuyOrderOutBand');
+        }
+        else{
+            buyOrder = OrderGenerate.generateBuyOrder();
+            
+            console.log('generateBuyOrder');
+        }
     }
 
     if(debugMode) {
