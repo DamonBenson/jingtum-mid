@@ -17,14 +17,14 @@ export const activateReqSchema = Joi.object().keys({
 
 // 三类信息查询
 export const workQueryReqSchema = Joi.object().keys({
-    WorkIds:
+    workIds:
         idCustom.id().hash().required(),
 })
 export const copyrightQueryReqSchema = Joi.object().keys({
-    CopyrightIds:
+    copyrightIds:
         idCustom.id().hash().required(),
 })
 export const approveQueryReqSchema = Joi.object().keys({
-    ApproveIds:
+    approveIds:
         idCustom.id().hash().required(),
 })
