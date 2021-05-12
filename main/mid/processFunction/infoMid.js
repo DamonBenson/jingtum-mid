@@ -3,6 +3,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 import Joi from 'joi';
 
+import * as localUtils from '../../../utils/localUtils.js';
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as tx from '../../../utils/jingtum/tx.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
@@ -99,7 +100,7 @@ export async function handleWorkInfo(req, res) {
         return resInfo;
     }
 
-    let workIds = body.WorkIds.split(',');
+    let workIds = body.workIds.split(',');
     let sqlPromises = workIds.map(async workId => {
         let filter = {
             work_id: workId,
@@ -107,12 +108,12 @@ export async function handleWorkInfo(req, res) {
         let sql = sqlText.table('work_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     })
-    let worksInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
+    let workInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
     console.timeEnd('handleWorkInfo');
     console.log('--------------------');
 
-    resInfo.data.worksInfo = worksInfo;
+    resInfo.data.workInfoList = workInfoList;
 
     return resInfo;
 
@@ -145,20 +146,20 @@ export async function handleCopyrightInfo(req, res) {
         return resInfo;
     }
 
-    let copyrightIds = body.CopyrightIds.split(',');
+    let copyrightIds = body.copyrightIds.split(',');
     let sqlPromises = copyrightIds.map(async copyrightId => {
         let filter = {
-            right_token_id: copyrightId,
+            copyright_id: copyrightId,
         }
         let sql = sqlText.table('right_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     })
-    let copyrightsInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
+    let copyrightInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
     console.timeEnd('handleCopyrightInfo');
     console.log('--------------------');
 
-    resInfo.data.copyrightsInfo = copyrightsInfo;
+    resInfo.data.copyrightInfoList = copyrightInfoList;
 
     return resInfo;
 
@@ -191,7 +192,7 @@ export async function handleApproveInfo(req, res) {
         return resInfo;
     }
 
-    let approveIds = body.ApproveIds.split(',');
+    let approveIds = body.approveIds.split(',');
     let sqlPromises = approveIds.map(async approveId => {
         let filter = {
             appr_token_id: approveId,
@@ -199,12 +200,12 @@ export async function handleApproveInfo(req, res) {
         let sql = sqlText.table('appr_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     })
-    let approvesInfo = (await Promise.all(sqlPromises)).map(sqlResArr => sqlResArr[0]);
+    let approveInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
     console.timeEnd('handleApproveInfo');
     console.log('--------------------');
 
-    resInfo.data.approvesInfo = approvesInfo;
+    resInfo.data.approveInfoList = approveInfoList;
 
     return resInfo;
 

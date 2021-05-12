@@ -163,7 +163,7 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
         let txMemos = issueRightTokenTx.memos;
         let rightInfo = localUtils.memos2obj(txMemos);
 
-        rightInfo.rightTokenId = issueRightTokenTx.tokenId;
+        rightInfo.copyrightId = issueRightTokenTx.tokenId;
         rightInfo.timestamp = issueRightTokenTx.date;
         rightInfo.address = issueRightTokenTx.receiver;
 
