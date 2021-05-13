@@ -1,10 +1,9 @@
 import jlib, { Wallet } from 'jingtum-lib';
-import mysql from 'mysql';
 
 import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as tx from '../utils/jingtum/tx.js';
 
-import {chains} from '../utils/info.js';
+import {chains} from '../utils/config/jingtum.js';
 
 const addAmount = 5;
 const addLoopCounter = addAmount - 1;

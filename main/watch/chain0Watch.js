@@ -1,5 +1,4 @@
 import jlib from 'jingtum-lib';
-import ipfsAPI from 'ipfs-api';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
@@ -8,19 +7,19 @@ import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 
-import {chains, ipfsConf, mysqlConf, debugMode, auditSystemAccount} from '../../utils/info.js';
+import {userAccount, chains} from '../../utils/config/jingtum.js';
+import {mysqlConf} from '../../utils/config/mysql.js';
 
 const u = jlib.utils;
 
-const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-const chain0 = chains[0]; // 存证链
+const uploadChain = chains[0]; // 存证链
 
 /*----------创建链接(存证链服务器3)----------*/
 
 var Remote = jlib.Remote;
-var r = new Remote({server: chain0.server[3], local_sign: true});
+var r = new Remote({server: uploadChain.server[2], local_sign: true});
 
 r.connect(async function(err, result) {
 
@@ -105,7 +104,7 @@ r.connect(async function(err, result) {
             let processedTx;
             switch(txType) {
                 case 'Payment':
-                    if(src == auditSystemAccount.address) {
+                    if(src == userAccount.authorizeAccount.address) {
                         processedTx = u.processTx(tx, src);
                         processedTx.account = src;
                         uploadTxs.push(processedTx);
@@ -114,7 +113,8 @@ r.connect(async function(err, result) {
                     break;
             }
         }
-        // 存证交易
+
+        // 存证交易入数据库
         await processUpload(uploadTxs, uploadTxs.length);
 
         // 结束计时
