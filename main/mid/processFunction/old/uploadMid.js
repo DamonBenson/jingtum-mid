@@ -1,12 +1,12 @@
 import ipfsAPI from 'ipfs-api';
 import sha256 from 'crypto-js/sha256.js';
 
-import * as tx from '../../../utils/jingtum/tx.js';
-import * as erc721 from '../../../utils/jingtum/erc721.js';
-import * as ipfsUtils from '../../../utils/ipfsUtils.js';
-import * as localUtils from '../../../utils/localUtils.js';
+import * as tx from '../../../../utils/jingtum/tx.js';
+import * as erc721 from '../../../../utils/jingtum/erc721.js';
+import * as ipfsUtils from '../../../../utils/ipfsUtils.js';
+import * as localUtils from '../../../../utils/localUtils.js';
 
-import {pic, chains, rightTokenName, ipfsConf, debugMode} from '../../../utils/info.js';
+import {pic, chains, rightTokenName, ipfsConf, debugMode} from '../../../../utils/info.js';
 
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const uploadChain = chains[0]; // 存证链

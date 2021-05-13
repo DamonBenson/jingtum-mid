@@ -348,6 +348,13 @@ const sellerTransferConfrimReqSchema = Joi.any();
 // 卖方许可确认
 const sellerApproveConfrimReqSchema = Joi.any();
 
+/**
+ * @description 许可通证生成（对于平台内部匹配的交易）。
+ * @param {Object}buyOrderInfo 包括买方地址buyerAddr、授权场景authorizationScene
+ * @param {Object[]}sellOrderInfoList 包括卖方地址sellerAddr、卖方私钥sellerSecret、版权通证标识copyrightId
+ */
+const approveConfirmReqSchema = Joi.any();
+
 // 买单监听
 const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['platformAddr', 'contractAddr']);
 

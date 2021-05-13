@@ -3,7 +3,7 @@ import jlib from 'jingtum-lib';
 import * as requestInfo from '../utils/jingtum/requestInfo.js';
 import * as tx from '../utils/jingtum/tx.js';
 
-import {chains} from '../utils/info.js';
+import {chains} from '../utils/config/jingtum.js';
 
 const Remote = jlib.Remote;
 
