@@ -1,28 +1,28 @@
-import jlib, { Wallet } from 'jingtum-lib';
+import {Wallet} from 'jingtum-lib';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
-import Joi from 'joi';
 
 import * as localUtils from '../../../utils/localUtils.js';
-import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as tx from '../../../utils/jingtum/tx.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as infoValidate from '../../../utils/validateUtils/info.js';
 
-import {userAccount, chains, mysqlConf} from '../../../utils/info.js';
-
-const Remote = jlib.Remote;
+import {userAccount} from '../../../utils/config/jingtum.js';
+import {mysqlConf} from '../../../utils/config/mysql.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
 // 中间层账号
-const a9 = userAccount[9].address;
-const s9 = userAccount[9].secret;
+const midAddr = userAccount.midAccount.address;
+const midSecr = userAccount.midAccount.secret;
 
-/*----------激活账号----------*/
-
-export async function handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req, res) {
+/**
+ * @description 激活账户，中间层签名。
+ * @param {int}amount 需要激活的区块链账户数量
+ * @returns {Object[]} 包括账户地址address、账户私钥secret
+ */
+export async function handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req) {
 
     console.time('handleActivateAccount');
 
@@ -59,9 +59,9 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
     for(let j = addAmount - 1; j >= 0; j--) {
         let a = walletArr[j].address;
         // 转账激活账号
-        activatePromises.push(tx.buildPaymentTx(a9, s9, uploadRemote, seqObj.a9.token++, a, 10000, 'Activate account', true));
-        activatePromises.push(tx.buildPaymentTx(a9, s9, tokenRemote, seqObj.a9.token++, a, 10000, 'Activate account', true));
-        activatePromises.push(tx.buildPaymentTx(a9, s9, contractRemote, seqObj.a9.contract++, a, 10000, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, uploadRemote, seqObj.mid.token++, a, 10, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, tokenRemote, seqObj.mid.token++, a, 10, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, contractRemote, seqObj.mid.contract++, a, 10, 'Activate account', true));
     }
     await Promise.all(activatePromises);
 
@@ -73,9 +73,12 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
 
 }
 
-/*----------查询作品信息----------*/
-
-export async function handleWorkInfo(req, res) {
+/**
+ * @description 查询作品信息。
+ * @param {int[]}workIds 作品标识列表
+ * @returns {Object[]} 存证信息列表，具体数据格式见文档
+ */
+export async function handleWorkInfo(req) {
 
     console.time('handleWorkInfo');
 
@@ -108,20 +111,23 @@ export async function handleWorkInfo(req, res) {
         let sql = sqlText.table('work_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     })
-    let workInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
+    let certificateInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
     console.timeEnd('handleWorkInfo');
     console.log('--------------------');
 
-    resInfo.data.workInfoList = workInfoList;
+    resInfo.data.certificateInfoList = certificateInfoList;
 
     return resInfo;
 
 }
 
-/*----------查询版权通证信息----------*/
-
-export async function handleCopyrightInfo(req, res) {
+/**
+ * @description 查询版权信息。
+ * @param {int[]}copyrightIds 版权通证标识列表
+ * @returns {Object[]} 版权通证信息列表，具体数据格式见文档
+ */
+export async function handleCopyrightInfo(req) {
 
     console.time('handleCopyrightInfo');
 
@@ -165,9 +171,12 @@ export async function handleCopyrightInfo(req, res) {
 
 }
 
-/*----------查询许可通证信息----------*/
-
-export async function handleApproveInfo(req, res) {
+/**
+ * @description 查询许可信息。
+ * @param {int[]}approveIds 许可通证标识列表
+ * @returns {Object[]} 许可通证信息列表，具体数据格式见文档
+ */
+export async function handleApproveInfo(req) {
 
     console.time('handleApproveInfo');
 
