@@ -5,10 +5,10 @@ import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
 
-import {mysqlConf} from '../../../utils/info.js';
+import {mysqlTestConf} from '../../../utils/info.js';
 import util from 'util';
 
-const c = mysql.createConnection(mysqlConf);
+const c = mysql.createConnection(mysqlTestConf);
 c.connect(); // mysql连接
 
 /**

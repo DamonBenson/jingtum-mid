@@ -214,6 +214,14 @@ const mysqlConf = {
     port: '3306',
     database: 'jingtum'
 }
+// 用于测试使用的数据库，存入的数据无区块链共识
+const mysqlTestConf = {
+    host: '39.102.93.47',
+    user: 'root',
+    password: 'bykyl626',
+    port: '3306',
+    database: 'Fake_jingtum'
+}
 
 const debugMode = true;
 
@@ -235,4 +243,4 @@ const availableSellAddr = {
 
 const auditSystemAccount = userAccount[0];
 
-export {pic, chains, userAccount, userAccountIndex, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs, availableSellAddr, auditSystemAccount};
+export {pic, chains, userAccount, userAccountIndex, userMemo, authMemo, rightTokenName, approveTokenName, ipfsConf, mysqlConf, mysqlTestConf, debugMode, buyOrderContractAddrs, sellOrderContractAddrs, availableSellAddr, auditSystemAccount};
