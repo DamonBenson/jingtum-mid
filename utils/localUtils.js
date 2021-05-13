@@ -137,6 +137,17 @@ export function toMysqlObj(obj) {
     }
 }
 
+/*----------mysql命名对象转js命名对象----------*/
+
+export function fromMysqlObj(obj) {
+    for(let key in obj) {
+        if(toHump(key) != key) {
+            obj[toHump(key)] = obj[key];
+            delete obj[key];
+        }
+    }
+}
+
 // /*----------时间戳转mysql的date格式----------*/
 
 // export function toMysqlDate(ts) {
