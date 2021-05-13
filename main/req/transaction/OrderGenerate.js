@@ -26,7 +26,9 @@ export function generateBuyOrderOutBand() {
     let subBuyOrderList = generateSubBuyOrder();
     let limitPrice = localUtils.randomNumber(1000, 10000);
     let tradeStrategy = localUtils.randomSelect([0,1]); // 0-性价比最高策略 1-价格最低策略
+    // let authorizationType = localUtils.randomNumber(0,9); // 十个授权方式
     let authorizationType = localUtils.randomNumber(0,9); // 十个授权方式
+
     let authorizationInfo = generateAuthorizationInfo(authorizationType);
     let side = 0;
     let buyOrder = {
@@ -49,7 +51,8 @@ export function generateBuyOrderOutBand() {
 export function generateBuyOrder() {
     
     let subBuyOrderList = generateSubBuyOrder();
-    let limitPrice = localUtils.randomNumber(1000, 10000);
+    let limitPrice = localUtils.randomNumber(5000, 40000);
+    // limitPrice = 40000;
     let tradeStrategy = localUtils.randomSelect([0,1]); // 0-性价比最高策略 1-价格最低策略
     let authorizationType = localUtils.randomNumber(0,9); // 十个授权方式
     let authorizationInfo = generateAuthorizationInfo(authorizationType);
@@ -100,10 +103,12 @@ export function generateLabelDemand_AND_LabeWeight() {
         3: {},
         4: {},
     }
+
+    // ORIGIN 
     for(let i = 0; i < 5; i++) {
         let Demand =[];
         for(let j = 0; j < 5; j++) {
-            if(localUtils.randomSelect([0,1,2,3]) == 1){// 增加标签
+            if(localUtils.randomNumber(1,4) == 1){// 增加标签
                 Demand.push(j);  
                 labelWeight[i][j] = localUtils.randomNumber(5,10);  
             }
@@ -111,9 +116,41 @@ export function generateLabelDemand_AND_LabeWeight() {
         labelDemand[i] = Demand;
     }
 
+    // Less 
+    // let count = 0;
+    // while(count == 0 ){
+    //     count = 0;
+    //     for(let i = 0; i < 5; i++) {
+    //         let Demand =[];
+    //         for(let j = 0; j < 5; j++) {
+    //             if(localUtils.randomNumber(1,25) == 1){// 增加标签
+    //                 Demand.push(j);  
+    //                 labelWeight[i][j] = localUtils.randomNumber(5,10);  
+    //                 count = 1;
+    //             }
+    //         }
+    //         labelDemand[i] = Demand;
+    //     }
+    //     console.log(labelDemand,count);
+    // }
+
+    // All 
+    // for(let i = 0; i < 5; i++) {
+    //     let Demand =[];
+    //     for(let j = 0; j < 5; j++) {
+    //         Demand.push(j);  
+    //         labelWeight[i][j] = localUtils.randomNumber(5,10);  
+    //     }
+    //     labelDemand[i] = Demand;
+    // }
+    // labelDemand[4] = [];
+    
+
     for(let i = 0; i < 5; i++) {
         for(let j = 0; j < 5; j++) {
             if(labelWeight[i][j] == null){
+                // if(localUtils.randomSelect([0,1,2,3,4]) == 1)// 该标签不赋值
+                //     1 == 1;
                 if(localUtils.randomSelect([0,1]) == 1)// 喜欢
                     labelWeight[i][j] = localUtils.randomNumber(5,10);
                 else
@@ -219,6 +256,8 @@ export function generateAuthorizationInfo(authorizationType) {
 export function generateSellOrder(wrokIds, sellerAddr) {
     let labelSet = generateLabelSet();
     let basePrice = localUtils.randomNumber(100, 1000);
+    // basePrice = 0;
+
     let expectedPrice = generateExpectedPrice(basePrice);
 
     let sellOrder = {
@@ -242,6 +281,8 @@ export function generateSellOrder(wrokIds, sellerAddr) {
 export function generateSellOrderOutBand(wrokIds, sellerAddr) {
     let labelSet = generateLabelSet();
     let basePrice = localUtils.randomNumber(100, 1000);
+    // basePrice = 0;
+
     let expectedPrice = generateExpectedPrice(basePrice);
 
     let sellOrder = {
@@ -272,6 +313,7 @@ export function generateLabelSet() {
             if(localUtils.randomSelect([0,1,2,3]) == 1){// 增加标签
                 Demand.push(j);  
             }
+            // Demand.push(j); 
         }
         labelSet[i] = Demand;
     }

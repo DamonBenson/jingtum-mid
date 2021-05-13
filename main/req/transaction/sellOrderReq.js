@@ -45,8 +45,9 @@ contractRemote.connect(async function(err, res) {
 
 });
 
-async function postSellOrderReq() {
+async function postSellOrderReq(SELLORDER = null) {
     console.time('sellOrderReq');
+
 
     for(let i = 0; i < sellOrderAmount; i++) {
 
@@ -72,16 +73,23 @@ async function postSellOrderReq() {
         //     return [workInfo.work_id,workInfo.addr];
         // });
         let sellOrder = null;
-        if (outband == true){
-            sellOrder = OrderGenerate.generateSellOrderOutBand(workIds, sellerAddr);
-
-            console.log("generateSellOrderOutBand");
+        if(SELLORDER != null){
+            sellOrder = SELLORDER;
         }
+        // 无参时：构造
         else{
-            sellOrder = OrderGenerate.generateSellOrder(workIds, sellerAddr);
-
-            console.log("generateSellOrder");
+            if (outband == true){
+                sellOrder = OrderGenerate.generateSellOrderOutBand(workIds, sellerAddr);
+    
+                console.log("generateSellOrderOutBand");
+            }
+            else{
+                sellOrder = OrderGenerate.generateSellOrder(workIds, sellerAddr);
+    
+                console.log("generateSellOrder");
+            }
         }
+
 
         if(debugMode) {
             console.log('sellOrder:', sellOrder);
