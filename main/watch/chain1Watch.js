@@ -50,7 +50,7 @@ r.connect(async function(err, result) {
 
         // 开始计时
         console.log('on ledger_closed: ' + msg.ledger_index);
-        console.time('chain0Watch');
+        console.time('chain1Watch');
 
         // 获取所有交易哈希
         let ledgerIndex = msg.ledger_index;
@@ -145,7 +145,7 @@ r.connect(async function(err, result) {
         await processTransferRightToken(transferRightTokenTxs, transferRightTokenTxs.length);
 
         // 结束计时
-        console.timeEnd('chain0Watch');
+        console.timeEnd('chain1Watch');
         console.log('--------------------');
 
     });
