@@ -13,7 +13,7 @@ const c = mysql.createConnection(mysqlTestConf);
 c.connect(); // mysql连接
 
 
-MimicAuthInsert()
+MimicAuthInsert();
 function MimicAuthInsert(){
         // 发送上传请求至http服务器mainMid.js.
         let addr = userAccount[userAccountIndex[localUtils.randomSelect(["用户1", "用户2"])]].address;
@@ -39,7 +39,7 @@ function MimicAuthInsert(){
         // 中间层               许可记录在数据库
         // ApprSave(Appr);
 }
-function generateworkAuth(){
+export function generateworkAuth(){
     let fileNum = localUtils.randomSelect([1,2,3,4],[0.7,0.2,0.07,0.003]);
     let upload_fileInfoList = []
     while(fileNum >0 ){
@@ -55,11 +55,11 @@ function generateworkAuth(){
         workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
         fileInfoList:upload_fileInfoList,
         creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
-        createdTime:"2018-12-31",// 创作/制作完成时间
+        createdTime:"20181231",// 创作/制作完成时间
         createdPlace:"BUPT",
         publishStatus:localUtils.randomSelect(["Unpublished","Published"]),//发表状态，取值为Unpublished [未发表]，或者为Published (publishInfo) 
         publishInfo:{
-            publishedTime:"2018-12-31",
+            publishedTime:"20181231",
             publishedSite:'http://yjxt.bupt.edu.cn/Gstudent'
         }
     };
@@ -99,7 +99,7 @@ function chain1watchResponse(workAuth, addr){
     return work;
 }
 
-function generateworkCopyRight(workAuth){
+export function generateworkCopyRight(workAuth){
 
     let workCopyRight = [];
     let Name = sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,4);
