@@ -90,25 +90,25 @@ uploadRemote.connect(async function(err, res) {
 
             // 激活账户
             infoRouter.post('/activateAccount', async function(req, res) {
-                let resInfo = await infoMid.handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req, res);
+                let resInfo = await infoMid.handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req);
                 res.send(resInfo);
             });
 
             // 作品信息查询
             infoRouter.get('/work', async function(req, res) {
-                let resInfo = await infoMid.handleWorkInfo(req, res);
+                let resInfo = await infoMid.handleWorkInfo(req);
                 res.send(resInfo);
             });
 
             // 版权信息查询
             infoRouter.get('/copyright', async function(req, res) {
-                let resInfo = await infoMid.handleCopyrightInfo(req, res);
+                let resInfo = await infoMid.handleCopyrightInfo(req);
                 res.send(resInfo);
             });
 
             // 许可信息查询
             infoRouter.get('/approve', async function(req, res) {
-                let resInfo = await infoMid.handleApproveInfo(req, res);
+                let resInfo = await infoMid.handleApproveInfo(req);
                 res.send(resInfo);
             });
 
@@ -130,7 +130,7 @@ uploadRemote.connect(async function(err, res) {
 
             // 版权确权请求
             authRouter.post('/copyright', async function(req, res) {
-                let resInfo = await authMid.handleCopyrightAuth(contractRemote, seqObj, req, res);
+                let resInfo = await authMid.handleCopyrightAuth(contractRemote, seqObj, req);
                 res.send(resInfo);
             });
 
@@ -141,7 +141,7 @@ uploadRemote.connect(async function(err, res) {
 
             // 确权状态查询
             authRouter.get('/state', async function(req, res) {
-                let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req, res);
+                let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req);
                 res.send(resInfo);
             });
 
@@ -244,7 +244,7 @@ uploadRemote.connect(async function(err, res) {
 
             // 许可通证生成（对于平台内部匹配的交易）
             transactionRouter.post('/approveConfirm', async function(req, res) {
-                let resInfo = await transactionMid.handleApproveConfirm(tokenRemote, seqObj, req, res);
+                let resInfo = await transactionMid.handleApproveConfirm(tokenRemote, seqObj, req);
                 res.send(resInfo);
             });
 

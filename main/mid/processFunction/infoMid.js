@@ -159,7 +159,7 @@ export async function handleCopyrightInfo(req) {
         }
         let sql = sqlText.table('right_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
-    })
+    });
     let copyrightInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
     console.timeEnd('handleCopyrightInfo');
