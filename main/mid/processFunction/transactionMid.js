@@ -868,7 +868,7 @@ const tokenChain = chains[0]; // 交易链
  * @param {Object[]}sellOrderInfoList 包括卖方地址sellerAddr、卖方私钥sellerSecret、版权通证标识copyrightId
  * @returns {Object[]} 包括版权通证标识copyrightId、许可通证标识approveId
  */
-export async function handleApproveConfirm(tokenRemote, seqObj, req, res) {
+export async function handleApproveConfirm(tokenRemote, seqObj, req) {
 
     console.time('handleApproveConfirm');
 

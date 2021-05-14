@@ -38,8 +38,7 @@ contractRemote.connect(async function(err, res) {
     let deployRes = await contract.initContract(platformAddr, platformSecret, contractRemote, seq++, abi, payload, true);
 
     let contractAddr = deployRes.ContractState;
-    let abiBuffer = Buffer.from(JSON.stringify(abi));
-    let abiHash = await ipfsUtils.add(ipfs, abiBuffer);
+    let abiHash = await ipfsUtils.add(abi);
     let contractInfo = {
         contract_addr: contractAddr,
         abi_hash: abiHash,
