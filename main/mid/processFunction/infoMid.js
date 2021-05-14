@@ -59,9 +59,9 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
     for(let j = addAmount - 1; j >= 0; j--) {
         let a = walletArr[j].address;
         // 转账激活账号
-        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, uploadRemote, seqObj.mid.token++, a, 10, 'Activate account', true));
-        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, tokenRemote, seqObj.mid.token++, a, 10, 'Activate account', true));
-        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, contractRemote, seqObj.mid.contract++, a, 10, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, uploadRemote, seqObj.mid.token++, a, 100, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, tokenRemote, seqObj.mid.token++, a, 100, 'Activate account', true));
+        activatePromises.push(tx.buildPaymentTx(midAddr, midSecr, contractRemote, seqObj.mid.contract++, a, 100, 'Activate account', true));
     }
     await Promise.all(activatePromises);
 

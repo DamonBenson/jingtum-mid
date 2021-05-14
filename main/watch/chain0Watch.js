@@ -144,11 +144,15 @@ async function processUpload(uploadTxs, loopConter) {
         workInfo.fileInfoList = fileInfoList;
         delete workInfo.fileInfoListHash;
 
-        if(workInfo.publishStatus == 1) {
+        if(workInfo.publishStatus == 'Published') {
+            workInfo.publishStatus = 1;
             let publishInfoHash = workInfo.publishInfoHash;
             let publishInfo = JSON.parse(await ipfsUtils.get(ipfs, publishInfoHash));
             Object.assign(workInfo, publishInfo);
             delete workInfo.publishInfoHash;
+        }
+        else {
+            workInfo.publishStatus = 0;
         }
 
         localUtils.toMysqlObj(workInfo);
