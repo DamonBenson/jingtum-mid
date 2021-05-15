@@ -115,18 +115,18 @@ r.connect(async function(err, result) {
                     txTokenName = processedTx.token;
                     switch(txTokenName) {
                         case tokenName.copyright:
-                            if(src == userAccount.authorizeAccount.address && dst != userAccount.authorizeAccount.address) {
+                            if(src == userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address) {
                                 issueRightTokenTxs.push(processedTx);
                             }
-                            else if(src != userAccount.authorizeAccount.address && dst != userAccount.authorizeAccount.address) {
+                            else if(src != userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address) {
                                 transferRightTokenTxs.push(processedTx);
                             }
                             break;
                         case tokenName.approve:
-                            if(src == userAccount.authorizeAccount.address && dst != userAccount.authorizeAccount.address) {
+                            if(src == userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
                                 issueApproveTokenTxs.push(processedTx);
                             }
-                            else if(src != userAccount.authorizeAccount.address && dst != userAccount.authorizeAccount.address) {
+                            else if(src != userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
                                 transferApproveTokenTxs.push(processedTx);
                             }
                             break;
@@ -161,16 +161,16 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
 
         let txMemos = issueRightTokenTx.memos;
-        let rightInfo = localUtils.memos2obj(txMemos);
+        let rightInfo = localUtils.tokenInfos2obj(txMemos);
 
         rightInfo.copyrightId = issueRightTokenTx.tokenId;
         rightInfo.timestamp = issueRightTokenTx.date;
         rightInfo.address = issueRightTokenTx.receiver;
 
-        let copyrightHolderHash = rightInfo.copyrightHolderHash;
-        let copyrightHolder = JSON.parse(await ipfsUtils.get(ipfs, copyrightHolderHash));
+        let copyrightHolderHash = rightInfo.copyrightHolder;
+        let copyrightHolder = await ipfsUtils.get(ipfs, copyrightHolderHash);
         Object.assign(rightInfo, copyrightHolder);
-        delete rightInfo.copyrightHolderHash;
+        delete rightInfo.copyrightHolder;
 
         localUtils.toMysqlObj(rightInfo);
         console.log(rightInfo);

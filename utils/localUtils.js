@@ -84,33 +84,7 @@ export function formatStr(num, len) {
 //     }, 0);
 // }
 
-/*----------对象转为ERC721Memos格式----------*/
 
-export function obj2memos(obj) {
-    let memos = [];
-    for(let k in obj) {
-        let memoObj = {
-            type: k,
-            data: obj[k].toString()
-        };
-        memos.push(memoObj);
-    }
-    return memos;
-}
-
-/*----------ERC721Memos格式转为对象----------*/
-
-export function memos2obj(arr) {
-    let obj = new Object();
-    for(let i = arr.length - 1; i >= 0; i--) {
-        let k = arr[i].MemoType;
-        let v = arr[i].MemoData;
-        obj[k] = v;
-    }
-    obj['copyrightType'] = Number(obj['copyrightType']);
-    obj['idType'] = Number(obj['idType']);
-    return obj;
-}
 
 /*----------下划线转驼峰----------*/
 
@@ -146,6 +120,7 @@ export function fromMysqlObj(obj) {
             delete obj[key];
         }
     }
+    return obj;
 }
 
 // /*----------时间戳转mysql的date格式----------*/
@@ -154,12 +129,62 @@ export function fromMysqlObj(obj) {
 //     return (new Date(ts * 1000)).toJSON().slice(0, 19).replace('/T.*/', ' ');
 // }
 
-/*----------拼接函数表达式----------*/
+/**
+ * @description 将对象转为链上的ERC721tokenInfos数据格式。
+ * @param {Object}obj tokensInfo对象
+ * @returns {Object[]} 链上的ERC721tokenInfos数据格式，包括type属性名、data属性值
+ */
+export function obj2tokenInfos(obj) {
+    let tokenInfos = [];
+    for(let k in obj) {
+        let tokenInfosObj = {
+            type: k,
+            data: obj[k].toString()
+        };
+        tokenInfos.push(tokenInfosObj);
+    }
+    return tokenInfos;
+}
 
-export function generateFuncStr(funcName, funcArgs) {
+/**
+ * @description 将链上的ERC721tokenInfos数据格式转为对象。
+ * @param {Object[]}arr 链上的ERC721tokenInfos数据，包括MemoType属性名、MemoData属性值
+ * @returns {Object} MemoType作为key，MemoData作为value的js对象
+ */
+export function tokenInfos2obj(arr) {
+    let obj = new Object();
+    for(let i = arr.length - 1; i >= 0; i--) {
+        let k = arr[i].MemoType;
+        let v = arr[i].MemoData;
+        obj[k] = v;
+    }
+    if(obj.hasOwnProperty('copyrightType')) {
+        obj['copyrightType'] = Number(obj['copyrightType']);
+    }
+    if(obj.hasOwnProperty('idType')) {
+        obj['idType'] = Number(obj['idType']);
+    }
+    return obj;
+}
 
-    let funcStr = funcName + "('" + funcArgs.join("','") + "')";
-    console.log(funcStr);
-    return funcStr;
+/**
+ * @description 将拥有修改flag和tokenInfos权限的地址数组，转为提交链上交易需要的格式。
+ * @param {String[]}flagAddrs 拥有修改flag权限的地址数组
+ * @param {String[]}tokenInfosAddrs 拥有修改tokenInfos权限的地址数组
+ * @returns {Object[]} 提交链上交易需要的权限列表格式，包括地址role、权限类型type
+ */
+export function toRolesArr(flagAddrs, tokenInfosAddrs) {
 
+    let rolesArr = [];
+
+    flagAddrs.forEach(flagAddr => {
+        rolesArr.push({role: flagAddr, type: 1});
+    });
+
+    tokenInfosAddrs.forEach(tokenInfosAddr => {
+        rolesArr.push({role: tokenInfosAddr, type: 2});
+    });
+
+    return rolesArr;
+    
 }

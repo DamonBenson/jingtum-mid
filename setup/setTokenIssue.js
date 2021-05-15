@@ -7,11 +7,14 @@ import {userAccount, chains, tokenName} from '../utils/config/jingtum.js';
 const tokenChain = chains[1];
 const issuerAddr = tokenChain.account.issuer.address;
 
-// const token = tokenName.copyright;
-// const addr = ; //百度智能授权系统
+const token = tokenName.copyright;
+const addr = userAccount.fakeBaiduAuthorizeAccount.address; //百度智能授权系统
+const flagAddrs = userAccount.superviseAccount.map(acc => acc.address);
+const tokenInfosAddrs = userAccount.authenticateAccount.map(acc => acc.address);
 
-const token = tokenName.approve;
-const addr = userAccount.authorizeAccount.address; //中间层智能授权系统
+// const token = tokenName.approve;
+// const addr = userAccount.buptAuthorizeAccount.address; //中间层智能授权系统
+// const flagAddrs = userAccount.superviseAccount.map(acc => acc.address);
 
 const Remote = jlib.Remote;
 const r = new Remote({server: tokenChain.server[0], local_sign: true});
@@ -32,8 +35,8 @@ r.connect(async function(err, result) {
     let accountInfo = await requestInfo.requestAccountInfo(issuerAddr, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await erc721.buildTokenIssueReq(r, addr, seq++, token, 100000000, true);
-
+    await erc721.buildTokenIssueTx(r, addr, seq++, token, 100000000, flagAddrs, tokenInfosAddrs, true);
+    
     r.disconnect();
 
 });

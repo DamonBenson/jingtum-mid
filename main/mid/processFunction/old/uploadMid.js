@@ -68,7 +68,7 @@ export async function handleUpload(uploadRemote, seqObj, req, res) {
         workHash: 'QmcpdLr5gy6dWpGjuQgwuYPzsBJRXc7efbdTeDUTABQaD3',
         workInfoHash: 'QmcmdhJ2zVCSc4yffgQXPzk6YcanX3wUvDeZzACjBCXX2Q'
     } */
-    let paymentRes = await tx.buildPaymentTx(a0, s0, uploadRemote, seqObj.a0.token++, addr, 0.000001, uploadMemos, true);
+    let paymentRes = await tx.buildPaymentTx(uploadRemote, a0, s0, seqObj.a0.token++, addr, 0.000001, uploadMemos, true);
     let hash = paymentRes.tx_json.hash;
 
     // 结束计时

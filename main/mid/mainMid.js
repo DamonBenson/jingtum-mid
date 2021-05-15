@@ -17,7 +17,7 @@ const uploadChain = chains[0]; // 存证链
 const tokenChain = chains[1]; // 交易链
 const contractChain = chains[2]; // 权益链
 
-const authorizeAddr = userAccount.authorizeAccount.address; // 智能授权系统（中间层部分）
+const authorizeAddr = userAccount.buptAuthorizeAccount.address; // 智能授权系统（中间层部分）
 const matchSystemAddr = userAccount.matchSystemAccount.address; // 智能交易系统
 const midAddr = userAccount.midAccount.address; // 中间层
 
@@ -82,6 +82,7 @@ uploadRemote.connect(async function(err, res) {
             seqObj.mid.upload = (await requestInfo.requestAccountInfo(midAddr, uploadRemote, false)).account_data.Sequence;
             seqObj.mid.token = (await requestInfo.requestAccountInfo(midAddr, tokenRemote, false)).account_data.Sequence;
             seqObj.mid.contract = (await requestInfo.requestAccountInfo(midAddr, contractRemote, false)).account_data.Sequence;
+            console.log(seqObj);
 
             /**
              * @description 信息查询相关请求路由。

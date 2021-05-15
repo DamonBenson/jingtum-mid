@@ -5,7 +5,7 @@ import * as tx from '../utils/jingtum/tx.js';
 
 import {chains} from '../utils/config/jingtum.js';
 
-const addAmount = 10;
+const addAmount = 3;
 const addLoopCounter = addAmount - 1;
 
 const Remote = jlib.Remote;
@@ -56,7 +56,7 @@ for(let i = chains.length - 1; i >= 0; i--) {
         let activatePromises = new Array(addAmount);
         for(let j = addLoopCounter; j >= 0; j--) {
             let a = walletArr[j].address;
-            activatePromises[j] = tx.buildPaymentTx(rootAddr, rootSecr, r, seq++, a, 100000000, 'setup', true); // 转账激活账号
+            activatePromises[j] = tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, a, 100000000, 'setup', true); // 转账激活账号
         }
         await Promise.all(activatePromises);
 

@@ -1,33 +1,46 @@
-import {chains} from '../info.js';
+import * as localUtils from '../localUtils.js';
 
-const tokenChain = chains[0];
-const ai = tokenChain.account.issuer.address;
-const si = tokenChain.account.issuer.secret;
+import {chains} from '../config/jingtum.js';
 
-/*----------授权发行通证----------*/
+const tokenChain = chains[1];
+const issuerAddr = tokenChain.account.issuer.address;
+const issuerSecr = tokenChain.account.issuer.secret;
 
-export function buildTokenIssueReq(r, addr, seq, name, num, showRes) {
+/**
+ * @description 设置发行权限。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}publisher 被授权发行的地址
+ * @param {int}seq 动态发币账号的交易序列号
+ * @param {String}name 被授权发行的通证名称
+ * @param {int}num 被授权发行的通证数量
+ * @param {String[]}flagAddrs 拥有修改flag权限的地址数组
+ * @param {String[]}tokenInfosAddrs 拥有修改tokenInfos权限的地址数组
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
+ */
+export function buildTokenIssueTx(remote, publisher, seq, name, num, flagAddrs, tokenInfosAddrs, showRes) {
 
-    let tx = r.buildTokenIssueTx({
-        account: ai,
-        publisher: addr,
+    let tx = remote.buildTokenIssueTx({
+        account: issuerAddr,
+        publisher: publisher,
         token: name,
-        number: num
+        number: num,
+        roles: localUtils.toRolesArr(flagAddrs, tokenInfosAddrs),
     });
 
-    tx.setSecret(si);
+    tx.setSecret(issuerSecr);
 
     tx.setSequence(seq);
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
             if(err) {
-                console.log('err:',err);
+                console.log('err:', err);
                 reject('err');
             }
             else if(result){
                 if(showRes) {
-                    console.log('buildTokenIssueReq:', result);
+                    console.log('buildTokenIssueTx:', result);
                 }
                 resolve(result);
             }
@@ -36,19 +49,30 @@ export function buildTokenIssueReq(r, addr, seq, name, num, showRes) {
 
 }
 
-/*----------发行通证----------*/
+/**
+ * @description 发行一般通证。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}publisher 发行通证账号的地址
+ * @param {String}secret 发行通证账号的私钥
+ * @param {int}seq 发行通证账号的交易序列号
+ * @param {String}dest 获得通证的地址
+ * @param {String}name 待发行通证的名称
+ * @param {String}id 待发行通证的标识
+ * @param {Object}tokenInfos 待发行通证的通证信息
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
+ */
+export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, tokenInfos, showRes) {
 
-export function buildIssueTokenTx(s, r, seq, p, addr, name, id, memos, showRes) {
-
-    let tx = r.buildTransferTokenTx({
-        publisher: p,
-        receiver: addr,
+    let tx = remote.buildTransferTokenTx({
+        publisher: publisher,
+        receiver: dest,
         token: name,
         tokenId: id,
-        memos: memos
+        tokenInfos: localUtils.obj2tokenInfos(tokenInfos),
     });
 
-    tx.setSecret(s);
+    tx.setSecret(secret);
 
     tx.setSequence(seq);
 
@@ -60,8 +84,8 @@ export function buildIssueTokenTx(s, r, seq, p, addr, name, id, memos, showRes) 
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildIssueTokenTx:', result);
-                    console.log('buildIssueTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                    // console.log('buildPubTokenTx:', result);
+                    console.log('buildPubTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -70,53 +94,80 @@ export function buildIssueTokenTx(s, r, seq, p, addr, name, id, memos, showRes) 
 
 }
 
-// /*----------授予通证----------*/
+/**
+ * @description 发行许可通证。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}publisher 发行通证账号的地址
+ * @param {String}secret 发行通证账号的私钥
+ * @param {int}seq 发行通证账号的交易序列号
+ * @param {String}dest 获得通证的地址
+ * @param {String}name 待发行通证的名称
+ * @param {String}id 待发行通证的标识
+ * @param {Object}tokenInfos 发行的通证信息
+ * @param {String}refId 待发行通证的引用通证标识
+ * @param {Object}refAddr 待发行通证的引用通证所有者地址
+ * @param {Object}refSecr 待发行通证的引用通证所有者私钥
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
+ */
+export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, name, id, tokenInfos, refId, refAddr, refSecr, showRes) {
 
-// export function buildAuthTokenTx(s, r, seq, p, rcv, name, id, showRes) {
-
-//     let tx = r.buildTransferTokenTx({
-//         publisher: p,
-//         receiver: rcv,
-//         token: name,
-//         tokenId: id,
-//         memos: []
-//     });
-
-//     tx.setSecret(s);
-
-//     tx.setSequence(seq);
-
-//     return new Promise((resolve, reject) => {
-//         tx.submit(function(err, result) {
-//             if(err) {
-//                 console.log('err:',err);
-//                 reject('err');
-//             }
-//             else if(result){
-//                 if(showRes) {
-//                     // console.log('buildAuthTokenTx:', result);
-//                     console.log('buildAuthTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
-//                 }
-//                 resolve(result);
-//             }
-//         });
-//     });
-
-// }
-
-/*----------转让通证----------*/
-
-export function buildTransferTokenTx(s, r, seq, p, rcv, name, id, showRes) {
-
-    let tx = r.buildTransferTokenTx({
-        publisher: p,
-        receiver: rcv,
+    let tx = remote.buildTransferTokenTx({
+        publisher: publisher,
+        receiver: dest,
         token: name,
         tokenId: id,
-        memos: []
+        tokenInfos: localUtils.obj2tokenInfos(tokenInfos),
+        referenceId: refId,
     });
 
-    tx.setSecret(s);
+    tx.setSecret(secret);
+
+    tx.setSequence(seq);
+
+    tx.ownerSign({
+        account: refAddr,
+        secret: refSecr,
+    });
+
+    return new Promise((resolve, reject) => {
+        tx.submit(function(err, result) {
+            if(err) {
+                console.log('err:',err);
+                reject('err');
+            }
+            else if(result){
+                if(showRes) {
+                    // console.log('buildPubApproveTokenTx:', result);
+                    console.log('buildPubApproveTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                }
+                resolve(result);
+            }
+        });
+    });
+
+}
+
+/**
+ * @description 转让通证。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}src 通证所有者的地址
+ * @param {String}secret 通证所有者的私钥
+ * @param {int}seq 通证所有者的交易序列号
+ * @param {String}dest 获得通证的地址
+ * @param {String}id 待转让通证的标识
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
+ */
+export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes) {
+
+    let tx = remote.buildTransferTokenTx({
+        publisher: src,
+        receiver: dest,
+        tokenId: id,
+    });
+
+    tx.setSecret(secret);
 
     tx.setSequence(seq);
 
@@ -138,16 +189,62 @@ export function buildTransferTokenTx(s, r, seq, p, rcv, name, id, showRes) {
 
 }
 
-/*----------查询通证信息----------*/
+/**
+ * @description 修改通证信息。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}src 通证修改者的地址
+ * @param {String}secret 通证修改者的私钥
+ * @param {int}seq 通证修改者的交易序列号
+ * @param {String}id 待修改通证的标识
+ * @param {Object}tokenInfos 添加的通证信息
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
+ */
+export function buildTokenChangeTx(remote, src, secret, seq, id, tokenInfos, showRes) {
 
-export function requestTokenInfo(r, tokenId, showRes) {
-
-    let tx = r.requestTokenInfo({
-        tokenId: tokenId
+    let tx = remote.buildTransferTokenTx({
+        account: src,
+        tokenId: id,
+        tokenInfos: localUtils.obj2tokenInfos(tokenInfos),
     });
+
+    tx.setSecret(secret);
+
+    tx.setSequence(seq);
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
+            if(err) {
+                console.log('err:',err);
+                reject('err');
+            }
+            else if(result){
+                if(showRes) {
+                    // console.log('buildTokenChangeTx:', result);
+                    console.log('buildTokenChangeTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                }
+                resolve(result);
+            }
+        });
+    });
+
+}
+
+/**
+ * @description 查询通证信息。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}id 待查询通证的标识
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 查询结果，具体格式见jingtum-lib文档
+ */
+export function requestTokenInfo(remote, id, showRes) {
+
+    let req = remote.requestTokenInfo({
+        tokenId: id,
+    });
+
+    return new Promise((resolve, reject) => {
+        req.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
                 reject('err');

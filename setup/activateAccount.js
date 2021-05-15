@@ -32,8 +32,8 @@ for(let i = chains.length - 1; i >= 0; i--) {
         let accountInfo = await requestInfo.requestAccountInfo(rootAddr, r, true);
         let seq = accountInfo.account_data.Sequence;
     
-        await tx.buildPaymentTx(rootAddr, rootSecr, r, seq++, chargeAddr, 100000000, 'setup', true);
-        await tx.buildPaymentTx(rootAddr, rootSecr, r, seq++, issuerAddr, 100000000, 'setup', true);
+        await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, chargeAddr, 100000000, 'setup', true);
+        await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, issuerAddr, 100000000, 'setup', true);
     
         r.disconnect();
     

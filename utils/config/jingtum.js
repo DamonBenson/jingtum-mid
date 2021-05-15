@@ -5,7 +5,11 @@
 export const userAccount = {
 
     // 必需用户，需要中间层保存
-    authorizeAccount: {
+    baiduAuthorizeAccount: {
+        address: 'jLDWh1YKsoCiXfAVPdat4GKzihHTYDkH3R',
+        secret: 'spqRyePwa293pWzboo1sT3Wn5m1TU',
+    },
+    buptAuthorizeAccount: {
         address: 'jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6',
         secret: 'saBoC8kDkPMxR4Z4eom4LCprhopw8',
     },
@@ -19,6 +23,10 @@ export const userAccount = {
     },
 
     // 模拟用户，仅用于测试阶段
+    fakeBaiduAuthorizeAccount: {
+        address: 'jGt4jgACfyFaW7AkPb48PRsD64491M85GF',
+        secret: 'spzH4oxRN1DhnkfYbohgbTyufQ43C',
+    },
     authenticateAccount: [
         {
             address: 'jJEu6rexDXzxcgZ9QJQLbmv8yVxCG6nsR7',
@@ -31,6 +39,20 @@ export const userAccount = {
         {
             address: 'jLzeqpW9Dyi1hRTVcFTfg3etzsmkV2atsn',
             secret: 'snAA68npSXvfzP1e2C8ijWi6QNuca',
+        },
+    ],
+    superviseAccount: [
+        {
+            address: 'j9evNeEWz4oGqwjNBmG1wTfS1tpyNhy3EW',
+            secret: 'sajkSufoJay2TcJfxDKRdxdx7EayS',
+        },
+        {
+            address: 'j4X6uBNtpy2SNTmWaJmzZ5vctauL5rB2MG',
+            secret: 'shiMBzrVUJDaG1ZGcu9jQfvaurGvJ',
+        },
+        {
+            address: 'jUuYkb47vBPjzr24Xa3tuaPc4W2fkeAE3h',
+            secret: 'saszDK4gSFXJ8p83B3sr7x8m8q6si',
         },
     ],
     buyPlatformAccount: [
