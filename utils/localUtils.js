@@ -149,13 +149,13 @@ export function obj2tokenInfos(obj) {
 /**
  * @description 将链上的ERC721tokenInfos数据格式转为对象。
  * @param {Object[]}arr 链上的ERC721tokenInfos数据，包括MemoType属性名、MemoData属性值
- * @returns {Object} MemoType作为key，MemoData作为value的js对象
+ * @returns {Object} type作为key，data作为value的js对象
  */
 export function tokenInfos2obj(arr) {
     let obj = new Object();
     for(let i = arr.length - 1; i >= 0; i--) {
-        let k = arr[i].MemoType;
-        let v = arr[i].MemoData;
+        let k = arr[i].type;
+        let v = arr[i].data;
         obj[k] = v;
     }
     if(obj.hasOwnProperty('copyrightType')) {

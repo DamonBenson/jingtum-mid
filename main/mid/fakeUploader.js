@@ -51,10 +51,14 @@ uploadRemote.connect(async function(err, res) {
 
             let workId = workRes.tx_json.hash;
             let copyrightInfoArr = await generateCopyrightInfo();
-            copyrightInfoArr.forEach(copyrightInfo => {
+
+            copyrightInfoArr.forEach(async (copyrightInfo, index) => {
+                if(index != 0) return;
                 copyrightInfo.workId = workId;
                 copyrightInfo = copyrightInfo;
-                let copyrightRes = await erc721.buildPubTokenTx(tokenRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, tokenSeq++, recvAddr, tokenName.copyright, sha256(workId + copyrightInfo.copyrightType), copyrightInfo, true);
+                let tokenId = sha256(workId + copyrightInfo.copyrightType).toString();
+                console.log(copyrightInfo);
+                let copyrightRes = await erc721.buildPubTokenTx(tokenRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, tokenSeq++, recvAddr, tokenName.copyright, tokenId, copyrightInfo, true);
             })
             
             await localUtils.sleep(10000);
@@ -83,7 +87,9 @@ async function generateCopyrightInfo() {
 
     let copyrightInfoArr = mimic.generateworkCopyRight();
 
-    copyrightInfoArr = copyrightInfoArr.map(copyrightInfo => {
+    for (let i = 0; i < copyrightInfoArr.length; i++) {
+
+        let copyrightInfo = copyrightInfoArr[i];
 
         let copyrightHolder = {
             name: copyrightInfo.name,
@@ -101,9 +107,9 @@ async function generateCopyrightInfo() {
         delete copyrightInfo.city;
         delete copyrightInfo.workSig;
 
-        return copyrightInfo; 
-
-    });
+        copyrightInfoArr[i] = copyrightInfo;
+        
+    }
 
     return copyrightInfoArr;
     

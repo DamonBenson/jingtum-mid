@@ -99,7 +99,7 @@ r.connect(async function(err, result) {
         let issueRightTokenTxs = [];
         let issueApproveTokenTxs = [];
         let transferRightTokenTxs = [];
-        let transferRightTokenTxs = [];
+        let transferApproveTokenTxs = [];
 
         for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
@@ -160,15 +160,16 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
 
-        let txMemos = issueRightTokenTx.memos;
-        let rightInfo = localUtils.tokenInfos2obj(txMemos);
+        let tokenInfos = issueRightTokenTx.tokenInfos;
+        console.log(tokenInfos);
+        let rightInfo = localUtils.tokenInfos2obj(tokenInfos);
 
         rightInfo.copyrightId = issueRightTokenTx.tokenId;
         rightInfo.timestamp = issueRightTokenTx.date;
         rightInfo.address = issueRightTokenTx.receiver;
 
         let copyrightHolderHash = rightInfo.copyrightHolder;
-        let copyrightHolder = await ipfsUtils.get(ipfs, copyrightHolderHash);
+        let copyrightHolder = await ipfsUtils.get(copyrightHolderHash);
         Object.assign(rightInfo, copyrightHolder);
         delete rightInfo.copyrightHolder;
 
