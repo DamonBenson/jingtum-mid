@@ -128,15 +128,13 @@ export function generateworkCopyRight(workAuth){
     {
         let SingleCopyRight = {
             copyrightType : i,
-            copyrightHolder : {
-                name : Name,
-                idType : IDType,
-                idNum : IDNum,
-                nation : "中国",
-                province : "北京",
-                city : "北京",
-                workSig : Name
-            }
+            name : Name,
+            idType : IDType,
+            idNum : IDNum,
+            nation : "中国",
+            province : "北京",
+            city : "北京",
+            workSig : Name
         }
         workCopyRight.push(SingleCopyRight);
     }

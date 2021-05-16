@@ -104,7 +104,7 @@ r.connect(async function(err, result) {
             let processedTx;
             switch(txType) {
                 case 'Payment':
-                    if(src == userAccount.authorizeAccount.address) {
+                    if(src == userAccount.fakeBaiduAuthorizeAccount.address) {
                         processedTx = u.processTx(tx, src);
                         processedTx.account = src;
                         uploadTxs.push(processedTx);
@@ -139,16 +139,19 @@ async function processUpload(uploadTxs, loopConter) {
         workInfo.completionTime = uploadTx.date;
         workInfo.address = uploadTx.counterparty;
 
-        let fileInfoListHash = workInfo.fileInfoListHash;
-        let fileInfoList = JSON.stringify(JSON.parse(await ipfsUtils.get(ipfs, fileInfoListHash)));
+        let fileInfoListHash = workInfo.fileInfoList;
+        let fileInfoList = JSON.stringify(await ipfsUtils.get(fileInfoListHash));
         workInfo.fileInfoList = fileInfoList;
-        delete workInfo.fileInfoListHash;
 
-        if(workInfo.publishStatus == 1) {
-            let publishInfoHash = workInfo.publishInfoHash;
-            let publishInfo = JSON.parse(await ipfsUtils.get(ipfs, publishInfoHash));
+        if(workInfo.publishStatus == 'Published') {
+            workInfo.publishStatus = 1;
+            let publishInfoHash = workInfo.publishInfo;
+            let publishInfo = await ipfsUtils.get(publishInfoHash);
             Object.assign(workInfo, publishInfo);
-            delete workInfo.publishInfoHash;
+            delete workInfo.publishInfo;
+        }
+        else {
+            workInfo.publishStatus = 0;
         }
 
         localUtils.toMysqlObj(workInfo);

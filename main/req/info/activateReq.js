@@ -2,7 +2,7 @@ import * as fetch from '../../../utils/fetch.js';
 
 import {debugMode} from '../../../utils/info.js';
 
-const addAmount = 3;
+const addAmount = 1;
 if(debugMode) {
     console.log('addAmount:', addAmount);
 }

@@ -5,52 +5,125 @@
 export const userAccount = {
 
     // 必需用户，需要中间层保存
-    authorizeAccount: {
-        
+    baiduAuthorizeAccount: {
+        address: 'jLDWh1YKsoCiXfAVPdat4GKzihHTYDkH3R',
+        secret: 'spqRyePwa293pWzboo1sT3Wn5m1TU',
+    },
+    buptAuthorizeAccount: {
+        address: 'jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6',
+        secret: 'saBoC8kDkPMxR4Z4eom4LCprhopw8',
     },
     midAccount: {
-
+        address: 'j3Ztxf6SRsAmubze8i8sd1TWeadoazDpPz',
+        secret: 'ssMENrDFyyoGSmnrKHfz3jLn714rq',
     },
     matchSystemAccount: {
-
+        address: 'jJsvjvitGBnPSscTAtdqS3VYFzTffeKA7M',
+        secret: 'ssc81hxJzNFK39zK7BLAVk5ZM5Y6X',
     },
 
     // 模拟用户，仅用于测试阶段
+    fakeBaiduAuthorizeAccount: {
+        address: 'jGt4jgACfyFaW7AkPb48PRsD64491M85GF',
+        secret: 'spzH4oxRN1DhnkfYbohgbTyufQ43C',
+    },
     authenticateAccount: [
         {
-            
+            address: 'jJEu6rexDXzxcgZ9QJQLbmv8yVxCG6nsR7',
+            secret: 'sneXVjunrxzhYhxDiBjsKktamqEkT',
         },
         {
-            
+            address: 'jHBcbQhMj9GJxsU21hJFnkXdsQQCRSLYZL',
+            secret: 'ssjN4uXZabHDHh1ZHGkE3pcKCir8a',
         },
         {
-
+            address: 'jLzeqpW9Dyi1hRTVcFTfg3etzsmkV2atsn',
+            secret: 'snAA68npSXvfzP1e2C8ijWi6QNuca',
+        },
+    ],
+    superviseAccount: [
+        {
+            address: 'j9evNeEWz4oGqwjNBmG1wTfS1tpyNhy3EW',
+            secret: 'sajkSufoJay2TcJfxDKRdxdx7EayS',
+        },
+        {
+            address: 'j4X6uBNtpy2SNTmWaJmzZ5vctauL5rB2MG',
+            secret: 'shiMBzrVUJDaG1ZGcu9jQfvaurGvJ',
+        },
+        {
+            address: 'jUuYkb47vBPjzr24Xa3tuaPc4W2fkeAE3h',
+            secret: 'saszDK4gSFXJ8p83B3sr7x8m8q6si',
         },
     ],
     buyPlatformAccount: [
         {
-
+            address: 'jppLWezdLH7an7Jd1wWcvRNtQEuMkPJN5G',
+            secret: 'snrVmjunkyidZeGUDgWjvq1BjHnQu',
         },
         {
-
+            address: 'jHa7hyXBe5v2qY6qMhb4SgoUmQqMYuX9Td',
+            secret: 'shj2CXv1c36xM68UQGRfvnCRrMBbP',
         },
         {
-
+            address: 'jwTRbQE2kXCJNKct1yjxjRvFaVYup2bA3W',
+            secret: 'ssUCnrpk5bJS6sXpZpKWcZdmgz2XS',
         },
     ],
     sellPlatformAccount: [
         {
-
+            address: 'jJRtZaLZ28TFfRevGKXFVwGqwQ4YxdAhHr',
+            secret: 'sh8MUA9X2sfaGsB7qXSbNg5yXf1xt',
         },
         {
-
+            address: 'jEbDUTHNGCA1L6hYyShFn7o8coDHV7MYAy',
+            secret: 'sn6mZDMWccNDChyoTfV7PmmVUeLAY',
         },
         {
-
+            address: 'jMJJtctjcJ7GonDV8boFNSQvwitWyNbHJp',
+            secret: 'spobuv7XaLfZuBP4GPDw2XprvGfrG',
         },
     ],
     normalAccount: [
-
+        {
+            address: 'jnuf1Hrd5cMZaxDHBPYPzmLvgt4svvSpjG',
+            secret: 'ssbDUUytaiEtdpcJMscRaJVcEoEQQ',
+        }, // 0
+        {
+            address: 'j4M6Hb65iKUVyzRNVYCCvqnpB6q4j7TT9Q',
+            secret: 'shzKzpESdq4GE7jhDMbRoYNsnwfH2',
+        }, // 1
+        {
+            address: 'j9FCRZNximd3wJUNH3AiFj5giM5XbhWVSC',
+            secret: 'sp6ywrLu31PkPejwN627cndecDcma',
+        }, // 2
+        {
+            address: 'j323rBW8jC6TzkmpCAsR8JeRGx2mDCUaFa',
+            secret: 'snqMbgtg9B8K4T1fYEaBG1xoSuU5B',
+        }, // 3
+        {
+            address: 'j953BZNrVXF9Qec238zXpqYNdVFLbRDH8W',
+            secret: 'snyvZNLY6orEQA6yEgRrXR6ryh9YV',
+        }, // 4
+        {
+            address: 'jByJnnNXKcb5kzngJgPZe5JgtuQnoEfGCm',
+            secret: 'shqfUo13UF2x6VX9EKmtaPLF6VSDm',
+        }, // 5
+        {
+            address: 'jD3bw7vcW6jXtrwKxygYqkBCjEkXMGQRCp',
+            secret: 'snRNqTpMZJFGXW33qi8qigUCAVW89',
+        }, // 6
+        {
+            address: 'j9KoRbsda9VMoCKsaRsTYZHiRkdkXc8cHd',
+            secret: 'snd9CB5qXnoqLCdEsLCTBrCs9F3kt',
+        }, // 7
+        {
+            address: 'jKRmxgPUr4WGSNNUekWqi8oCkFD8bXZBY5',
+            secret: 'snHpgAomPu4HeCv5ALVrppDKjTJkB',
+        }, // 8
+        {
+            address: 'jft9cFxf2LjSTuqfGFMwiZG3qguaYAkepx',
+            secret: 'snvHhnLwWihnXiuLD2LvcdAiyg3qy',
+        }, // 9
     ],
 
 };
@@ -80,19 +153,15 @@ export const chains = [
                 address: 'jaXFNVexGYnFALQzSHUkLakyVs1Lxs9ETJ',
                 secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn',
             },
-            gate: {
-                address: 'jnjTbty9qpPu2d9mHUjH5kzq4TRcnpJsQr',
-                secret: 'snEsawU3xG6cthJ7ucg8dKFuHvpwk',
-            },
         },
     },
 
     // chains[1]交易链
     {
         server: [
-            'ws://39.102.92.249:9030',
-            'ws://39.102.90.153:9030',
-            'ws://39.102.92.229:9030',
+            'ws://39.102.92.249:6020',
+            'ws://39.102.90.153:6020',
+            'ws://39.102.92.229:6020',
         ],
         account: {
             root: {
@@ -100,12 +169,12 @@ export const chains = [
                 secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
             },
             charge: {
-                address: 'jEx8qHwy2r5vMrVrbc7i4juWKmtsSm4DS9',
-                secret: 'snQfZGdaR9sMe7D3uCcEHMvs4ocjA',
+                address: 'j7xQsY7aGJVoAaTGWYzyLoCLtGe9NwX7w',
+                secret: 'ss1nxL1FkJAZmVtHzHJKAw52He8fB',
             },
             issuer: {
-                address: 'jfCdDWueik3AsSjcfcaQsdpFjW8CyZYT76',
-                secret: 'snjQmeX9gdwuVNHqvypxn2d663jKL',
+                address: 'jaXFNVexGYnFALQzSHUkLakyVs1Lxs9ETJ',
+                secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn',
             },
         },
     },
