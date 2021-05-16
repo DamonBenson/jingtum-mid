@@ -50,19 +50,38 @@ export function generateworkAuth(){
             fileAddress:'http://yjxt.bupt.edu.cn/Gstudent/Default.aspx'//文件下载地址
            });
     }
-    let workAuth = {
-        workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString()[0,8],
-        workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
-        fileInfoList:upload_fileInfoList,
-        creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
-        createdTime:"20181231",// 创作/制作完成时间
-        createdPlace:"BUPT",
-        publishStatus:localUtils.randomSelect(["Unpublished","Published"]),//发表状态，取值为Unpublished [未发表]，或者为Published (publishInfo) 
-        publishInfo:{
-            publishedTime:"20181231",
-            publishedSite:'http://yjxt.bupt.edu.cn/Gstudent'
-        }
-    };
+    publishStatus = localUtils.randomSelect(["Unpublished","Published"])
+    let workAuth = {};
+
+    if(publishStatus == "Published"){
+        workAuth = {
+            workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString()[0,8],
+            workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
+            fileInfoList:upload_fileInfoList,
+            creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
+            createdTime:"20181231",// 创作/制作完成时间
+            createdPlace:"BUPT",
+            publishStatus:publishStatus,//发表状态，取值为Unpublished [未发表]，或者为Published (publishInfo) 
+            publishInfo:{
+                publishedTime:"20181231",
+                publishedSite:'http://yjxt.bupt.edu.cn/Gstudent'
+            }
+        };
+
+    }
+    else{
+        workAuth = {
+            workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString()[0,8],
+            workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
+            fileInfoList:upload_fileInfoList,
+            creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
+            createdTime:"20181231",// 创作/制作完成时间
+            createdPlace:"BUPT",
+            publishStatus:publishStatus,//发表状态，取值为Unpublished [未发表]，或者为Published (publishInfo) 
+    
+        };
+    }
+
     if(debugMode) {
         console.log('workAuth:', workAuth);
     }
@@ -110,13 +129,13 @@ export function generateworkCopyRight(workAuth){
         let SingleCopyRight = {
             copyrightType : i,
             copyrightHolder : {
-                Name : Name,
-                IDType : IDType,
-                IDNum : IDNum,
-                Nation : "中国",
-                Province : "北京",
-                City : "北京",
-                WorkSig : Name
+                name : Name,
+                idType : IDType,
+                idNum : IDNum,
+                nation : "中国",
+                province : "北京",
+                city : "北京",
+                workSig : Name
             }
         }
         workCopyRight.push(SingleCopyRight);
@@ -154,8 +173,8 @@ function chain2watchResponse(SingleCopyRight , addr){
     }
     return copyRight;
 }
-
-function generateworkAppr(workAuth, copyRight, addr){
+// TODO this is not finished
+export function generateworkAppr(workAuth, copyRight, addr){
 
     let now = Math.round((new Date())/ 1000);
     let workAppr = {

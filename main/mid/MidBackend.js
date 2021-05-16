@@ -16,61 +16,7 @@ backendRouter.get('/authRightRate', async function(req, res) {
     res.end();
 });
 // localhost:9002/backend/authRightRate
-backendRouter.get('/authByCompany', async function(req, res) {
-    let resJson = await backendMid.handleAuthByCompany(req, res);
-    // resJson = JSON.stringify(resJson,"","\t")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/authByCompany
 
-backendRouter.get('/certificateAmountEXchange', async function(req, res) {
-    let resJson = await backendMid.handleCertificateAmountEXchange(req, res);
-    // resJson = JSON.stringify(resJson,"","\t")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/certificateAmountEXchange
-
-backendRouter.get('/certificateAmountGroupByWorkType', async function(req, res) {
-    let resJson = await backendMid.handleCertificateAmountGroupByWorkType(req, res);
-    // resJson = JSON.stringify(resJson,"","\t")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/certificateAmountGroupByWorkType
-
-backendRouter.get('/certificateAmountGroupByWorkTypeEXchange', async function(req, res) {
-    let resJson = await backendMid.handleCertificateAmountGroupByWorkTypeEXchange(req, res);
-    // resJson = JSON.stringify(resJson,"","\t")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/certificateAmountGroupByWorkTypeEXchange
-
-backendRouter.get('/copyRightAmountEXchange', async function(req, res) {
-    let resJson = await backendMid.handleCopyRightAmountEXchange(req, res);
-    // resJson = JSON.stringify(resJson,"","\t")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/copyRightAmountEXchange
-
-backendRouter.get('/copyRightAmountGroupByIDtype', async function(req, res) {
-    let resJson = await backendMid.handleCopyRightAmountGroupByIDtype(req, res);
-    // resJson = JSON.stringify(resJson,"","\n")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/copyRightAmountGroupByIDtype
-
-backendRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, res) {
-    let resJson = await backendMid.handleCopyRightAmountGroupByCopyrightType(req, res);
-    // resJson = JSON.stringify(resJson,null,"\n")
-    res.send({'data':resJson});
-    res.end();
-});
-// localhost:9002/backend/copyRightAmountGroupByCopyrightType
 
 
 
