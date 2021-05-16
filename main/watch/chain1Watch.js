@@ -159,9 +159,8 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     let rightInfoPromises = [];
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
-
         let tokenInfos = issueRightTokenTx.tokenInfos;
-        console.log(tokenInfos);
+        console.log("tokenInfos:",tokenInfos);
         let rightInfo = localUtils.tokenInfos2obj(tokenInfos);
 
         rightInfo.copyrightId = issueRightTokenTx.tokenId;

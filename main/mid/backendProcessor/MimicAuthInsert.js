@@ -9,11 +9,9 @@ import sha256 from 'crypto-js/sha256.js';
 import {userAccount, userAccountIndex, mysqlTestConf, debugMode} from '../../../utils/info.js';
 import util from 'util';
 
-const c = mysql.createConnection(mysqlTestConf);
-c.connect(); // mysql连接
-
-
-MimicAuthInsert();
+// const c = mysql.createConnection(mysqlTestConf);
+// c.connect(); // mysql连接
+// MimicAuthInsert();
 function MimicAuthInsert(){
         // 发送上传请求至http服务器mainMid.js.
         let addr = userAccount[userAccountIndex[localUtils.randomSelect(["用户1", "用户2"])]].address;
@@ -50,12 +48,12 @@ export function generateworkAuth(){
             fileAddress:'http://yjxt.bupt.edu.cn/Gstudent/Default.aspx'//文件下载地址
            });
     }
-    publishStatus = localUtils.randomSelect(["Unpublished","Published"])
+    let publishStatus = localUtils.randomSelect(["Unpublished","Published"])
     let workAuth = {};
 
     if(publishStatus == "Published"){
         workAuth = {
-            workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString()[0,8],
+            workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
             workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
             fileInfoList:upload_fileInfoList,
             creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
@@ -71,7 +69,7 @@ export function generateworkAuth(){
     }
     else{
         workAuth = {
-            workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString()[0,8],
+            workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
             workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
             fileInfoList:upload_fileInfoList,
             creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
@@ -161,13 +159,13 @@ function chain2watchResponse(SingleCopyRight , addr){
         address : addr,//
         work_id : null,//
         copyright_right : SingleCopyRight.copyrightType,
-        name : copyrightHolder.Name,
-        id_type : copyrightHolder.IDType,
-        id_num : copyrightHolder.IDNum,
-        nation : copyrightHolder.Nation,
-        province : copyrightHolder.Province,
-        city : copyrightHolder.City,
-        work_sig : copyrightHolder.Name
+        name : copyrightHolder.name,
+        id_type : copyrightHolder.idType,
+        id_num : copyrightHolder.idNum,
+        nation : copyrightHolder.nation,
+        province : copyrightHolder.province,
+        city : copyrightHolder.city,
+        work_sig : copyrightHolder.name
     }
     return copyRight;
 }

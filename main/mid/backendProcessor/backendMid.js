@@ -5,10 +5,10 @@ import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
 
-import {mysqlTestConf} from '../../../utils/info.js';
+import {mysqlConf} from '../../../utils/info.js';
 import util from 'util';
 
-const c = mysql.createConnection(mysqlTestConf);
+const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
 /**
@@ -151,9 +151,6 @@ export async function handleCertificateAmountEXchange(req, res) {
 
     console.time('handleCertificateAmountEXchange');
     let sqlRes = await getCertificateAmountEXchange();
-
-    // let resJson = JSON.stringify(sqlRes);
-
     console.timeEnd('handleCertificateAmountEXchange');
     console.log('--------------------');
     return sqlRes;
@@ -171,14 +168,14 @@ async function getCertificateAmountEXchange() {
                  AND\
             work_info.created_time < %s'
             ,endTimeStamp,startTimeStamp);
-        // console.log(sqlRight);
-        let value = localUtils.randomNumber(30,50);
-        // sqlRes = await mysqlUtils.sql(c, sqlRight);
-        // // console.log(sqlRes);
-        // sqlRes.forEach(value => 
-        //     Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
-        // );
+        console.log(sqlRight);
+        sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log(sqlRes);
+        sqlRes.forEach(value => 
+            Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
+        );
         
+        // let value = localUtils.randomNumber(30,50);
         let MonthInfo = {
             "CertificateAmount": value,
             "Month" : MonthArray[index + 1],
@@ -497,48 +494,48 @@ async function getCopyRightAmountGroupByCopyrightType() {
 
 
 
-/** 监测维权服务 等待百度文档
- *
- *
- */
-// 一维图（一个自变量）
-// 1）	存证总数量随时间的变化。
-export async function handleCertificateAmountEXchange(req, res) {
+// /** 监测维权服务 等待百度文档
+//  *
+//  *
+//  */
+// // 一维图（一个自变量）
+// // 1）	存证总数量随时间的变化。
+// export async function handleCertificateAmountEXchange(req, res) {
 
-    console.time('handleCertificateAmountEXchange');
-    let sqlRes = await getCertificateAmountEXchange();
+//     console.time('handleCertificateAmountEXchange');
+//     let sqlRes = await getCertificateAmountEXchange();
 
-    console.timeEnd('handleCertificateAmountEXchange');
-    console.log('--------------------');
-    return sqlRes;
-}
+//     console.timeEnd('handleCertificateAmountEXchange');
+//     console.log('--------------------');
+//     return sqlRes;
+// }
 
-async function getCertificateAmountEXchange() {
-    let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
-    // console.log([TimeStampArray, MonthArray]);
-    let CertificateAmountEXchange = [];
-    for (let index = 0; index < 12; index++) {
-        let endTimeStamp = TimeStampArray[index];
-        let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight =util.format(
-            'work_info.created_time >= %s\
-                 AND\
-            work_info.created_time < %s'
-            ,endTimeStamp,startTimeStamp);
-        // console.log(sqlRight);
-        let value = localUtils.randomNumber(30,50);
-        // sqlRes = await mysqlUtils.sql(c, sqlRight);
-        // // console.log(sqlRes);
-        // sqlRes.forEach(value => 
-        //     Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
-        // );
+// async function getCertificateAmountEXchange() {
+//     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
+//     // console.log([TimeStampArray, MonthArray]);
+//     let CertificateAmountEXchange = [];
+//     for (let index = 0; index < 12; index++) {
+//         let endTimeStamp = TimeStampArray[index];
+//         let startTimeStamp = TimeStampArray[(index + 1)];
+//         let sqlRight =util.format(
+//             'work_info.created_time >= %s\
+//                  AND\
+//             work_info.created_time < %s'
+//             ,endTimeStamp,startTimeStamp);
+//         // console.log(sqlRight);
+//         let value = localUtils.randomNumber(30,50);
+//         // sqlRes = await mysqlUtils.sql(c, sqlRight);
+//         // // console.log(sqlRes);
+//         // sqlRes.forEach(value => 
+//         //     Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
+//         // );
         
-        let MonthInfo = {
-            "CertificateAmount": value,
-            "Month" : MonthArray[index + 1],
-        };
-        CertificateAmountEXchange.push(MonthInfo);
-    }
-    console.log(CertificateAmountEXchange);
-    return CertificateAmountEXchange;
-}
+//         let MonthInfo = {
+//             "CertificateAmount": value,
+//             "Month" : MonthArray[index + 1],
+//         };
+//         CertificateAmountEXchange.push(MonthInfo);
+//     }
+//     console.log(CertificateAmountEXchange);
+//     return CertificateAmountEXchange;
+// }

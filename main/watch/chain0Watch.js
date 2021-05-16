@@ -152,10 +152,11 @@ async function processUpload(uploadTxs, loopConter) {
         }
         else {
             workInfo.publishStatus = 0;
+            delete workInfo.publishInfo;
         }
 
+        console.log("workInfo",workInfo);
         localUtils.toMysqlObj(workInfo);
-        console.log(workInfo);
 
         let sql = sqlText.table('work_info').data(workInfo).insert();
         workInfoPromises.push(mysqlUtils.sql(c, sql));
