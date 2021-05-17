@@ -9,6 +9,7 @@ import * as localUtils from '../../utils/localUtils.js';
 
 import {userAccount, chains, tokenName} from '../../utils/config/jingtum.js';
 import {mysqlConf} from '../../utils/config/mysql.js';
+import {debugMode} from '../../utils/config/project.js';
 
 const u = jlib.utils;
 
@@ -154,13 +155,14 @@ r.connect(async function(err, result) {
 
 async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     
-    console.log('issueRightTokenTxs:', issueRightTokenTxs);
+    if(debugMode == true) {
+        console.log('issueRightTokenTxs:', issueRightTokenTxs);
+    }
 
     let rightInfoPromises = [];
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
         let tokenInfos = issueRightTokenTx.tokenInfos;
-        console.log("tokenInfos:",tokenInfos);
         let rightInfo = localUtils.tokenInfos2obj(tokenInfos);
 
         rightInfo.copyrightId = issueRightTokenTx.tokenId;
@@ -173,7 +175,7 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
         delete rightInfo.copyrightHolder;
 
         localUtils.toMysqlObj(rightInfo);
-        console.log(rightInfo);
+        console.log('copyrightInfo:', rightInfo);
 
         let sql = sqlText.table('right_token_info').data(rightInfo).insert();
         rightInfoPromises.push(mysqlUtils.sql(c, sql));
@@ -186,7 +188,9 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
 
 async function processIssueApproveToken(issueApproveTokenTxs, loopConter) {
     
-    console.log('issueApproveTokenTxs:', issueApproveTokenTxs);
+    if(debugMode == true) {
+        console.log('issueApproveTokenTxs:', issueApproveTokenTxs);
+    }
 
     let approveInfoPromises = [];
 

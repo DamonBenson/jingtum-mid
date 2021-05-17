@@ -1,10 +1,14 @@
 import fetch from 'node-fetch';
 
 export function postData(url, data) {
+    const params = new URLSearchParams();
+    Object.keys(data).forEach(key => {
+        params.append(key, data[key]);
+    });
     return new Promise((resolve, reject) => {
         fetch(url, {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: params,
             mode: 'cors',
             headers: {
                 "Accept":"application/json",

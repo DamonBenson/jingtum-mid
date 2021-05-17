@@ -13,7 +13,7 @@ export function add(obj) {
     return new Promise((resolve, reject) => {
         let url = ipfsAddAddr + '/add';
         let form = new formData();
-        console.log('ipfs:data', JSON.stringify(obj));
+        // console.log('ipfs:data', JSON.stringify(obj));
         form.append('data', JSON.stringify(obj));
         fetch(url, {
             method: 'POST',

@@ -9,6 +9,7 @@ import * as localUtils from '../../utils/localUtils.js';
 
 import {userAccount, chains} from '../../utils/config/jingtum.js';
 import {mysqlConf} from '../../utils/config/mysql.js';
+import {debugMode} from '../../utils/config/project.js';
 
 const u = jlib.utils;
 
@@ -127,7 +128,9 @@ r.connect(async function(err, result) {
 
 async function processUpload(uploadTxs, loopConter) {
 
-    console.log('uploadTxs:', uploadTxs);
+    if(debugMode == true) {
+        console.log('uploadTxs:', uploadTxs);
+    }
 
     let workInfoPromises = [];
 
@@ -155,7 +158,7 @@ async function processUpload(uploadTxs, loopConter) {
             delete workInfo.publishInfo;
         }
 
-        console.log("workInfo",workInfo);
+        console.log("workInfo:", workInfo);
         localUtils.toMysqlObj(workInfo);
 
         let sql = sqlText.table('work_info').data(workInfo).insert();

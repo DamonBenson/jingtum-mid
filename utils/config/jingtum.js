@@ -1,3 +1,20 @@
+/**
+ * @description 服务器公网IP。
+ */
+const publicServerAddr = [
+    '39.102.92.249',
+    '39.102.90.153',
+    '39.102.92.229',
+];
+
+/**
+ * @description 服务器私网IP。
+ */
+const privateServerAddr = [
+    '172.31.43.240',
+    '172.31.43.238',
+    '172.31.43.239',
+];
 
 /**
  * @description 自定义账户。
@@ -136,9 +153,9 @@ export const chains = [
     // chains[0]存证链
     {
         server: [
-            'ws://39.102.92.249:5020',
-            'ws://39.102.90.153:5020',
-            'ws://39.102.92.229:5020',
+            'ws://' + publicServerAddr[0] + ':5020',
+            'ws://' + publicServerAddr[1] + ':5020',
+            'ws://' + publicServerAddr[2] + ':5020',
         ],
         account: {
             root: {
@@ -159,9 +176,9 @@ export const chains = [
     // chains[1]交易链
     {
         server: [
-            'ws://39.102.92.249:6020',
-            'ws://39.102.90.153:6020',
-            'ws://39.102.92.229:6020',
+            'ws://' + publicServerAddr[0] + ':6020',
+            'ws://' + publicServerAddr[1] + ':6020',
+            'ws://' + publicServerAddr[2] + ':6020',
         ],
         account: {
             root: {
@@ -182,9 +199,9 @@ export const chains = [
     // chains[2]权益链
     {
         server: [
-            'ws://39.102.92.249:9030',
-            'ws://39.102.90.153:9030',
-            'ws://39.102.92.229:9030',
+            'ws://' + publicServerAddr[0] + ':9030',
+            'ws://' + publicServerAddr[1] + ':9030',
+            'ws://' + publicServerAddr[2] + ':9030',
         ],
         account: {
             root: {
@@ -208,8 +225,8 @@ export const chains = [
  * @description 各类通证名称。
  */
 export const tokenName = {
-    copyright: 'rightToken',
-    approve: 'approveToken',
+    copyright: 'rightToken_test1',
+    approve: 'approveToken_test1',
 };
 
 /**

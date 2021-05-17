@@ -32,7 +32,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
         data: {},
     }
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let body = req.body;
     try {
         await infoValidate.activateReqSchema.validateAsync(body);
     } catch(e) {
