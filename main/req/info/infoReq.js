@@ -9,7 +9,7 @@ import {mysqlConf, debugMode} from '../../../utils/info.js';
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
-const queryMode = 'work';
+const queryMode = 'copyright';
 const queryAmount = 2;
 
 switch(queryMode) {
@@ -26,7 +26,6 @@ switch(queryMode) {
         }
         
         let workRes = await fetch.getData('http://127.0.0.1:9001/info/work', {workIds: workIds});
-        console.log(Buffer.from(workRes.body._readableState.buffer.head.data).toString());
         if(debugMode) {
             let workResInfo = JSON.parse(Buffer.from(workRes.body._readableState.buffer.head.data).toString());
             console.log('worksInfo:', workResInfo.data.certificateInfoList);
@@ -38,7 +37,7 @@ switch(queryMode) {
         let copyrightSql = sqlText.table('right_token_info').field('copyright_id').order('RAND()').limit(queryAmount).select();
         let rightTokenInfoArr = await mysqlUtils.sql(c, copyrightSql);
         let rightTokenIds = rightTokenInfoArr.map(rightTokenInfo => {
-            return rightTokenInfo.right_token_id;
+            return rightTokenInfo.copyright_id;
         });
         if(debugMode) {
             console.log('rightTokenIds', rightTokenIds);
@@ -47,7 +46,7 @@ switch(queryMode) {
         let rightRes = await fetch.getData('http://127.0.0.1:9001/info/copyright', {copyrightIds: rightTokenIds});
         if(debugMode) {
             let rightResInfo = JSON.parse(Buffer.from(rightRes.body._readableState.buffer.head.data).toString());
-            console.log('rightsInfo:', rightResInfo.data.copyrightsInfo);
+            console.log('rightsInfo:', rightResInfo.data.copyrightInfoList);
         }
         break;
 
