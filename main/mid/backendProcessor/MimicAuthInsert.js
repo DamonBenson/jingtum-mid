@@ -68,11 +68,9 @@ export function generateworkAuth(){
     }
     let publishStatus = localUtils.randomSelect(["Unpublished","Published"])
     let workAuth = {};
-
+    let createdDay = DateUtil.getPastDay();
+    let publishedDay = DateUtil.getBetweenDay(createdDay);
     if(publishStatus == "Published"){
-        let createdDay = DateUtil.getPastDay();
-        let publishedDay = DateUtil.getBetweenDay(createdDay);
-
         workAuth = {
             workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
             workType: localUtils.randomNumber(1,15),// 1-14文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
