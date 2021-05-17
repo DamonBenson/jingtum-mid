@@ -12,6 +12,15 @@ import util from 'util';
 // const c = mysql.createConnection(mysqlTestConf);
 // c.connect(); // mysql连接
 // MimicAuthInsert();
+/*
+ * @param null:
+ * @return: null
+ * @author: Bernard
+ * @date: 2021/5/17 14:35
+ * @description:提交 假数据 绕过区块链直接填写到 假数据库 中
+ * @example:.
+ *
+ */
 function MimicAuthInsert(){
         // 发送上传请求至http服务器mainMid.js.
         let addr = userAccount[userAccountIndex[localUtils.randomSelect(["用户1", "用户2"])]].address;
@@ -37,6 +46,15 @@ function MimicAuthInsert(){
         // 中间层               许可记录在数据库
         // ApprSave(Appr);
 }
+/*
+ * @param null:
+ * @return: null
+ * @author: Bernard
+ * @date: 2021/5/17 14:36
+ * @description:生成一个合理的存证结果，该存折没有对应的作品
+ * @example:.
+ *
+ */
 export function generateworkAuth(){
     let fileNum = localUtils.randomSelect([1,2,3,4],[0.7,0.2,0.07,0.003]);
     let upload_fileInfoList = []
@@ -44,7 +62,7 @@ export function generateworkAuth(){
         fileNum --;
         upload_fileInfoList.push({
             fileHash:sha256(localUtils.randomNumber(100, 2000000000).toString()).toString(),
-            fileType:localUtils.randomNumber(1,4),// 文本(1)、图片(2)、音频(3)、视频(4)
+            fileType:localUtils.randomNumber(1,5),// 文本(1)、图片(2)、音频(3)、视频(4)
             fileAddress:'http://yjxt.bupt.edu.cn/Gstudent/Default.aspx'//文件下载地址
            });
     }
@@ -52,16 +70,19 @@ export function generateworkAuth(){
     let workAuth = {};
 
     if(publishStatus == "Published"){
+        let createdDay = DateUtil.getPastDay();
+        let publishedDay = DateUtil.getBetweenDay(createdDay);
+
         workAuth = {
             workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
-            workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
+            workType: localUtils.randomNumber(1,15),// 1-14文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
             fileInfoList:upload_fileInfoList,
-            creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
-            createdTime:"20181231",// 创作/制作完成时间
+            creationType:localUtils.randomNumber(1,8),// 1-7原创，改编，翻译，汇编，注释，整理，其他
+            createdTime:createdDay.format("YYYYMMDD"),// 创作/制作完成时间
             createdPlace:"BUPT",
             publishStatus:publishStatus,//发表状态，取值为Unpublished [未发表]，或者为Published (publishInfo) 
             publishInfo:{
-                publishedTime:"20181231",
+                publishedTime:publishedDay.format("YYYYMMDD"),
                 publishedSite:'http://yjxt.bupt.edu.cn/Gstudent'
             }
         };
@@ -70,10 +91,10 @@ export function generateworkAuth(){
     else{
         workAuth = {
             workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
-            workType: localUtils.randomNumber(1,14),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
+            workType: localUtils.randomNumber(1,15),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
             fileInfoList:upload_fileInfoList,
-            creationType:localUtils.randomNumber(1,7),// 原创，改编，翻译，汇编，注释，整理，其他
-            createdTime:"20181231",// 创作/制作完成时间
+            creationType:localUtils.randomNumber(1,8),// 原创，改编，翻译，汇编，注释，整理，其他
+            createdTime:createdDay.format("YYYYMMDD"),// 创作/制作完成时间
             createdPlace:"BUPT",
             publishStatus:publishStatus,//发表状态，取值为Unpublished [未发表]，或者为Published (publishInfo) 
     
@@ -115,7 +136,16 @@ function chain1watchResponse(workAuth, addr){
     }
     return work;
 }
-
+/*
+ * @param null:
+ * @return: null
+ * @author: Bernard
+ * @date: 2021/5/17 14:37
+ * @description:收到存证结果对应颁发13个通证，为了展示需求，7广播,8信息网络传播权,9摄制权,10改编权,11翻译权,12汇编权,13其他
+ * 部分不会颁布
+ * @example:.
+ *
+ */
 export function generateworkCopyRight(workAuth){
 
     let workCopyRight = [];
@@ -124,6 +154,9 @@ export function generateworkCopyRight(workAuth){
     let IDNum = localUtils.randomNumber(3300000000, 3600000000).toString().substring(0,18);// 18位身份证
     for(let i = 1;i<=13;i++)
     {
+        if(i>=7)//广播权开始//部分不会颁布
+            if(localUtils.randomSelect([0,1])==1)
+                continue;
         let SingleCopyRight = {
             copyrightType : i,
             name : Name,
@@ -209,5 +242,5 @@ function ApprFormat(workAppr) {
     }
 
     return Appr;
-    
+
 }

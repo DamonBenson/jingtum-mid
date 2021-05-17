@@ -8,7 +8,15 @@ export function sleep(ms) {
 }
 
 /*----------生成区间[min, max)的随机整数---------*/
-
+/*
+ * @param min:
+ * @param max: 右开
+ * @author: Qiumufei
+ * @date: 2021/5/17 10:37
+ * @description:
+ * @example:.
+ *
+ */
 export function randomNumber(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
