@@ -42,6 +42,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/activateAccount:', resInfo.data);
         console.timeEnd('handleActivateAccount');
         console.log('--------------------');
         return resInfo;
@@ -65,10 +66,12 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
     }
     await Promise.all(activatePromises);
 
+    resInfo.data.accounts = walletArr;
+    console.log('/info/activateAccount:', resInfo.data);
+
     console.timeEnd('handleActivateAccount');
     console.log('--------------------');
 
-    resInfo.data.accounts = walletArr;
     return resInfo;
 
 }
@@ -98,6 +101,7 @@ export async function handleWorkInfo(req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/work:', resInfo.data);
         console.timeEnd('handleWorkInfo');
         console.log('--------------------');
         return resInfo;
@@ -114,10 +118,11 @@ export async function handleWorkInfo(req) {
     })
     let certificateInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
+    resInfo.data.certificateInfoList = certificateInfoList;
+    console.log('/info/work:', resInfo.data);
+
     console.timeEnd('handleWorkInfo');
     console.log('--------------------');
-
-    resInfo.data.certificateInfoList = certificateInfoList;
 
     return resInfo;
 
@@ -148,6 +153,7 @@ export async function handleCopyrightInfo(req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/copyright:', resInfo.data);
         console.timeEnd('handleCopyrightInfo');
         console.log('--------------------');
         return resInfo;
@@ -163,10 +169,11 @@ export async function handleCopyrightInfo(req) {
     });
     let copyrightInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
+    resInfo.data.copyrightInfoList = copyrightInfoList;
+    console.log('/info/copyright:', resInfo.data);
+
     console.timeEnd('handleCopyrightInfo');
     console.log('--------------------');
-
-    resInfo.data.copyrightInfoList = copyrightInfoList;
 
     return resInfo;
 
@@ -197,6 +204,7 @@ export async function handleApproveInfo(req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/approve:', resInfo.data);
         console.timeEnd('handleApproveInfo');
         console.log('--------------------');
         return resInfo;
@@ -212,10 +220,12 @@ export async function handleApproveInfo(req) {
     })
     let approveInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
+    resInfo.data.approveInfoList = approveInfoList;
+    console.log('/info/approve:', resInfo.data);
+
     console.timeEnd('handleApproveInfo');
     console.log('--------------------');
 
-    resInfo.data.approveInfoList = approveInfoList;
 
     return resInfo;
 

@@ -82,7 +82,7 @@ uploadRemote.connect(async function(err, res) {
             seqObj.mid.upload = (await requestInfo.requestAccountInfo(midAddr, uploadRemote, false)).account_data.Sequence;
             seqObj.mid.token = (await requestInfo.requestAccountInfo(midAddr, tokenRemote, false)).account_data.Sequence;
             seqObj.mid.contract = (await requestInfo.requestAccountInfo(midAddr, contractRemote, false)).account_data.Sequence;
-            console.log(seqObj);
+            console.log('seq:', seqObj);
 
             /**
              * @description 信息查询相关请求路由。
