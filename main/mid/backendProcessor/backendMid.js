@@ -10,7 +10,7 @@ import util from 'util';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-
+let CONNECT = true;// When false, Send Random Response
 /**
  *
  */
@@ -77,8 +77,8 @@ async function getAuthByCompany() {
     for(let i = 0 ; i < 4; i++){
         sqlRight =util.format(
             'SELECT DISTINCT\
-                 right_token_info.addr,\
-                 COUNT(right_token_info.addr)\
+                 right_token_info.address,\
+                 COUNT(right_token_info.address)\
              FROM\
                  right_token_info\
                  INNER JOIN\
@@ -94,7 +94,7 @@ async function getAuthByCompany() {
                      work_info.created_time < %s\
                  )\
              GROUP BY\
-                 right_token_info.addr\
+                 right_token_info.address\
              ORDER BY\
                  work_info.created_time ASC'
             ,timeSlot[i+1],timeSlot[i]);
@@ -102,7 +102,7 @@ async function getAuthByCompany() {
         sqlRes = await mysqlUtils.sql(c, sqlRight);
         // console.log(sqlRes);
         sqlRes.forEach(value => 
-            Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
+            Res[i][value['address']] = value['COUNT(right_token_info.address)']
         );
     }
     console.log(Res);
@@ -164,20 +164,39 @@ async function getCertificateAmountEXchange() {
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
         let sqlRight =util.format(
-            'work_info.created_time >= %s\
-                 AND\
-            work_info.created_time < %s'
+            'SELECT DISTINCT\n' +
+            '\tCOUNT(right_token_info.work_id)\n' +
+            'FROM\n' +
+            '\tright_token_info\n' +
+            '\tINNER JOIN\n' +
+            '\t(\n' +
+            '\t\twork_info\n' +
+            '\t)\n' +
+            '\tON \n' +
+            '\t\tright_token_info.work_id = work_info.work_id\n' +
+            'WHERE\n' +
+            '\tright_token_info.copyright_type = 1 AND\n' +
+            '\t(\n' +
+            '\t\twork_info.completion_time <= %s AND\n' +
+            '\t\t(\n' +
+            '\t\t\twork_info.completion_time > %s\n' +
+            '\t\t)\n' +
+            '\t)'
             ,endTimeStamp,startTimeStamp);
-        console.log(sqlRight);
-        sqlRes = await mysqlUtils.sql(c, sqlRight);
-        console.log(sqlRes);
-        sqlRes.forEach(value => 
-            Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
-        );
-        
-        // let value = localUtils.randomNumber(30,50);
+        console.log("sqlRight:",sqlRight);
+        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log("sqlRes:",sqlRes);
+        let valueRes = 0;
+
+        sqlRes.forEach(function(item,index){
+            valueRes = item['COUNT(right_token_info.work_id)'];
+            console.log(item['COUNT(right_token_info.work_id)']+'---'+index);
+        });
+        console.log("valueRes =",valueRes);
+        if(CONNECT == false)valueRes = localUtils.randomNumber(30,50);
+
         let MonthInfo = {
-            "CertificateAmount": value,
+            "CertificateAmount": valueRes,
             "Month" : MonthArray[index + 1],
         };
         CertificateAmountEXchange.push(MonthInfo);
@@ -190,36 +209,88 @@ export async function handleCertificateAmountGroupByWorkType(req, res) {
 
     console.time('handleCertificateAmountGroupByWorkType');
     let sqlRes = await getCertificateAmountGroupByWorkType();
-
-
-    // let resJson = JSON.stringify(sqlRes);
     console.timeEnd('handleCertificateAmountGroupByWorkType');
     console.log('--------------------');
     return sqlRes;
 }
-
+const WORKTYPE = {
+     1:"文字",2:"口述",3:"音乐",4:"戏剧",5:"曲艺",
+    6:"舞蹈",7:"杂技艺术",8:"美术",9:"建筑",10:"摄影",
+    11:"电影和类似摄制电影方法创作的作品",12:"图形",13:"模型",14:"其他"
+};
 async function getCertificateAmountGroupByWorkType() {
     let CertificateAmountGroupByWorkType = [];
     let WorkTypeInfo = {};
 
-    WorkTypeInfo = {
-        "workType":"音乐",
-        "CertificateAmount":localUtils.randomNumber(80,100)
-    };
-    CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":"电影",
-        "CertificateAmount":localUtils.randomNumber(60,80)
-    };
-    CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":"美术",
-        "CertificateAmount":localUtils.randomNumber(40,60)
-    };
-    CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+    if(CONNECT = true){
+        let sqlRight =util.format(
+            'SELECT\n' +
+            '\t*\n' +
+            'FROM\n' +
+            '\t(\n' +
+            '\t\tSELECT\n' +
+            '\t\t\twork_info.work_type, \n' +
+            '\t\t\tCOUNT(work_info.work_id) AS num\n' +
+            '\t\tFROM\n' +
+            '\t\t\twork_info\n' +
+            '\t\tGROUP BY\n' +
+            '\t\t\twork_info.work_type\n' +
+            '\t) AS Type\n' +
+            'ORDER BY\n' +
+            '\tnum DESC\n' +
+            'LIMIT 3');
+        console.log("sqlRight:",sqlRight);
+        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log("sqlRes:",sqlRes);
+        let Res = {};
+        sqlRes.forEach(value =>
+            Res[WORKTYPE[value['work_type']]] = value['num']
+        );
+        console.log("Res:",Res);
+        let keys = Object.keys(Res);
+        console.log("keys:",keys);
+        for (let i = 0, n = keys.length, key; i < n; ++i) {
+            key = keys[i];
+            WorkTypeInfo = {
+                "workType":key,
+                "CertificateAmount":Res[key]
+            };
+            CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+        }
+        console.log("CertificateAmountGroupByWorkType:",CertificateAmountGroupByWorkType);
 
+    }
+    else{
+        WorkTypeInfo = {
+            "workType":"音乐",
+            "CertificateAmount":localUtils.randomNumber(80,100)
+        };
+        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":"电影",
+            "CertificateAmount":localUtils.randomNumber(60,80)
+        };
+        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":"美术",
+            "CertificateAmount":localUtils.randomNumber(40,60)
+        };
+        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+    }
     return CertificateAmountGroupByWorkType;
 }
+function sortDict(dict) {
+    var dict2 = {},
+        keys = Object.keys(dict).sort();
+
+    for (var i = 0, n = keys.length, key; i < n; ++i) {
+        key = keys[i];
+        dict2[key] = dict[key];
+    }
+
+    return dict2;
+}
+
 // 2）	截止当前不同创作类型的存证数量分布。
 
 // 二维图（两个自变量）
@@ -241,29 +312,122 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
     let CertificateAmountGroupByWorkTypeEXchange = [];
     let MonthGap = 3;
     let WorkTypeInfo = {};
-    for (let index = 0; index < 12; index = index + MonthGap) {
-        let CertificateAmountGroupByWorkType = [];
+    // console.log([TimeStampArray, MonthArray]);
+    if(CONNECT == true){
+        // TODO 第一个月确定选中的类型
+        let index = 0;
         let endTimeStamp = TimeStampArray[index];
-        let startTimeStamp = TimeStampArray[(index + MonthGap)];
-        WorkTypeInfo = {
-            "workType":"音乐",
-            "CertificateAmount":localUtils.randomNumber(80,100),
-            "Month" : MonthArray[index + MonthGap],
-        };
-        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":"电影",
-            "CertificateAmount":localUtils.randomNumber(60,80),
-            "Month" : MonthArray[index + MonthGap],
-        };
-        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":"美术",
-            "CertificateAmount":localUtils.randomNumber(40,60),
-            "Month" : MonthArray[index + MonthGap],
-        };
-        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-        CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);
+        let startTimeStamp = TimeStampArray[(index + 1)];
+        let sqlRight =util.format(
+            'SELECT\n' +
+            '\t*\n' +
+            'FROM\n' +
+            '\t(\n' +
+            '\t\tSELECT\n' +
+            '\t\t\twork_info.work_type, \n' +
+            '\t\t\tCOUNT(work_info.work_id) AS num\n' +
+            '\t\tFROM\n' +
+            '\t\t\twork_info\n' +
+            '\t\tWHERE\n' +
+            '\t\t\twork_info.completion_time <= %s AND\n' +
+            '\t\t\twork_info.completion_time > %s\n' +
+            '\t\tGROUP BY\n' +
+            '\t\t\twork_info.work_type\n' +
+            '\t) AS Type\n' +
+            'ORDER BY\n' +
+            '\tnum DESC\n' +
+            'LIMIT 3'
+            ,endTimeStamp,startTimeStamp);
+        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        let Res = {};
+        sqlRes.forEach(value =>
+            Res[WORKTYPE[value['work_type']]] = value['num']
+        );
+        console.log("Res =",Res);
+
+        let keys = Object.keys(Res);
+        console.log("keys:",keys);
+        for (let i = 0, n = keys.length, key; i < n; ++i) {
+            key = keys[i];
+            if(Res[key]==null)Res[key]=0;
+            let MonthInfo = {
+                "workType":key,
+                "CertificateAmount":Res[key],
+                "Month" : MonthArray[index + MonthGap],
+            };
+            CertificateAmountGroupByWorkTypeEXchange.push(MonthInfo);
+        }
+        index = index + MonthGap;
+        for (; index < 12; index = index + MonthGap) {
+            endTimeStamp = TimeStampArray[index];
+            startTimeStamp = TimeStampArray[(index + 1)];
+            sqlRight =util.format(
+                'SELECT\n' +
+                '\t*\n' +
+                'FROM\n' +
+                '\t(\n' +
+                '\t\tSELECT\n' +
+                '\t\t\twork_info.work_type, \n' +
+                '\t\t\tCOUNT(work_info.work_id) AS num\n' +
+                '\t\tFROM\n' +
+                '\t\t\twork_info\n' +
+                '\t\tWHERE\n' +
+                '\t\t\twork_info.completion_time <= %s AND\n' +
+                '\t\t\twork_info.completion_time > %s\n' +
+                '\t\tGROUP BY\n' +
+                '\t\t\twork_info.work_type\n' +
+                '\t) AS Type\n' +
+                'ORDER BY\n' +
+                '\tnum DESC\n' +
+                'LIMIT 3'
+                ,endTimeStamp,startTimeStamp);
+            console.log("sqlRight:",sqlRight);
+            sqlRes = await mysqlUtils.sql(c, sqlRight);
+            console.log("sqlRes:",sqlRes);
+            Res = {};
+            sqlRes.forEach(value =>
+                Res[WORKTYPE[value['work_type']]] = value['num']
+            );
+            console.log("Res =",Res);
+
+            for (let i = 0, n = keys.length, key; i < n; ++i) {
+                key = keys[i];
+                if(Res[key]==null)Res[key]=0;
+                let MonthInfo = {
+                    "workType":key,
+                    "CertificateAmount":Res[key],
+                    "Month" : MonthArray[index + MonthGap],
+                };
+                CertificateAmountGroupByWorkTypeEXchange.push(MonthInfo);
+            }
+        }
+    }
+    else{
+        for (let index = 0; index < 12; index = index + MonthGap) {
+            let CertificateAmountGroupByWorkType = [];
+            let endTimeStamp = TimeStampArray[index];
+            let startTimeStamp = TimeStampArray[(index + MonthGap)];
+            WorkTypeInfo = {
+                "workType":"音乐",
+                "CertificateAmount":localUtils.randomNumber(80,100),
+                "Month" : MonthArray[index + MonthGap],
+            };
+            CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+            WorkTypeInfo = {
+                "workType":"电影",
+                "CertificateAmount":localUtils.randomNumber(60,80),
+                "Month" : MonthArray[index + MonthGap],
+            };
+            CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+            WorkTypeInfo = {
+                "workType":"美术",
+                "CertificateAmount":localUtils.randomNumber(40,60),
+                "Month" : MonthArray[index + MonthGap],
+            };
+            CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+            CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);
+        }
+
     }
 
 
@@ -307,26 +471,38 @@ export async function handleCopyRightAmountEXchange(req, res) {
 
 async function getCopyRightAmountEXchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
-    // console.log([TimeStampArray, MonthArray]);
     let CopyRightAmountEXchange = [];
     for (let index = 0; index < 12; index++) {
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
         let sqlRight =util.format(
-            'work_info.created_time >= %s\
-                 AND\
-            work_info.created_time < %s'
+            'SELECT DISTINCT\n' +
+            '\tCOUNT(right_token_info.copyright_id)\n' +
+            'FROM\n' +
+            '\tright_token_info\n' +
+            '\tINNER JOIN\n' +
+            '\t(\n' +
+            '\t\twork_info\n' +
+            '\t)\n' +
+            '\tON \n' +
+            '\t\tright_token_info.work_id = work_info.work_id\n' +
+            'WHERE\n' +
+            '\t\twork_info.completion_time <= %s AND\n' +
+            '\t\t\twork_info.completion_time > %s\n'
             ,endTimeStamp,startTimeStamp);
         // console.log(sqlRight);
-        let value = localUtils.randomNumber(30,50);
-        // sqlRes = await mysqlUtils.sql(c, sqlRight);
-        // // console.log(sqlRes);
-        // sqlRes.forEach(value => 
-        //     Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
-        // );
-        
+        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log(sqlRes);
+        let valueRes = 0;
+        sqlRes.forEach(function(item,index){
+            valueRes = item['COUNT(right_token_info.copyright_id)'];
+            console.log(item['COUNT(right_token_info.copyright_id)']+'---'+index);
+        });
+        if(CONNECT = false) valueRes = localUtils.randomNumber(30,50);
+        console.log("valueRes =",valueRes);
+
         let MonthInfo = {
-            "CopyRightAmount": value,
+            "CopyRightAmount": valueRes,
             "Month" : MonthArray[index + 1],
         };
         CopyRightAmountEXchange.push(MonthInfo);
@@ -431,15 +607,57 @@ export async function handleCopyRightAmountGroupByIDtype(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
+// 1..9   1.2.4为个人
 async function getCopyRightAmountGroupByIDtype() {
     let CopyRightAmountGroupByIDtype = {};
-
-    CopyRightAmountGroupByIDtype = {
-        "个人账户数目" : localUtils.randomNumber(300,500),
-        "非个人账户数目": localUtils.randomNumber(600,1000),
+    if(CONNECT = false){
+        CopyRightAmountGroupByIDtype = {
+            "个人账户数目" : localUtils.randomNumber(300,500),
+            "非个人账户数目": localUtils.randomNumber(600,1000),
+        };
     }
+    else{
+        let sqlRight =util.format(
+            'SELECT\n' +
+            '\tCOUNT(right_token_info.copyright_id) AS num\n' +
+            'FROM\n' +
+            '\tright_token_info\n' +
+            'WHERE\n' +
+            '\tright_token_info.id_type = 3 OR \n' +
+            '\tright_token_info.id_type = 5 OR \n' +
+            '\tright_token_info.id_type = 6 OR \n' +
+            '\tright_token_info.id_type = 7 OR \n' +
+            '\tright_token_info.id_type = 8 OR \n' +
+            '\tright_token_info.id_type = 9');
+        console.log(sqlRight);
+        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log(sqlRes);
+        let InPersonalNum = 0;
+        sqlRes.forEach(function(item,index){
+            InPersonalNum = item['num'];
+        });
+        sqlRight =util.format(
+            'SELECT\n' +
+            '\tCOUNT(right_token_info.copyright_id) AS num\n' +
+            'FROM\n' +
+            '\tright_token_info\n' +
+            'WHERE\n' +
+            '\tright_token_info.id_type = 1 OR \n' +
+            '\tright_token_info.id_type = 2 OR \n' +
+            '\tright_token_info.id_type = 4');
+        console.log(sqlRight);
+        sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log(sqlRes);
+        let PersonalNum = 0;
+        sqlRes.forEach(function(item,index){
+            PersonalNum = item['num'];
+        });
 
+        CopyRightAmountGroupByIDtype = {
+            "个人账户数目" : PersonalNum,
+            "非个人账户数目": InPersonalNum,
+        };
+    }
     return CopyRightAmountGroupByIDtype;
 }
 // 二维图（两个自变量）
@@ -459,23 +677,60 @@ export async function handleCopyRightAmountGroupByCopyrightType(req, res) {
 
 async function getCopyRightAmountGroupByCopyrightType() {
     let CopyRightAmountGroupByIDtype = {};
-
-    CopyRightAmountGroupByIDtype = {
-        "复制权" : localUtils.randomNumber(200,500),
-        "发行权" : localUtils.randomNumber(200,500),
-        "出租权" : localUtils.randomNumber(200,500),
-        "展览权" : localUtils.randomNumber(200,500),
-        "表演权" : localUtils.randomNumber(200,500),
-        "放映权" : localUtils.randomNumber(200,500),
-        "广播"   : localUtils.randomNumber(200,500),
-        "信息网络传播权" : localUtils.randomNumber(200,500),
-        "摄制权" : localUtils.randomNumber(200,500),
-        "改编权" : localUtils.randomNumber(200,500),
-        "翻译权" : localUtils.randomNumber(200,500),
-        "汇编权" : localUtils.randomNumber(200,500),
-        "其他"   : localUtils.randomNumber(50,200),
-        
+    if(CONNECT == true){
+        let sqlRight =util.format(
+            'SELECT\n' +
+            '\tCOUNT(right_token_info.copyright_id) AS num, \n' +
+            '\tright_token_info.copyright_type\n' +
+            'FROM\n' +
+            '\tright_token_info\n' +
+            'GROUP BY\n' +
+            '\tright_token_info.copyright_type\n' +
+            'ORDER BY\n' +
+            '\tright_token_info.copyright_type');
+        console.log(sqlRight);
+        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        console.log(sqlRes);
+        let AmountGroup = {};
+        sqlRes.forEach(function(item,index){
+            AmountGroup[index] = item['num'];
+        });
+        console.log(AmountGroup);
+        CopyRightAmountGroupByIDtype = {
+            "复制权" : AmountGroup[0],
+            "发行权" : AmountGroup[1],
+            "出租权" : AmountGroup[2],
+            "展览权" : AmountGroup[3],
+            "表演权" : AmountGroup[4],
+            "放映权" : AmountGroup[5],
+            "广播"   : AmountGroup[6],
+            "信息网络传播权" : AmountGroup[7],
+            "摄制权" : AmountGroup[8],
+            "改编权" : AmountGroup[9],
+            "翻译权" : AmountGroup[10],
+            "汇编权" : AmountGroup[11],
+            "其他"   : AmountGroup[12]
+        }
     }
+    else {
+        CopyRightAmountGroupByIDtype = {
+            "复制权" : localUtils.randomNumber(200,500),
+            "发行权" : localUtils.randomNumber(200,500),
+            "出租权" : localUtils.randomNumber(200,500),
+            "展览权" : localUtils.randomNumber(200,500),
+            "表演权" : localUtils.randomNumber(200,500),
+            "放映权" : localUtils.randomNumber(200,500),
+            "广播"   : localUtils.randomNumber(200,500),
+            "信息网络传播权" : localUtils.randomNumber(200,500),
+            "摄制权" : localUtils.randomNumber(200,500),
+            "改编权" : localUtils.randomNumber(200,500),
+            "翻译权" : localUtils.randomNumber(200,500),
+            "汇编权" : localUtils.randomNumber(200,500),
+            "其他"   : localUtils.randomNumber(50,200),
+
+        }
+    }
+
 
     return CopyRightAmountGroupByIDtype;
 }
@@ -527,7 +782,7 @@ async function getCopyRightAmountGroupByCopyrightType() {
 //         // sqlRes = await mysqlUtils.sql(c, sqlRight);
 //         // // console.log(sqlRes);
 //         // sqlRes.forEach(value => 
-//         //     Res[i][value['addr']] = value['COUNT(right_token_info.addr)']
+//         //     Res[i][value['address']] = value['COUNT(right_token_info.address)']
 //         // );
         
 //         let MonthInfo = {
