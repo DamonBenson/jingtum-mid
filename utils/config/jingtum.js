@@ -23,8 +23,8 @@ export const userAccount = {
 
     // 必需用户，需要中间层保存
     baiduAuthorizeAccount: {
-        address: 'jLDWh1YKsoCiXfAVPdat4GKzihHTYDkH3R',
-        secret: 'spqRyePwa293pWzboo1sT3Wn5m1TU',
+        address: 'jB7rxgh43ncbTX4WeMoeadiGMfmfqY2xLZ',
+        secret: '',
     },
     buptAuthorizeAccount: {
         address: 'jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6',

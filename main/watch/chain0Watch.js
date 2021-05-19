@@ -106,7 +106,10 @@ r.connect(async function(err, result) {
             processedTx.account = src;
             switch(txType) {
                 case 'Payment':
-                    if(src == userAccount.fakeBaiduAuthorizeAccount.address) {
+                    if(src == userAccount.baiduAuthorizeAccount.address) {
+                        uploadTxs.push(processedTx);
+                    }
+                    else if(src == userAccount.fakeBaiduAuthorizeAccount.address) {
                         uploadTxs.push(processedTx);
                     }
                 default:
