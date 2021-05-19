@@ -128,6 +128,12 @@ r.connect(async function(err, result) {
                             else if(src != userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address) {
                                 transferRightTokenTxs.push(processedTx);
                             }
+                            else if(src == userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) {
+                                issueRightTokenTxs.push(processedTx);
+                            }
+                            else if(src != userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) {
+                                transferRightTokenTxs.push(processedTx);
+                            }
                             break;
                         case tokenName.approve:
                             if(src == userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
