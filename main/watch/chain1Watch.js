@@ -9,12 +9,16 @@ import * as localUtils from '../../utils/localUtils.js';
 
 import {userAccount, chains, tokenName} from '../../utils/config/jingtum.js';
 import {mysqlConf} from '../../utils/config/mysql.js';
+import {debugMode} from '../../utils/config/project.js';
 
 const u = jlib.utils;
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 const tokenChain = chains[1]; // 交易链
+
+const flagAddrs = userAccount.superviseAccount.map(acc => acc.address);
+const tokenInfosAddrs = userAccount.authenticateAccount.map(acc => acc.address);
 
 /*----------创建链接(交易链服务器3)----------*/
 
@@ -100,18 +104,21 @@ r.connect(async function(err, result) {
         let issueApproveTokenTxs = [];
         let transferRightTokenTxs = [];
         let transferApproveTokenTxs = [];
+        let tokenInfoChangeTxs = [];
+        let tokenFlagChangeTxs = [];
+
+        // console.log(txs);
 
         for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
             let txType = tx.TransactionType;
             let src = tx.Account;
             let dst = tx.Destination;
-            let processedTx;
+            let processedTx = u.processTx(tx, src);
+            processedTx.account = src;
             let txTokenName;
             switch(txType) {
                 case 'TransferToken':
-                    processedTx = u.processTx(tx, src);
-                    processedTx.account = src;
                     txTokenName = processedTx.token;
                     switch(txTokenName) {
                         case tokenName.copyright:
@@ -134,6 +141,14 @@ r.connect(async function(err, result) {
                             break;
                     }
                     break;
+                case 'TokenInfoChange':
+                    if(tokenInfosAddrs.includes(src)) {
+                        tokenInfoChangeTxs.push(processedTx);
+                    }
+                    else if(flagAddrs.includes(src)) {
+                        tokenFlagChangeTxs.push(processedTx);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -143,6 +158,7 @@ r.connect(async function(err, result) {
         await processIssueApproveToken(issueApproveTokenTxs, issueApproveTokenTxs.length);
         // await processTransferRightToken(transferRightTokenTxs, transferRightTokenTxs.length);
         // await processTransferApproveToken(transferApproveTokenTxs, transferApproveTokenTxs.length);
+        await processTokenInfoChange(tokenInfoChangeTxs, tokenInfoChangeTxs.length);
 
         // 结束计时
         console.timeEnd('chain1Watch');
@@ -154,26 +170,28 @@ r.connect(async function(err, result) {
 
 async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     
-    console.log('issueRightTokenTxs:', issueRightTokenTxs);
+    if(debugMode == true) {
+        console.log('issueRightTokenTxs:', issueRightTokenTxs);
+    }
 
     let rightInfoPromises = [];
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
+
         let tokenInfos = issueRightTokenTx.tokenInfos;
-        console.log("tokenInfos:",tokenInfos);
         let rightInfo = localUtils.tokenInfos2obj(tokenInfos);
 
         rightInfo.copyrightId = issueRightTokenTx.tokenId;
         rightInfo.timestamp = issueRightTokenTx.date;
         rightInfo.address = issueRightTokenTx.receiver;
 
-        let copyrightHolderHash = rightInfo.copyrightHolder;
+        let copyrightHolderHash = rightInfo.copyrightHolderHash;
         let copyrightHolder = await ipfsUtils.get(copyrightHolderHash);
         Object.assign(rightInfo, copyrightHolder);
-        delete rightInfo.copyrightHolder;
+        delete rightInfo.copyrightHolderHash;
 
         localUtils.toMysqlObj(rightInfo);
-        console.log(rightInfo);
+        console.log('copyrightInfo:', rightInfo);
 
         let sql = sqlText.table('right_token_info').data(rightInfo).insert();
         rightInfoPromises.push(mysqlUtils.sql(c, sql));
@@ -186,7 +204,9 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
 
 async function processIssueApproveToken(issueApproveTokenTxs, loopConter) {
     
-    console.log('issueApproveTokenTxs:', issueApproveTokenTxs);
+    if(debugMode == true) {
+        console.log('issueApproveTokenTxs:', issueApproveTokenTxs);
+    }
 
     let approveInfoPromises = [];
 
@@ -237,3 +257,32 @@ async function processIssueApproveToken(issueApproveTokenTxs, loopConter) {
 //     await Promise.all(postAddrChangePromises); // 更改token_info表中的拥有者地址
 
 // }
+
+async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
+
+    if(debugMode == true) {
+        console.log('tokenInfoChangeTxs:', tokenInfoChangeTxs);
+    }
+
+    let authInfoPromises = [];
+
+    tokenInfoChangeTxs.forEach(async(tokenInfoChangeTx) => {
+
+        let memos = tokenInfoChangeTx.memos;
+        let authInfo = localUtils.memos2obj(memos);
+
+        authInfo.contractAddress = tokenInfoChangeTx.account;
+        authInfo.copyrightId = tokenInfoChangeTx.tokenId;
+        authInfo.timestamp = tokenInfoChangeTx.date;
+
+        localUtils.toMysqlObj(authInfo);
+        console.log('authenticationInfo:', authInfo);
+
+        let sql = sqlText.table('auth_info').data(authInfo).insert();
+        authInfoPromises.push(mysqlUtils.sql(c, sql));
+
+    });
+
+    await Promise.all(authInfoPromises);
+
+}

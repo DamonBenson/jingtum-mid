@@ -47,24 +47,22 @@ uploadRemote.connect(async function(err, res) {
 
             let workInfo = JSON.stringify(await generateWorkInfo());
             let recvAddr = userAccount.normalAccount[0].address;
-            let workRes = await tx.buildPaymentTx(uploadRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, uploadSeq++, recvAddr, 0.000001, workInfo, true);
-            // console.log("workRes",workRes)
+            let workRes = await tx.buildPaymentTx(uploadRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, uploadSeq++, recvAddr, 0.000001, workInfo, false);
 
             let workId = workRes.tx_json.hash;
             let copyrightInfoArr = await generateCopyrightInfo();
 
             copyrightInfoArr.forEach(async (copyrightInfo, index) => {
-                // if(index != 0) return;
+                if(index != 0) return;
                 console.log("copyrightInfo.workId",workId)
                 copyrightInfo.workId = workId;
                 copyrightInfo = copyrightInfo;
                 let tokenId = sha256(workId + copyrightInfo.copyrightType).toString();
                 console.log(copyrightInfo);
                 let copyrightRes = await erc721.buildPubTokenTx(tokenRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, tokenSeq++, recvAddr, tokenName.copyright, tokenId, copyrightInfo, true);
-                // console.log("copyrightRes",copyrightRes)
             })
             
-            await localUtils.sleep(10000);
+            await localUtils.sleep(60000);
 
         }
 

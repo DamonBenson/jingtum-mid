@@ -98,10 +98,10 @@ r.connect(async function(err, result) {
             let txType = tx.TransactionType;
             let src = tx.Account;
             let dst = tx.Destination;
+            let processedTx = u.processTx(tx, src);
+            processedTx.account = src;
             switch(txType) {
                 case 'AlethContract':
-                    let processedTx = u.processTx(tx, src);
-                    processedTx.account = src;
                     let contractMethod = processedTx.func;
                     if(contractAddr.buyOrder.includes(dst)) {
                         let index = contractAddr.buyOrder.indexOf(dst);

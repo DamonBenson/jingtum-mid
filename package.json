@@ -16,7 +16,7 @@
     "express": "^4.17.1",
     "form-data": "^4.0.0",
     "ipfs-api": "^26.1.2",
-    "jingtum-lib": "^2.4.7",
+    "jingtum-lib": "file:local_packages/jingtum-lib",
     "joi": "^17.4.0",
     "kafka-node": "^5.0.0",
     "lodash": "^4.17.21",

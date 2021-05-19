@@ -19,3 +19,9 @@ export const copyrightAuthReqSchema = Joi.any();
  * @param {String}contractAddr 确权合约地址
  */
 export const authStateReqSchema = Joi.any();
+
+/**
+ * @description 不通过合约完成同步版权确权。
+ * @param {int[]}copyrightIds 版权通证标识列表
+ */
+ export const innerCopyrightAuthReqSchema = Joi.any();

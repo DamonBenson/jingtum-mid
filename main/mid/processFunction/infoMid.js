@@ -20,7 +20,7 @@ const midSecr = userAccount.midAccount.secret;
 /**
  * @description 激活账户，中间层签名。
  * @param {int}amount 需要激活的区块链账户数量
- * @returns {Object[]} 包括账户地址address、账户私钥secret
+ * @returns {Object[]} 账户信息列表，包括：账户地址address、账户私钥secret
  */
 export async function handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req) {
 
@@ -32,7 +32,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
         data: {},
     }
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let body = req.body;
     try {
         await infoValidate.activateReqSchema.validateAsync(body);
     } catch(e) {
@@ -42,6 +42,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/activateAccount:', resInfo.data);
         console.timeEnd('handleActivateAccount');
         console.log('--------------------');
         return resInfo;
@@ -65,10 +66,12 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
     }
     await Promise.all(activatePromises);
 
+    resInfo.data.accounts = walletArr;
+    console.log('/info/activateAccount:', resInfo.data);
+
     console.timeEnd('handleActivateAccount');
     console.log('--------------------');
 
-    resInfo.data.accounts = walletArr;
     return resInfo;
 
 }
@@ -98,6 +101,7 @@ export async function handleWorkInfo(req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/work:', resInfo.data);
         console.timeEnd('handleWorkInfo');
         console.log('--------------------');
         return resInfo;
@@ -114,10 +118,11 @@ export async function handleWorkInfo(req) {
     })
     let certificateInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
+    resInfo.data.certificateInfoList = certificateInfoList;
+    console.log('/info/work:', resInfo.data);
+
     console.timeEnd('handleWorkInfo');
     console.log('--------------------');
-
-    resInfo.data.certificateInfoList = certificateInfoList;
 
     return resInfo;
 
@@ -125,8 +130,8 @@ export async function handleWorkInfo(req) {
 
 /**
  * @description 查询版权信息。
- * @param {int[]}copyrightIds 版权通证标识列表
- * @returns {Object[]} 版权通证信息列表，具体数据格式见文档
+ * @param {int[]}copyrightIds 版权权利通证标识列表
+ * @returns {Object[]} 版权权利通证信息列表，具体数据格式见文档
  */
 export async function handleCopyrightInfo(req) {
 
@@ -148,6 +153,7 @@ export async function handleCopyrightInfo(req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/copyright:', resInfo.data);
         console.timeEnd('handleCopyrightInfo');
         console.log('--------------------');
         return resInfo;
@@ -163,10 +169,11 @@ export async function handleCopyrightInfo(req) {
     });
     let copyrightInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
+    resInfo.data.copyrightInfoList = copyrightInfoList;
+    console.log('/info/copyright:', resInfo.data);
+
     console.timeEnd('handleCopyrightInfo');
     console.log('--------------------');
-
-    resInfo.data.copyrightInfoList = copyrightInfoList;
 
     return resInfo;
 
@@ -174,8 +181,8 @@ export async function handleCopyrightInfo(req) {
 
 /**
  * @description 查询许可信息。
- * @param {int[]}approveIds 许可通证标识列表
- * @returns {Object[]} 许可通证信息列表，具体数据格式见文档
+ * @param {int[]}approveIds 版权许可通证标识列表
+ * @returns {Object[]} 版权许可通证信息列表，具体数据格式见文档
  */
 export async function handleApproveInfo(req) {
 
@@ -197,6 +204,7 @@ export async function handleApproveInfo(req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/info/approve:', resInfo.data);
         console.timeEnd('handleApproveInfo');
         console.log('--------------------');
         return resInfo;
@@ -212,10 +220,12 @@ export async function handleApproveInfo(req) {
     })
     let approveInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
 
+    resInfo.data.approveInfoList = approveInfoList;
+    console.log('/info/approve:', resInfo.data);
+
     console.timeEnd('handleApproveInfo');
     console.log('--------------------');
 
-    resInfo.data.approveInfoList = approveInfoList;
 
     return resInfo;
 

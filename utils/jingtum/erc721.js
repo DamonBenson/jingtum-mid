@@ -13,24 +13,30 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {int}seq 动态发币账号的交易序列号
  * @param {String}name 被授权发行的通证名称
  * @param {int}num 被授权发行的通证数量
+ * @param {int}flag 被授权发行的通证冻结标识
  * @param {String[]}flagAddrs 拥有修改flag权限的地址数组
  * @param {String[]}tokenInfosAddrs 拥有修改tokenInfos权限的地址数组
+ * @param {int}refFlag 0-一般通证（版权通证）；1-有引用关系的通证（许可通证）
  * @param {bool}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
-export function buildTokenIssueTx(remote, publisher, seq, name, num, flagAddrs, tokenInfosAddrs, showRes) {
+export function buildTokenIssueTx(remote, publisher, seq, name, num, flag, flagAddrs, tokenInfosAddrs, refFlag, showRes) {
 
     let tx = remote.buildTokenIssueTx({
         account: issuerAddr,
         publisher: publisher,
         token: name,
         number: num,
+        flag: flag,
         roles: localUtils.toRolesArr(flagAddrs, tokenInfosAddrs),
+        referenceFlag: refFlag,
     });
 
     tx.setSecret(issuerSecr);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -41,6 +47,9 @@ export function buildTokenIssueTx(remote, publisher, seq, name, num, flagAddrs, 
             else if(result){
                 if(showRes) {
                     console.log('buildTokenIssueTx:', result);
+                }
+                else {
+                    console.log('buildTokenIssueTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -64,7 +73,7 @@ export function buildTokenIssueTx(remote, publisher, seq, name, num, flagAddrs, 
  */
 export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, tokenInfos, showRes) {
 
-    let tx = remote.buildTransferTokenTx({
+    let tx = remote.buildPubTokenTx({
         publisher: publisher,
         receiver: dest,
         token: name,
@@ -74,7 +83,9 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -84,7 +95,9 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildPubTokenTx:', result);
+                    console.log('buildPubTokenTx:', result);
+                }
+                else {
                     console.log('buildPubTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
@@ -112,18 +125,20 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
  */
 export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, name, id, tokenInfos, refId, refAddr, refSecr, showRes) {
 
-    let tx = remote.buildTransferTokenTx({
+    let tx = remote.buildPubTokenTx({
         publisher: publisher,
         receiver: dest,
         token: name,
         tokenId: id,
         tokenInfos: localUtils.obj2tokenInfos(tokenInfos),
-        referenceId: refId,
+        referenceID: refId,
     });
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     tx.ownerSign({
         account: refAddr,
@@ -138,7 +153,9 @@ export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, nam
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildPubApproveTokenTx:', result);
+                    console.log('buildPubApproveTokenTx:', result);
+                }
+                else {
                     console.log('buildPubApproveTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
@@ -162,14 +179,16 @@ export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, nam
 export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes) {
 
     let tx = remote.buildTransferTokenTx({
-        publisher: src,
+        owner: src,
         receiver: dest,
         tokenId: id,
     });
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -179,7 +198,9 @@ export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildTransferTokenTx:', result);
+                    console.log('buildTransferTokenTx:', result);
+                }
+                else {
                     console.log('buildTransferTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
@@ -200,9 +221,9 @@ export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes
  * @param {bool}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
-export function buildTokenChangeTx(remote, src, secret, seq, id, tokenInfos, showRes) {
+export function buildTokenInfoChangeTx(remote, src, secret, seq, id, tokenInfos, showRes) {
 
-    let tx = remote.buildTransferTokenTx({
+    let tx = remote.buildTokenChangeTx({
         account: src,
         tokenId: id,
         tokenInfos: localUtils.obj2tokenInfos(tokenInfos),
@@ -210,7 +231,54 @@ export function buildTokenChangeTx(remote, src, secret, seq, id, tokenInfos, sho
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
+    
+    return new Promise((resolve, reject) => {
+        tx.submit(function(err, result) {
+            if(err) {
+                console.log('err:',err);
+                reject('err');
+            }
+            else if(result){
+                if(showRes) {
+                    console.log('buildTokenInfoChangeTx:', result);
+                }
+                else {
+                    console.log('buildTokenInfoChangeTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                }
+                resolve(result);
+            }
+        });
+    });
+
+}
+
+/**
+ * @description 冻结/解冻通证。
+ * @param {Object}remote 底层链连接对象
+ * @param {String}src 通证修改者的地址
+ * @param {String}secret 通证修改者的私钥
+ * @param {int}seq 通证修改者的交易序列号
+ * @param {String}id 待修改通证的标识
+ * @param {int}flag 冻结标识
+ * @param {bool}showRes 是否显示结果
+ * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
+ */
+ export function buildTokenFlagChangeTx(remote, src, secret, seq, id, flag, showRes) {
+
+    let tx = remote.buildTokenChangeTx({
+        account: src,
+        tokenId: id,
+        flags: flag,
+    });
+
+    tx.setSecret(secret);
+
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -220,8 +288,10 @@ export function buildTokenChangeTx(remote, src, secret, seq, id, tokenInfos, sho
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildTokenChangeTx:', result);
-                    console.log('buildTokenChangeTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                    console.log('buildTokenFlagChangeTx:', result);
+                }
+                else {
+                    console.log('buildTokenFlagChangeTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -252,6 +322,9 @@ export function requestTokenInfo(remote, id, showRes) {
             else if(result){
                 if(showRes) {
                     console.log('requestTokenInfo:', result);
+                }
+                else {
+                    console.log('requestTokenInfo:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }

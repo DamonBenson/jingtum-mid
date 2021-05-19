@@ -7,8 +7,8 @@ export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/*----------生成区间[min, max)的随机整数---------*/
-/*
+/**
+ * @description 生成区间[min, max)的随机整数。
  * @param min:
  * @param max: 右开
  * @author: Qiumufei
@@ -35,6 +35,12 @@ export function randomString(len) {
 
 /*----------按prob概率分布从res中随机选择----------*/
 
+/**
+ * @description 按prob概率分布从res数组中随机选择。
+ * @param {Array}res 所有可能结果构成的数组
+ * @param {Array}prob res数组中每个元素对应的被选择概率
+ * @returns {any} 随机结果
+ */
 export function randomSelect(res, prob) {
     if(!prob) {
         prob = (new Array(res.length)).fill(1);
@@ -61,38 +67,6 @@ export function formatStr(num, len) {
     if(String(num).length > len) return num;
     return (Array(len).join(0) + num).slice(-len);
 }
-
-// /*----------16进制ascii码转字符串----------*/
-
-// export function ascii2str(ascii) {
-//     let str = '';
-//     for(let i = ascii.length/2; i > 0; i--) {
-//         str = String.fromCharCode(hex2int(ascii.substring(2 * i - 2, 2 * i))) + str;
-//     }
-//     return str;
-// }
-
-// /*----------16进制字符转10进制数字----------*/
-
-// export function hex2int(hex) {
-//     let len = hex.length, a = new Array(len), code;
-//     for(let i = 0; i < len; i++) {
-//         code = hex.charCodeAt(i);
-//         if(48 <= code && code < 58) {
-//             code -= 48;
-//         } 
-//         else {
-//             code = (code & 0xdf) - 65 + 10;
-//         }
-//         a[i] = code;
-//     }
-//     return a.reduce(function(acc, c) {
-//         acc = 16 * acc + c;
-//         return acc;
-//     }, 0);
-// }
-
-
 
 /*----------下划线转驼峰----------*/
 
@@ -138,7 +112,7 @@ export function fromMysqlObj(obj) {
 // }
 
 /**
- * @description 将对象转为链上的ERC721tokenInfos数据格式。
+ * @description 将js对象转为链上的ERC721tokenInfos数据格式。
  * @param {Object}obj tokensInfo对象
  * @returns {Object[]} 链上的ERC721tokenInfos数据格式，包括type属性名、data属性值
  */
@@ -155,8 +129,8 @@ export function obj2tokenInfos(obj) {
 }
 
 /**
- * @description 将链上的ERC721tokenInfos数据格式转为对象。
- * @param {Object[]}arr 链上的ERC721tokenInfos数据，包括MemoType属性名、MemoData属性值
+ * @description 将链上的ERC721tokenInfos数据格式转为js对象。
+ * @param {Object[]}arr 链上的ERC721tokenInfos数据，包括type属性名、data属性值
  * @returns {Object} type作为key，data作为value的js对象
  */
 export function tokenInfos2obj(arr) {
@@ -195,4 +169,19 @@ export function toRolesArr(flagAddrs, tokenInfosAddrs) {
 
     return rolesArr;
     
+}
+
+/**
+ * @description 将链上的ERC721memos数据格式转为js对象。
+ * @param {Object[]}arr 链上的ERC721memos数据，包括MemoType属性名、MemoData属性值
+ * @returns {Object} MemoType作为key，MemoData作为value的js对象
+ */
+ export function memos2obj(arr) {
+    let obj = new Object();
+    for(let i = arr.length - 1; i >= 0; i--) {
+        let k = arr[i].MemoType;
+        let v = arr[i].MemoData;
+        obj[k] = v;
+    }
+    return obj;
 }
