@@ -105,7 +105,7 @@ async function generateCopyrightInfo() {
             workSig: copyrightInfo.workSig,
         }
         let copyrightHolderHash = await ipfsUtils.add(copyrightHolder);
-        copyrightInfo.copyrightHolder = copyrightHolderHash;
+        copyrightInfo.copyrightHolderHash = copyrightHolderHash;
 
         delete copyrightInfo.name;
         delete copyrightInfo.nation;

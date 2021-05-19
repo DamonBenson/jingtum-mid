@@ -70,10 +70,14 @@ export function generateworkAuth(){
     let workAuth = {};
     let createdDay = DateUtil.getPastDay();
     let publishedDay = DateUtil.getBetweenDay(createdDay);
+    let workType = localUtils.randomNumber(1,15);
+    if(localUtils.randomSelect([1,2])!=1){
+        workType = localUtils.randomSelect([1, 3, 8, 12]);
+    }
     if(publishStatus == "Published"){
         workAuth = {
             workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
-            workType: localUtils.randomNumber(1,15),// 1-14文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
+            workType: workType,// 1-14文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
             fileInfoList:upload_fileInfoList,
             creationType:localUtils.randomNumber(1,8),// 1-7原创，改编，翻译，汇编，注释，整理，其他
             createdTime:createdDay.format("YYYYMMDD"),// 创作/制作完成时间
@@ -89,7 +93,7 @@ export function generateworkAuth(){
     else{
         workAuth = {
             workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
-            workType: localUtils.randomNumber(1,15),// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
+            workType: workType,// 文字,口述,音乐,戏剧,曲艺,舞蹈,杂技艺术,美术,建筑,摄影,电影和类似摄制电影方法创作的作品,图形,模型,其他
             fileInfoList:upload_fileInfoList,
             creationType:localUtils.randomNumber(1,8),// 原创，改编，翻译，汇编，注释，整理，其他
             createdTime:createdDay.format("YYYYMMDD"),// 创作/制作完成时间
@@ -149,7 +153,7 @@ export function generateworkCopyRight(workAuth){
     let workCopyRight = [];
     let Name = sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,4);
     let IDType = localUtils.randomSelect([1,4,5,6],[0.4,0.2,0.1,0.3]);//居民身份证、军官证、营业执照、护照、企业法人营业执照、组织机构代码证书、事业单位法人证书、社团法人证书、其他有效证件
-    let IDNum = localUtils.randomNumber(3300000000, 3600000000).toString().substring(0,18);// 18位身份证
+    let idNumHash = sha256(localUtils.randomNumber(100, 2000000000).toString()).toString();// 18位身份证
     for(let i = 1;i<=13;i++)
     {
         if(i>=7)//广播权开始//部分不会颁布
@@ -159,7 +163,7 @@ export function generateworkCopyRight(workAuth){
             copyrightType : i,
             name : Name,
             idType : IDType,
-            idNum : IDNum,
+            idNumHash : idNumHash,
             nation : "中国",
             province : "北京",
             city : "北京",
@@ -192,7 +196,7 @@ function chain2watchResponse(SingleCopyRight , addr){
         copyright_right : SingleCopyRight.copyrightType,
         name : copyrightHolder.name,
         id_type : copyrightHolder.idType,
-        id_num : copyrightHolder.idNum,
+        id_num : copyrightHolder.idNumHash,
         nation : copyrightHolder.nation,
         province : copyrightHolder.province,
         city : copyrightHolder.city,

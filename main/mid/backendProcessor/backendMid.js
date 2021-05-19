@@ -1,15 +1,17 @@
-import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
 
-import {mysqlConf} from '../../../utils/info.js';
 import util from 'util';
 
-const c = mysql.createConnection(mysqlConf);
+import mysql from 'mysql';
+import {mysqlConf} from '../../../utils/info.js';
+export const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
+
+
 let CONNECT = true;// When false, Send Random Response
 /**
  *
@@ -201,6 +203,7 @@ async function getCertificateAmountEXchange() {
         };
         CertificateAmountEXchange.push(MonthInfo);
     }
+    CertificateAmountEXchange.reverse();
     console.log(CertificateAmountEXchange);
     return CertificateAmountEXchange;
 }
@@ -222,7 +225,7 @@ async function getCertificateAmountGroupByWorkType() {
     let CertificateAmountGroupByWorkType = [];
     let WorkTypeInfo = {};
 
-    if(CONNECT = true){
+    if(CONNECT == true){
         let sqlRight =util.format(
             'SELECT\n' +
             '\t*\n' +
@@ -310,6 +313,7 @@ export async function handleCertificateAmountGroupByWorkTypeEXchange(req, res) {
 async function getCertificateAmountGroupByWorkTypeEXchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     let CertificateAmountGroupByWorkTypeEXchange = [];
+    let CertificateAmountGroupByWorkType = [];
     let MonthGap = 3;
     let WorkTypeInfo = {};
     // console.log([TimeStampArray, MonthArray]);
@@ -355,8 +359,9 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
                 "CertificateAmount":Res[key],
                 "Month" : MonthArray[index + MonthGap],
             };
-            CertificateAmountGroupByWorkTypeEXchange.push(MonthInfo);
+            CertificateAmountGroupByWorkType.push(MonthInfo);
         }
+        CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);
         index = index + MonthGap;
         for (; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
@@ -389,7 +394,7 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
                 Res[WORKTYPE[value['work_type']]] = value['num']
             );
             console.log("Res =",Res);
-
+            CertificateAmountGroupByWorkType =[];
             for (let i = 0, n = keys.length, key; i < n; ++i) {
                 key = keys[i];
                 if(Res[key]==null)Res[key]=0;
@@ -398,8 +403,10 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
                     "CertificateAmount":Res[key],
                     "Month" : MonthArray[index + MonthGap],
                 };
-                CertificateAmountGroupByWorkTypeEXchange.push(MonthInfo);
+                CertificateAmountGroupByWorkType.push(MonthInfo);
             }
+            CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);
+
         }
     }
     else{
@@ -430,7 +437,7 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
 
     }
 
-
+    CertificateAmountGroupByWorkTypeEXchange.reverse();
     return CertificateAmountGroupByWorkTypeEXchange;
 }
 // 4）	不同创作类型的存证数量随时间的变化。creationType
@@ -498,7 +505,7 @@ async function getCopyRightAmountEXchange() {
             valueRes = item['COUNT(right_token_info.copyright_id)'];
             console.log(item['COUNT(right_token_info.copyright_id)']+'---'+index);
         });
-        if(CONNECT = false) valueRes = localUtils.randomNumber(30,50);
+        if(CONNECT == false) valueRes = localUtils.randomNumber(30,50);
         console.log("valueRes =",valueRes);
 
         let MonthInfo = {
@@ -507,6 +514,7 @@ async function getCopyRightAmountEXchange() {
         };
         CopyRightAmountEXchange.push(MonthInfo);
     }
+    CopyRightAmountEXchange.reverse();
     return CopyRightAmountEXchange;
 }
 // 2）	截止当前不同作品类型、不同创作类型的通证数量分布。 INNER_JOIN workType、creationType
@@ -610,7 +618,7 @@ export async function handleCopyRightAmountGroupByIDtype(req, res) {
 // 1..9   1.2.4为个人
 async function getCopyRightAmountGroupByIDtype() {
     let CopyRightAmountGroupByIDtype = {};
-    if(CONNECT = false){
+    if(CONNECT == false){
         CopyRightAmountGroupByIDtype = {
             "个人账户数目" : localUtils.randomNumber(300,500),
             "非个人账户数目": localUtils.randomNumber(600,1000),

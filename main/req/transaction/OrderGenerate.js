@@ -258,14 +258,14 @@ export function generateSellOrder(wrokIds, sellerAddr) {
     let basePrice = localUtils.randomNumber(100, 1000);
     // basePrice = 0;
 
-    let expectedPrice = generateExpectedPrice(basePrice);
+    let expectedPrice = generateExpectedPrice(basePrice); 
 
     let sellOrder = {
         labelSet: labelSet,
         expectedPrice: expectedPrice,
         sellerAddr: sellerAddr,
         contact: 'phoneNumber', // 联系方式
-        assetId: wrokIds,
+        assetId: wrokIds,// TODO 缺乏workID
         assetType: 0,
         consumable: false,
         expireTime: 86400,
