@@ -20,7 +20,7 @@ const midSecr = userAccount.midAccount.secret;
 /**
  * @description 激活账户，中间层签名。
  * @param {int}amount 需要激活的区块链账户数量
- * @returns {Object[]} 包括账户地址address、账户私钥secret
+ * @returns {Object[]} 账户信息列表，包括：账户地址address、账户私钥secret
  */
 export async function handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req) {
 
@@ -130,8 +130,8 @@ export async function handleWorkInfo(req) {
 
 /**
  * @description 查询版权信息。
- * @param {int[]}copyrightIds 版权通证标识列表
- * @returns {Object[]} 版权通证信息列表，具体数据格式见文档
+ * @param {int[]}copyrightIds 版权权利通证标识列表
+ * @returns {Object[]} 版权权利通证信息列表，具体数据格式见文档
  */
 export async function handleCopyrightInfo(req) {
 
@@ -181,8 +181,8 @@ export async function handleCopyrightInfo(req) {
 
 /**
  * @description 查询许可信息。
- * @param {int[]}approveIds 许可通证标识列表
- * @returns {Object[]} 许可通证信息列表，具体数据格式见文档
+ * @param {int[]}approveIds 版权许可通证标识列表
+ * @returns {Object[]} 版权许可通证信息列表，具体数据格式见文档
  */
 export async function handleApproveInfo(req) {
 

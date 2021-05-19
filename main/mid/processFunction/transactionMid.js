@@ -863,10 +863,10 @@ const tokenChain = chains[0]; // 交易链
 // }
 
 /**
- * @description 许可通证生成（对于平台内部匹配的交易），卖方用户签名。
- * @param {Object}buyOrderInfo 包括买方地址buyerAddr、授权场景authorizationScene
- * @param {Object[]}sellOrderInfoList 包括卖方地址sellerAddr、卖方私钥sellerSecret、版权通证标识copyrightId
- * @returns {Object[]} 包括版权通证标识copyrightId、许可通证标识approveId
+ * @description 版权许可通证生成（对于平台内部匹配的交易），卖方用户签名。
+ * @param {Object}buyOrderInfo 买单信息，包括：买方地址buyerAddr、授权场景authorizationScene
+ * @param {Object[]}sellOrderInfoList 卖单信息列表，包括：卖方地址sellerAddr、卖方私钥sellerSecret、版权通证标识copyrightId
+ * @returns {Object[]} 授权结果列表，包括：版权权利通证标识copyrightId、版权许可通证标识approveId
  */
 export async function handleApproveConfirm(tokenRemote, seqObj, req) {
 

@@ -34,7 +34,9 @@ export function buildTokenIssueTx(remote, publisher, seq, name, num, flag, flagA
 
     tx.setSecret(issuerSecr);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -81,7 +83,9 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -132,7 +136,9 @@ export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, nam
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     tx.ownerSign({
         account: refAddr,
@@ -180,7 +186,9 @@ export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
@@ -223,8 +231,10 @@ export function buildTokenInfoChangeTx(remote, src, secret, seq, id, tokenInfos,
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
-
+    if(seq) {
+        tx.setSequence(seq);
+    }
+    
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
             if(err) {
@@ -266,7 +276,9 @@ export function buildTokenInfoChangeTx(remote, src, secret, seq, id, tokenInfos,
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {

@@ -102,12 +102,11 @@ r.connect(async function(err, result) {
             let txType = tx.TransactionType;
             let src = tx.Account;
             let dst = tx.Destination;
-            let processedTx;
+            let processedTx = u.processTx(tx, src);
+            processedTx.account = src;
             switch(txType) {
                 case 'Payment':
                     if(src == userAccount.fakeBaiduAuthorizeAccount.address) {
-                        processedTx = u.processTx(tx, src);
-                        processedTx.account = src;
                         uploadTxs.push(processedTx);
                     }
                 default:

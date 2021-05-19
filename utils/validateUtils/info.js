@@ -29,7 +29,7 @@ export const workQueryReqSchema = Joi.object().keys({
 
 /**
  * @description 查询作品信息。
- * @param {int[]}copyrightIds 版权通证标识列表
+ * @param {int[]}copyrightIds 版权权利通证标识列表
  */
 export const copyrightQueryReqSchema = Joi.object().keys({
     copyrightIds:
@@ -38,7 +38,7 @@ export const copyrightQueryReqSchema = Joi.object().keys({
 
 /**
  * @description 查询作品信息。
- * @param {int[]}approveIds 许可通证标识列表
+ * @param {int[]}approveIds 版权许可通证标识列表
  */
  export const approveQueryReqSchema = Joi.object().keys({
     approveIds:

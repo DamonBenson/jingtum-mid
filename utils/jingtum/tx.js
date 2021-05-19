@@ -54,7 +54,9 @@ export function buildSignedTx(remote, blob, showRes) {
 
     tx.setSecret(secret);
 
-    tx.setSequence(seq);
+    if(seq) {
+        tx.setSequence(seq);
+    }
 
     tx.addMemo(memos);
 

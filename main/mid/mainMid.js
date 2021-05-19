@@ -130,10 +130,10 @@ uploadRemote.connect(async function(err, res) {
             // });
 
             // 版权确权请求
-            authRouter.post('/copyright', async function(req, res) {
-                let resInfo = await authMid.handleCopyrightAuth(contractRemote, seqObj, req);
-                res.send(resInfo);
-            });
+            // authRouter.post('/copyright', async function(req, res) {
+            //     let resInfo = await authMid.handleCopyrightAuth(contractRemote, seqObj, req);
+            //     res.send(resInfo);
+            // });
 
             // authRouter.post('/signedCopyright', async function(req, res) {
             //     let resInfo = await authMid.handleSignedCopyrightAuth(contractRemote, seqObj, req, res);
@@ -141,8 +141,14 @@ uploadRemote.connect(async function(err, res) {
             // });
 
             // 确权状态查询
-            authRouter.get('/state', async function(req, res) {
-                let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req);
+            // authRouter.get('/state', async function(req, res) {
+            //     let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req);
+            //     res.send(resInfo);
+            // });
+
+            // 内部版权确权请求
+            authRouter.post('/innerCopyright', async function(req, res) {
+                let resInfo = await authMid.handleInnerCopyrightAuth(tokenRemote, seqObj, req);
                 res.send(resInfo);
             });
 
