@@ -160,14 +160,27 @@ export async function handleCopyrightInfo(req) {
     }
 
     let copyrightIds = body.copyrightIds.split(',');
-    let sqlPromises = copyrightIds.map(async copyrightId => {
+    let rightTokenSqlPromises = copyrightIds.map(async copyrightId => {
         let filter = {
             copyright_id: copyrightId,
         }
         let sql = sqlText.table('right_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);
     });
-    let copyrightInfoList = (await Promise.all(sqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
+    let copyrightInfoList = (await Promise.all(rightTokenSqlPromises)).map(sqlResArr => localUtils.fromMysqlObj(sqlResArr[0]));
+
+    let authenticateSqlPromises = copyrightIds.map(async copyrightId => {
+        let filter = {
+            copyright_id: copyrightId,
+        }
+        let sql = sqlText.table('auth_info').field('contract_address, authentication_id, license_url, timestamp').where(filter).select();
+        return mysqlUtils.sql(c, sql);
+    });
+    let authenticationInfoList = (await Promise.all(authenticateSqlPromises)).map(sqlResArr => sqlResArr.map(sqlRes => localUtils.fromMysqlObj(sqlRes)));
+
+    for (let i = copyrightInfoList.length - 1; i >= 0; i--) {
+        copyrightInfoList[i].authenticationInfoList = authenticationInfoList[i];
+    }
 
     resInfo.data.copyrightInfoList = copyrightInfoList;
     console.log('/info/copyright:', resInfo.data);

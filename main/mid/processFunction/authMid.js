@@ -153,9 +153,9 @@ export async function handleAuthState(contractRemote, seqObj, req) {
     }
 
     //方法体
-    let copyrightIds = body.copyrightIds.split(',');
+    let copyrightIds = body.copyrightIds;
     let authenticationInfoList = new Array(copyrightIds.length);
-    let pubApproveTokenPromises = copyrightIds.map((copyrightId, index) => {
+    let authenticatePromises = copyrightIds.map((copyrightId, index) => {
         let auditResult = localUtils.randomSelect([true, false], [0.8, 0.2]);
         authenticationInfoList[index] = {
             copyrightId: copyrightId,
@@ -174,11 +174,11 @@ export async function handleAuthState(contractRemote, seqObj, req) {
         return null;
     });
 
-    let pubApproveTokenResArr = await Promise.all(pubApproveTokenPromises);
+    let authenticateResArr = await Promise.all(authenticatePromises);
 
-    let txInfoPromises = pubApproveTokenResArr.map(pubApproveTokenRes => {
-        if(pubApproveTokenRes) {
-            let txHash = pubApproveTokenRes.tx_json.hash;
+    let txInfoPromises = authenticateResArr.map(authenticateRes => {
+        if(authenticateRes) {
+            let txHash = authenticateRes.tx_json.hash;
             return requestInfo.requestTx(tokenRemote, txHash, true);
         }
         return null;

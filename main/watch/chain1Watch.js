@@ -3,6 +3,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
+import * as erc721 from '../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
@@ -121,26 +122,15 @@ r.connect(async function(err, result) {
                 case 'TransferToken':
                     txTokenName = processedTx.token;
                     switch(txTokenName) {
-                        case tokenName.copyright:
-                            if(src == userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address) {
-                                issueRightTokenTxs.push(processedTx);
-                            }
-                            else if(src != userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address) {
-                                transferRightTokenTxs.push(processedTx);
-                            }
-                            else if(src == userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) {
-                                issueRightTokenTxs.push(processedTx);
-                            }
-                            else if(src != userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) {
-                                transferRightTokenTxs.push(processedTx);
-                            }
-                            break;
+                        // case tokenName.copyright:
+                        //     if((src == userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) ||
+                        //     (src == userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address)) {
+                        //         issueRightTokenTxs.push(processedTx);
+                        //     }
+                        //     break;
                         case tokenName.approve:
                             if(src == userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
                                 issueApproveTokenTxs.push(processedTx);
-                            }
-                            else if(src != userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
-                                transferApproveTokenTxs.push(processedTx);
                             }
                             break;
                         default:
@@ -161,7 +151,7 @@ r.connect(async function(err, result) {
         }
 
         await processIssueRightToken(issueRightTokenTxs, issueRightTokenTxs.length);
-        await processIssueApproveToken(issueApproveTokenTxs, issueApproveTokenTxs.length);
+        await processIssueApproveToken(r, issueApproveTokenTxs, issueApproveTokenTxs.length);
         // await processTransferRightToken(transferRightTokenTxs, transferRightTokenTxs.length);
         // await processTransferApproveToken(transferApproveTokenTxs, transferApproveTokenTxs.length);
         await processTokenInfoChange(tokenInfoChangeTxs, tokenInfoChangeTxs.length);
@@ -180,35 +170,35 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
         console.log('issueRightTokenTxs:', issueRightTokenTxs);
     }
 
-    let rightInfoPromises = [];
+    let copyrightInfoPromises = [];
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
 
         let tokenInfos = issueRightTokenTx.tokenInfos;
-        let rightInfo = localUtils.tokenInfos2obj(tokenInfos);
+        let copyrightInfo = localUtils.tokenInfos2obj(tokenInfos);
 
-        rightInfo.copyrightId = issueRightTokenTx.tokenId;
-        rightInfo.timestamp = issueRightTokenTx.date;
-        rightInfo.address = issueRightTokenTx.receiver;
+        copyrightInfo.copyrightId = issueRightTokenTx.tokenId;
+        copyrightInfo.timestamp = issueRightTokenTx.date;
+        copyrightInfo.address = issueRightTokenTx.receiver;
 
-        let copyrightHolderHash = rightInfo.copyrightHolderHash;
+        let copyrightHolderHash = copyrightInfo.copyrightHolderHash;
         let copyrightHolder = await ipfsUtils.get(copyrightHolderHash);
-        Object.assign(rightInfo, copyrightHolder);
-        delete rightInfo.copyrightHolderHash;
+        Object.assign(copyrightInfo, copyrightHolder);
+        delete copyrightInfo.copyrightHolderHash;
 
-        localUtils.toMysqlObj(rightInfo);
-        console.log('copyrightInfo:', rightInfo);
+        localUtils.toMysqlObj(copyrightInfo);
+        console.log('copyrightInfo:', copyrightInfo);
 
-        let sql = sqlText.table('right_token_info').data(rightInfo).insert();
-        rightInfoPromises.push(mysqlUtils.sql(c, sql));
+        let sql = sqlText.table('right_token_info').data(copyrightInfo).insert();
+        copyrightInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
 
-    await Promise.all(rightInfoPromises);
+    await Promise.all(copyrightInfoPromises);
 
 }
 
-async function processIssueApproveToken(issueApproveTokenTxs, loopConter) {
+async function processIssueApproveToken(tokenRemote, issueApproveTokenTxs, loopConter) {
     
     if(debugMode == true) {
         console.log('issueApproveTokenTxs:', issueApproveTokenTxs);
@@ -218,7 +208,29 @@ async function processIssueApproveToken(issueApproveTokenTxs, loopConter) {
 
     issueApproveTokenTxs.forEach(async(issueApproveTokenTx) => {
 
-        // 方法体
+        let tokenInfos = issueApproveTokenTx.tokenInfos;
+        let approveInfo = localUtils.tokenInfos2obj(tokenInfos);
+
+        approveInfo.approveId = issueApproveTokenTx.tokenId;
+        approveInfo.startTime = issueApproveTokenTx.date;
+        approveInfo.timestamp = issueApproveTokenTx.date;
+        approveInfo.address = issueApproveTokenTx.receiver;
+
+        let approveTokenInfo = await erc721.requestTokenInfo(tokenRemote, issueApproveTokenTx.tokenId, false);
+        let copyrightId = approveTokenInfo.TokenInfo.ReferenceID;
+        let rightTokenInfo = await erc721.requestTokenInfo(tokenRemote, copyrightId, false);
+        tokenInfos = rightTokenInfo.TokenInfo.TokenInfos.map(TokenInfo => TokenInfo.TokenInfo);
+        let copyrightInfo = localUtils.tokenInfos2obj(tokenInfos);
+        let copyrightType = copyrightInfo.copyrightType;
+
+        approveInfo.copyrightId = copyrightId;
+        approveInfo.copyrightType = copyrightType;
+
+        localUtils.toMysqlObj(approveInfo);
+        console.log('approveInfo:', approveInfo);
+
+        let sql = sqlText.table('appr_token_info').data(approveInfo).insert();
+        approveInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
 

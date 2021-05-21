@@ -27,10 +27,10 @@ const sideConst = 0;
 /*----------数据验证格式定义----------*/
 
 // 已签名交易
-const signedTxReqSchema = Joi.string().hex().required().id('signedTxSchema');
+export const signedTxReqSchema = Joi.string().hex().required().id('signedTxSchema');
 
 // 买单上传
-const buyOrderReqSchema = Joi.object().keys({
+export const buyOrderReqSchema = Joi.object().keys({
     subBuyOrderList: 
         Joi.array().min(minSubBuyOrderListLength).max(maxSubBuyOrderListLength).items(
             Joi.object().keys({
@@ -83,7 +83,7 @@ const buyOrderReqSchema = Joi.object().keys({
 }).id('buyOrderReqSchema');
 
 // 买单确认接收
-const buyOrderConfirmSchema = Joi.object().keys({
+export const buyOrderConfirmSchema = Joi.object().keys({
     buyOrderId:
         Joi.string().hex().required(),
     buyOrderHash:
@@ -97,7 +97,7 @@ const buyOrderConfirmSchema = Joi.object().keys({
 }).id('buyOrderConfirmSchema');
 
 // 卖单上传
-const sellOrderReqSchema = Joi.object().keys({
+export const sellOrderReqSchema = Joi.object().keys({
     labelSet:
         Joi.object().length(mainClassAmount).and('0', '1', '2', '3', '4').pattern(
             /.*/,
@@ -260,7 +260,7 @@ const sellOrderReqSchema = Joi.object().keys({
 }).id('sellOrderReqSchema');
 
 // 写入匹配结果
-const matchReqSchema = Joi.object().keys({
+export const matchReqSchema = Joi.object().keys({
     buyOrderInfo:
         Joi.object().keys({
             buyOrderId:
@@ -340,175 +340,20 @@ const matchReqSchema = Joi.object().keys({
 }).id('matchReqSchema');
 
 // 买方确认
-const buyerConfrimReqSchema = Joi.any();
+export const buyerConfrimReqSchema = Joi.any();
 
 // 卖方转让确认
-const sellerTransferConfrimReqSchema = Joi.any();
+export const sellerTransferConfrimReqSchema = Joi.any();
 
 // 卖方许可确认
-const sellerApproveConfrimReqSchema = Joi.any();
+export const sellerApproveConfrimReqSchema = Joi.any();
 
 /**
- * @description 版权许可通证生成（对于平台内部匹配的交易）。
- * @param {Object}buyOrderInfo 包括买方地址buyerAddr、授权场景authorizationScene
- * @param {Object[]}sellOrderInfoList 包括卖方地址sellerAddr、卖方私钥sellerSecret、版权通证标识copyrightId
+ * @description 版权许可通证生成（对于平台内部匹配的交易），卖方用户签名。
+ * @param {Object}buyOrderInfo 买单信息，包括：买方地址buyerAddr、授权场景authorizationScene、授权渠道authorizationChannel、授权范围authorizationArea、授权时间authorizationTime
+ * @param {Object[]}sellOrderInfoList 卖单信息列表，包括：卖方地址sellerAddr、卖方私钥sellerSecret、作品标识workId
  */
-const approveConfirmReqSchema = Joi.any();
+export const approveConfirmReqSchema = Joi.any();
 
 // 买单监听
-const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['platformAddr', 'contractAddr']);
-
-/*----------数据格式验证函数----------*/
-
-// 已签名交易
-export async function validateSignedTx(body) {
-
-    try {
-        await signedTxReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-
-}
-
-// 上传买单
-export async function validateBuyOrderReq(body) {
-
-    try {
-        await buyOrderReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
-
-// 买单确认接收
-export async function validateBuyOrderConfirm(body) {
-
-    try {
-        await buyOrderConfirmSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-
-}
-
-// 上传卖单
-export async function validateSellOrderReq(body) {
-
-    try {
-        await sellOrderReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
-
-// 写入匹配结果
-export async function validateMatchReq(body) {
-
-    try {
-        await matchReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
-
-// 买方确认
-export async function validateBuyerConfirmReq(body) {
-
-    try {
-        await buyerConfrimReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
-
-// 卖方转让确认
-export async function validateSellerTransferConfirmReq(body) {
-
-    try {
-        await sellerTransferConfrimReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
-
-// 卖方许可确认
-export async function validateSellerApproveConfirmReq(body) {
-
-    try {
-        await sellerApproveConfrimReqSchema.validateAsync(body);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
-
-// 买单监听
-export async function validateBuyOrderWatch(data) {
-
-    try {
-        await buyOrderWatchSchema.validateAsync(data);
-    }
-    catch(e) {
-        e.details.map((detail, index) => {
-            console.log('error message ' + index + ':', detail.message);
-        });
-        return [false, e];
-    }
-
-    return [true, 'valid req.'];
-    
-}
+export const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['platformAddr', 'contractAddr']);

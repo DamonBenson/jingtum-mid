@@ -16,7 +16,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {int}flag 被授权发行的通证冻结标识
  * @param {String[]}flagAddrs 拥有修改flag权限的地址数组
  * @param {String[]}tokenInfosAddrs 拥有修改tokenInfos权限的地址数组
- * @param {int}refFlag 0-一般通证（版权通证）；1-有引用关系的通证（许可通证）
+ * @param {int}refFlag 0-一般通证（版权权利通证）；1-有引用关系的通证（版权许可通证）
  * @param {bool}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
@@ -108,7 +108,7 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
 }
 
 /**
- * @description 发行许可通证。
+ * @description 发行引用通证。
  * @param {Object}remote 底层链连接对象
  * @param {String}publisher 发行通证账号的地址
  * @param {String}secret 发行通证账号的私钥
@@ -117,13 +117,13 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
  * @param {String}name 待发行通证的名称
  * @param {String}id 待发行通证的标识
  * @param {Object}tokenInfos 发行的通证信息
- * @param {String}refId 待发行通证的引用通证标识
- * @param {Object}refAddr 待发行通证的引用通证所有者地址
- * @param {Object}refSecr 待发行通证的引用通证所有者私钥
+ * @param {String}refId 待发行通证的被引用通证标识
+ * @param {Object}refAddr 待发行通证的被引用通证所有者地址
+ * @param {Object}refSecr 待发行通证的被引用通证所有者私钥
  * @param {bool}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
-export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, name, id, tokenInfos, refId, refAddr, refSecr, showRes) {
+export function buildPubRefTokenTx(remote, publisher, secret, seq, dest, name, id, tokenInfos, refId, refAddr, refSecr, showRes) {
 
     let tx = remote.buildPubTokenTx({
         publisher: publisher,
@@ -153,10 +153,10 @@ export function buildPubApproveTokenTx(remote, publisher, secret, seq, dest, nam
             }
             else if(result){
                 if(showRes) {
-                    console.log('buildPubApproveTokenTx:', result);
+                    console.log('buildPubRefTokenTx:', result);
                 }
                 else {
-                    console.log('buildPubApproveTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                    console.log('buildPubRefTokenTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -322,9 +322,6 @@ export function requestTokenInfo(remote, id, showRes) {
             else if(result){
                 if(showRes) {
                     console.log('requestTokenInfo:', result);
-                }
-                else {
-                    console.log('requestTokenInfo:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }

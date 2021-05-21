@@ -1,18 +1,34 @@
 import fetch from 'node-fetch';
 
 export function postData(url, data) {
-    const params = new URLSearchParams();
-    Object.keys(data).forEach(key => {
-        params.append(key, data[key]);
-    });
+    // const params = new URLSearchParams();
+    // Object.keys(data).forEach(key => {
+    //     params.append(key, data[key]);
+    // });
+    // return new Promise((resolve, reject) => {
+    //     fetch(url, {
+    //         method: 'POST',
+    //         body: params,
+    //         mode: 'cors',
+    //         headers: {
+    //             "Accept":"application/json",
+    //             "Content-Type":"application/x-www-form-urlencoded"
+    //         }
+    //     }).then(res => {
+    //         resolve(res);
+    //     }).catch(err => {
+    //         console.log(err);
+    //         reject(err);
+    //     });
+    // });
     return new Promise((resolve, reject) => {
         fetch(url, {
             method: 'POST',
-            body: params,
+            body: JSON.stringify(data),
             mode: 'cors',
             headers: {
                 "Accept":"application/json",
-                "Content-Type":"application/x-www-form-urlencoded"
+                "Content-Type":"application/json"
             }
         }).then(res => {
             resolve(res);
@@ -38,7 +54,7 @@ export function getData(url, data) {
             mode: 'cors',
             headers: {
                 "Accept":"application/json",
-                "Content-Type":"application/x-www-form-urlencoded"
+                "Content-Type":"application/json"
             }
         }).then(res => {
             resolve(res);

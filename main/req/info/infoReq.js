@@ -35,15 +35,15 @@ switch(queryMode) {
     case 'copyright':
 
         let copyrightSql = sqlText.table('right_token_info').field('copyright_id').order('RAND()').limit(queryAmount).select();
-        let rightTokenInfoArr = await mysqlUtils.sql(c, copyrightSql);
-        let rightTokenIds = rightTokenInfoArr.map(rightTokenInfo => {
-            return rightTokenInfo.copyright_id;
+        let copyrightInfoArr = await mysqlUtils.sql(c, copyrightSql);
+        let copyrightIds = copyrightInfoArr.map(copyrightInfo => {
+            return copyrightInfo.copyright_id;
         });
         if(debugMode) {
-            console.log('rightTokenIds', rightTokenIds);
+            console.log('copyrightIds', copyrightIds);
         }
 
-        let rightRes = await fetch.getData('http://127.0.0.1:9001/info/copyright', {copyrightIds: rightTokenIds});
+        let rightRes = await fetch.getData('http://127.0.0.1:9001/info/copyright', {copyrightIds: copyrightIds});
         if(debugMode) {
             let rightResInfo = JSON.parse(Buffer.from(rightRes.body._readableState.buffer.head.data).toString());
             console.log('rightsInfo:', rightResInfo.data.copyrightInfoList);
@@ -53,15 +53,15 @@ switch(queryMode) {
     case 'approve':
 
         let approveSql = sqlText.table('appr_token_info').field('approve_id').order('RAND()').limit(queryAmount).select();
-        let approveTokenInfoArr = await mysqlUtils.sql(c, approveSql);
-        let approveTokenIds = approveTokenInfoArr.map(approveTokenInfo => {
-            return approveTokenInfo.token_id;
+        let approveInfoArr = await mysqlUtils.sql(c, approveSql);
+        let approveIds = approveInfoArr.map(approveInfo => {
+            return approveInfo.approve_id;
         });
         if(debugMode) {
-            console.log('approveTokenIds', approveTokenIds);
+            console.log('approveIds', approveIds);
         }
 
-        let approveRes = await fetch.getData('http://127.0.0.1:9001/info/approve', {approveIds: approveTokenIds});
+        let approveRes = await fetch.getData('http://127.0.0.1:9001/info/approve', {approveIds: approveIds});
         if(debugMode) {
             let approveResInfo = JSON.parse(Buffer.from(approveRes.body._readableState.buffer.head.data).toString());
             console.log('approvesInfo:', approveResInfo.data.approvesInfo);

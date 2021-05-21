@@ -103,6 +103,8 @@ export function requestTx(r, hash, showRes) {
         hash: hash
     });
 
+    console.log(req);
+
     return new Promise((resolve, reject) => {
         req.submit(function(err, result) {
             if(err) {

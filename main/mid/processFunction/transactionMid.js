@@ -1,20 +1,23 @@
-import ipfsAPI from 'ipfs-api';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
+import sha256 from 'crypto-js/sha256.js';
 
-import * as tx from '../../../utils/jingtum/tx.js'
+import * as tx from '../../../utils/jingtum/tx.js';
+import * as erc721 from '../../../utils/jingtum/erc721.js';
 import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as transactionValidate from '../../../utils/validateUtils/transaction.js';
 
-import {userAccount, chains, ipfsConf, mysqlConf} from '../../../utils/info.js';
+import {userAccount, chains, tokenName} from '../../../utils/config/jingtum.js';
+import {mysqlConf} from '../../../utils/config/mysql.js';
 import _ from 'lodash';
 
-const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-const tokenChain = chains[0]; // 交易链
+
+const authorizeAddr = userAccount.buptAuthorizeAccount.address; // 智能授权系统（中间层部分）
+const authorizeSecr = userAccount.buptAuthorizeAccount.secret;
 
 // /*----------智能授权系统发币账号----------*/
 
@@ -864,9 +867,9 @@ const tokenChain = chains[0]; // 交易链
 
 /**
  * @description 版权许可通证生成（对于平台内部匹配的交易），卖方用户签名。
- * @param {Object}buyOrderInfo 买单信息，包括：买方地址buyerAddr、授权场景authorizationScene
- * @param {Object[]}sellOrderInfoList 卖单信息列表，包括：卖方地址sellerAddr、卖方私钥sellerSecret、版权通证标识copyrightId
- * @returns {Object[]} 授权结果列表，包括：版权权利通证标识copyrightId、版权许可通证标识approveId
+ * @param {Object}buyOrderInfo 买单信息，包括：买方地址buyerAddr、授权场景authorizationScene、授权渠道authorizationChannel、授权范围authorizationArea、授权时间authorizationTime
+ * @param {Object[]}sellOrderInfoList 卖单信息列表，包括：卖方地址sellerAddr、卖方私钥sellerSecret、作品标识workId
+ * @returns {Object[]} 授权结果列表，包括：作品标识workId、版权许可通证标识列表approveIds
  */
 export async function handleApproveConfirm(tokenRemote, seqObj, req) {
 
@@ -878,7 +881,7 @@ export async function handleApproveConfirm(tokenRemote, seqObj, req) {
         data: {},
     }
 
-    let body = JSON.parse(Object.keys(req.body)[0]);
+    let body = req.body;
     try {
         await transactionValidate.approveConfirmReqSchema.validateAsync(body);
     } catch(e) {
@@ -888,17 +891,62 @@ export async function handleApproveConfirm(tokenRemote, seqObj, req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
+        console.log('/transaction/approveConfirm:', resInfo.data);
         console.timeEnd('handleApproveConfirm');
         console.log('--------------------');
         return resInfo;
     }
 
-    //方法体
+    console.log(body);
+    let buyOrderInfo = body.buyOrderInfo;
+    let buyerAddr = buyOrderInfo.buyerAddr;
+    let approveScene = buyOrderInfo.authorizationScene;
+    let tokenInfos = {
+        approveChannel: buyOrderInfo.authorizationChannel,
+        approveArea: buyOrderInfo.authorizationArea,
+        approveTime: buyOrderInfo.authorizationTime,
+    };
+
+    let approveResultList = [];
+
+    let sellOrderInfoList = body.sellOrderInfoList;
+    let pubApproveTokenPromises = sellOrderInfoList.map(async sellOrderInfo => {
+
+        let sellerAddr = sellOrderInfo.sellerAddr;
+        let sellerSecr = sellOrderInfo.sellerSecret;
+        let workId = sellOrderInfo.workId;
+
+        let approveResult = {
+            workId: workId,
+            approveIds: [],
+        };
+
+        let copyrightIds = await getTokenIds(workId, approveScene);
+        let singlePubApproveTokenPromises = copyrightIds.map(copyrightId => {
+
+            let approveId = sha256(copyrightId + JSON.stringify(buyOrderInfo)).toString();
+
+            approveResult.approveIds.push(approveId);
+
+            return erc721.buildPubRefTokenTx(tokenRemote, authorizeAddr, authorizeSecr, seqObj.authorize.token++, buyerAddr, tokenName.approve, approveId, tokenInfos, copyrightId, sellerAddr, sellerSecr, true);
+
+        });
+
+        approveResultList.push(approveResult);
+
+        return Promise.all(singlePubApproveTokenPromises);
+
+    });
+
+    await Promise.all(pubApproveTokenPromises);
+
+    resInfo.data.approveResultList = approveResultList;
+    console.log('/transaction/approveConfirm:', resInfo.data);
 
     console.timeEnd('handleApproveConfirm');
     console.log('--------------------');
 
-    resInfo.data.approveResultList = approveResultList;
+    
     return resInfo;
 
 }
@@ -918,24 +966,32 @@ function getType(authorizationInfo) {
     return Object.keys(authorizationInfo)[0];
 }
 
-async function getTokenIds(workId, authorizationType) {
+async function getTokenIds(workId, approveScene) {
 
-    const apprType2RightType = {
-        0: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        1: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        2: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        3: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        4: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        5: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        6: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        7: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        8: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-        9: 'right_type = 0 OR right_type = 1 OR right_type = 2',
-    }
-    let rightFilter = apprType2RightType[authorizationType];
-    let filter = 'work_id = ' + workId + ' AND (' + rightFilter + ')'
-    let sql = sqlText.table('right_token_info').field('token_id').where(filter).select();
-    let tokenIds = await mysqlUtils.sql(c, sql);
-    return tokenIds;
+    const approveScene2rigehtType = [
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+    ];
+
+    const rightFilter = approveScene2rigehtType.map(types => {
+        let str = 'copyright_type = ' + types.join(' OR copyright_type = ');
+        return str;
+    });
+    
+    let filter = "work_id = '" + workId + "' AND (" + rightFilter[approveScene] + ")";
+    let sql = sqlText.table('right_token_info').field('copyright_id').where(filter).select();
+    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+    let copyrightIds = copyrightInfoArr.map(copyrightInfo => {
+        return copyrightInfo.copyright_id;
+    });
+    return copyrightIds;
 
 }
