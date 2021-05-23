@@ -153,7 +153,7 @@ r.connect(async function(err, result) {
                     break;
             }
         }
-        //根据队列中的对象依次执行 买单、卖单、匹配结果、买卖确认
+        //根据队列中的对象依次执行 买单、卖单、匹配结果、买卖确认、确权请求、确权结果
         // await processBuyOrder(buyOrderTxss, buyOrderTxss.length);
         // await processBuyOrderConfirm(buyOrderConfirmTxss, buyOrderConfirmTxss.length);
         // await processSellOrder(sellOrderTxss, sellOrderTxss.length);

@@ -77,14 +77,14 @@ export class Client {
         });
         if (debugMode){console.log('现在有消费者', this.consumers);}; //debugMode
     }
-    //TODO添加一个消费者
+    // TODO 添加一个消费者
     // AddConsumer(topic = this.consumers[0][0].topic, options = this.consumers[0][0].options){
     //     this.ConConsumer(this.conn, topic, options,  function (message){
     //         message.value = JSON.parse(message.value)
     //         if(debugMode){console.log(message.value)};//debugMode
     //     });
     // }
-    //TODO插入生产者
+    // TODO 插入生产者
     // insertProducer(producer){
     //     this.producers.push(producer)
     //     if (debugMode){console.log('现在有生产者', this.producers.length);}; //debugMode
@@ -157,7 +157,7 @@ export class Client {
             sellOrderContractAddrs[0] + '_SellOrder',
             buyOrderContractAddrs[0] + '_Match',
             sellOrderContractAddrs[0] + '_BuyerConfirmTxs',
-            sellOrderContractAddrs + '_SellerConfirmTxs'
+            sellOrderContractAddrs[0] + '_SellerConfirmTxs'
         ];
         // this.consumers = new Map([[
         //     'consumers',
@@ -179,7 +179,7 @@ export class Client {
 }
 
 export function getClient(conn = {'kafkaHost':'39.102.93.47:9092'}, options = null){
-    if(debugMode){console.log('我动了')};//debugMode
+    if(debugMode){console.log('Client init starting...')};//debugMode
     const client = new Client(conn);
     // if(debugMode){console.log('Client init',client)};//debugMode
     if(debugMode){console.log('Client init Finished,\n..........\n')};//debugMode

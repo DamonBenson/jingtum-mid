@@ -71,7 +71,7 @@ export function generateworkAuth(){
     let createdDay = DateUtil.getPastDay();
     let publishedDay = DateUtil.getBetweenDay(createdDay);
     let workType = localUtils.randomNumber(1,15);
-    if(localUtils.randomSelect([1,2])!=1){
+    if(localUtils.randomSelect([1,2])!=1){//文字、音乐、美术、图形比较多
         workType = localUtils.randomSelect([1, 3, 8, 12]);
     }
     if(publishStatus == "Published"){
