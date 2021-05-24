@@ -13,11 +13,7 @@ import * as localUtils from '../../../utils/localUtils.js';
 import util from 'util';
 
 import mysql from 'mysql';
-import {mysqlConf} from '../../../utils/info.js';
-export const c = mysql.createConnection(mysqlConf);
-c.connect(); // mysql连接
-
-
+import {c} from "../MidBackend.js";
 let CONNECT = true;// When false, Send Random Response
 /**
  *

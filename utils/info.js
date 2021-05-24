@@ -212,6 +212,39 @@ const mysqlConf = {
     user: 'root',
     password: 'bykyl626',
     port: '3306',
+    useConnectionPooling: true,
+    schema:{
+        tableName: 'session',
+        columnNames:{
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    },
+    database: 'jingtum'
+}
+/**
+ * @Description: mysqlPoolConf: 听说可以保持连接
+ * @url: https://github.com/mysqljs/mysql#pooling-connections
+ * @implements  Used in the MidBackend.js
+ * @author Bernard
+ * @date 2021/5/24
+*/
+export const mysqlPoolConf = {
+    connectionLimit : 10,
+    host: '39.102.93.47',
+    user: 'root',
+    password: 'bykyl626',
+    port: '3306',
+    useConnectionPooling: true,
+    schema:{
+        tableName: 'session',
+        columnNames:{
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    },
     database: 'jingtum'
 }
 // 用于测试使用的数据库，存入的数据无区块链共识
@@ -220,8 +253,11 @@ const mysqlTestConf = {
     user: 'root',
     password: 'bykyl626',
     port: '3306',
+    useConnectionPooling: true,
     database: 'Fake_jingtum'
 }
+
+
 
 const debugMode = true;
 

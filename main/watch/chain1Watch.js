@@ -122,12 +122,12 @@ r.connect(async function(err, result) {
                 case 'TransferToken':
                     txTokenName = processedTx.token;
                     switch(txTokenName) {
-                        // case tokenName.copyright:
-                        //     if((src == userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) ||
-                        //     (src == userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address)) {
-                        //         issueRightTokenTxs.push(processedTx);
-                        //     }
-                        //     break;
+                        case tokenName.copyright:
+                            if((src == userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) ||
+                            (src == userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address)) {
+                                issueRightTokenTxs.push(processedTx);
+                            }
+                            break;
                         case tokenName.approve:
                             if(src == userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
                                 issueApproveTokenTxs.push(processedTx);
