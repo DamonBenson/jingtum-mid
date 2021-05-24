@@ -1,17 +1,21 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import * as backendMid from './backendProcessor/backendMid.js';
+import * as authDisplayGroup from './backendProcessor/authDisplayGroup.js';
+import * as listenDisplayGroup from './backendProcessor/listenDisplayGroup.js';
 /*----------信息查询请求路由配置----------*/
 function reconnectMysql(){
-    backendMid.c.connect();
+    authDisplayGroup.c.connect();
 }
-const backendRouter = express.Router({
+const authRouter = express.Router({
     caseSensitive: false,// 不区分大小写
-
 });
-backendRouter.get('/authRightRate', async function(req, res) {
+
+const listenRouter = express.Router({
+    caseSensitive: false,// 不区分大小写
+});
+authRouter.get('/authRightRate', async function(req, res) {
     try{
-        let resJson = await backendMid.handleAuthRightRate(req, res);
+        let resJson = await authDisplayGroup.handleAuthRightRate(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -19,9 +23,9 @@ backendRouter.get('/authRightRate', async function(req, res) {
     res.end();
 });
 // localhost:9002/backend/authRightRate
-backendRouter.get('/authByCompany', async function(req, res) {
+authRouter.get('/authByCompany', async function(req, res) {
     try{
-        let resJson = await backendMid.handleAuthByCompany(req, res);
+        let resJson = await authDisplayGroup.handleAuthByCompany(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -30,9 +34,9 @@ backendRouter.get('/authByCompany', async function(req, res) {
 });
 // localhost:9002/backend/authByCompany
 
-backendRouter.get('/certificateAmountEXchange', async function(req, res) {
+authRouter.get('/certificateAmountEXchange', async function(req, res) {
     try{
-        let resJson = await backendMid.handleCertificateAmountEXchange(req, res);
+        let resJson = await authDisplayGroup.handleCertificateAmountEXchange(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -41,9 +45,9 @@ backendRouter.get('/certificateAmountEXchange', async function(req, res) {
 });
 // localhost:9002/backend/certificateAmountEXchange
 
-backendRouter.get('/certificateAmountGroupByWorkType', async function(req, res) {
+authRouter.get('/certificateAmountGroupByWorkType', async function(req, res) {
     try{
-        let resJson = await backendMid.handleCertificateAmountGroupByWorkType(req, res);
+        let resJson = await authDisplayGroup.handleCertificateAmountGroupByWorkType(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -52,9 +56,9 @@ backendRouter.get('/certificateAmountGroupByWorkType', async function(req, res) 
 });
 // localhost:9002/backend/certificateAmountGroupByWorkType
 
-backendRouter.get('/certificateAmountGroupByWorkTypeEXchange', async function(req, res) {
+authRouter.get('/certificateAmountGroupByWorkTypeEXchange', async function(req, res) {
     try{
-        let resJson = await backendMid.handleCertificateAmountGroupByWorkTypeEXchange(req, res);
+        let resJson = await authDisplayGroup.handleCertificateAmountGroupByWorkTypeEXchange(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -63,9 +67,9 @@ backendRouter.get('/certificateAmountGroupByWorkTypeEXchange', async function(re
 });
 // localhost:9002/backend/certificateAmountGroupByWorkTypeEXchange
 
-backendRouter.get('/copyRightAmountEXchange', async function(req, res) {
+authRouter.get('/copyRightAmountEXchange', async function(req, res) {
     try{
-        let resJson = await backendMid.handleCopyRightAmountEXchange(req, res);
+        let resJson = await authDisplayGroup.handleCopyRightAmountEXchange(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -74,9 +78,9 @@ backendRouter.get('/copyRightAmountEXchange', async function(req, res) {
 });
 // localhost:9002/backend/copyRightAmountEXchange
 
-backendRouter.get('/copyRightAmountGroupByIDtype', async function(req, res) {
+authRouter.get('/copyRightAmountGroupByIDtype', async function(req, res) {
     try{
-        let resJson = await backendMid.handleCopyRightAmountGroupByIDtype(req, res);
+        let resJson = await authDisplayGroup.handleCopyRightAmountGroupByIDtype(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -85,9 +89,9 @@ backendRouter.get('/copyRightAmountGroupByIDtype', async function(req, res) {
 });
 // localhost:9002/backend/copyRightAmountGroupByIDtype
 
-backendRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, res) {
+authRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, res) {
     try{
-        let resJson = await backendMid.handleCopyRightAmountGroupByCopyrightType(req, res);
+        let resJson = await authDisplayGroup.handleCopyRightAmountGroupByCopyrightType(req, res);
         res.send({'data':resJson});
     }catch{
         reconnectMysql();
@@ -97,6 +101,20 @@ backendRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, re
 // localhost:9002/backend/copyRightAmountGroupByCopyrightType
 
 
+/**************************/
+/****       监测维权     ****/
+/**************************/
+
+listenRouter.get('/DetectNum', async function(req, res) {
+    try{
+        let resJson = await authDisplayGroup.handleDetectNum(req, res);
+        res.send({'data':resJson});
+    }catch{
+        reconnectMysql();
+    }
+    res.end();
+});
+// localhost:9002/backend/listen/DetectNum
 
 /*----------http服务器配置----------*/
 
@@ -117,7 +135,9 @@ app.all('*', function(req, res, next) {
     res.header("Content-Type", "application/json;charset=utf-8");
     next();
 });
-app.use('/backend', backendRouter);
+app.use('/backend', authRouter);
+app.use('/backend/listen', listenRouter);
+
 
 /*----------启动http服务器----------*/
 

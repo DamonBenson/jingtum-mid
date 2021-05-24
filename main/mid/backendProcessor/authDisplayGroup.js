@@ -1,3 +1,9 @@
+/**
+ * @file: authDisplayGroup.js
+ * @Description: 存证确权后端处理函数
+ * @author Bernard
+ * @date 2021/5/23
+*/
 import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
