@@ -2,7 +2,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
-import * as fetch from '../../../utils/fetch.js'
+import * as httpUtils from '../../../utils/httpUtils.js'
 
 import {userAccount} from "../../../utils/config/jingtum.js";
 import {mysqlConf} from '../../../utils/config/mysql.js';
@@ -41,7 +41,7 @@ if(debugMode) {
     console.log('approveConfirmReq:', approveConfirmReq);
 }
 
-let res = await fetch.postData('http://127.0.0.1:9001/transaction/approveConfirm', approveConfirmReq);
+let res = await httpUtils.post('http://127.0.0.1:9001/transaction/approveConfirm', approveConfirmReq);
 if(debugMode) {
     let resInfo = JSON.parse(Buffer.from(res.body._readableState.buffer.head.data).toString());
     console.log('resInfo:', resInfo.data.approveResultList);

@@ -27,7 +27,10 @@ const sideConst = 0;
 /*----------数据验证格式定义----------*/
 
 // 已签名交易
-export const signedTxReqSchema = Joi.string().hex().required().id('signedTxSchema');
+export const signedTxReqSchema = Joi.object().keys({
+    blob:
+        Joi.string().hex().required(),
+}).id('signedTxReqSchema');
 
 // 买单上传
 export const buyOrderReqSchema = Joi.object().keys({
@@ -83,7 +86,7 @@ export const buyOrderReqSchema = Joi.object().keys({
 }).id('buyOrderReqSchema');
 
 // 买单确认接收
-export const buyOrderConfirmSchema = Joi.object().keys({
+export const buyOrderAcceptSchema = Joi.object().keys({
     buyOrderId:
         Joi.string().hex().required(),
     buyOrderHash:

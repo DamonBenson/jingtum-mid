@@ -6,7 +6,7 @@ import util from 'util';
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 
 import {chains, userAccount, userAccountIndex, mysqlConf, sellOrderContractAddrs, debugMode, availableSellAddr} from '../../../utils/info.js';
 
@@ -60,7 +60,7 @@ async function postSellOrderReq() {
 
         let [sellOrder,classErrorNum,ErrorNum] = generateSellOrder_Invalid(workIds, sellerAddr); 
 
-        let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
+        let signedRes = await httpUtils.post(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
         if(debugMode) {
             console.log('Buffer:', Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
 
@@ -91,7 +91,7 @@ async function postSellOrderReq() {
         // jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         // let blob = unsignedTx.tx_json.blob;
         
-        // let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
+        // let signedTxRes = await httpUtils.post(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
         // let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
         // console.log('res:', resInfo);
 

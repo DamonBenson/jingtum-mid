@@ -1,18 +1,18 @@
 import sha256 from 'crypto-js/sha256.js';
 import * as localUtils from '../../../utils/localUtils.js';
-import {userAccount, userAccountIndex, buyOrderContractAddrs,sellOrderContractAddrs} from '../../../utils/info.js';
-const sellPlatformAddr = userAccount[userAccountIndex['卖方平台账号']].address; // 平台账号
-const sellPlatformAddrOutBand = userAccount[userAccountIndex['卖方平台2']].address; // 平台账号
 
-const buyPlatformAddr = userAccount[userAccountIndex['买方平台账号']].address; // 平台账号
-const buyPlatformAddrOutBand = userAccount[userAccountIndex['买方平台2']].address; // 平台账号
+import {userAccount, contractAddr} from '../../../utils/config/jingtum.js';
 
-const buyerAddr = [ userAccount[userAccountIndex['用户1']].address,
-                    userAccount[userAccountIndex['用户2']].address,
-                    userAccount[userAccountIndex['用户3']].address,
-                    userAccount[userAccountIndex['用户4']].address,
-                    userAccount[userAccountIndex['用户5']].address,
-                    userAccount[userAccountIndex['用户6']].address,];
+const sellPlatformAddr = userAccount.platformAccount[0].address;
+const sellPlatformAddrOutBand = userAccount.platformAccount[1].address;
+
+const buyPlatformAddr = userAccount.platformAccount[0].address;
+const buyPlatformAddrOutBand = userAccount.platformAccount[1].address;
+
+const buyerAddr = userAccount.normalAccount.map(acc => acc.address);
+
+const buyOrderContractAddrs = contractAddr.buyOrder;
+const sellOrderContractAddrs = contractAddr.sellOrder;
 
 
 global.salt = 1 + localUtils.randomNumber(1, 9999); 
@@ -65,8 +65,8 @@ export function generateBuyOrder() {
         side: side,
         buyerAddr: buyerAddr[localUtils.randomNumber(0,5)],//6个用户
         contact: 'phoneNumber', // 联系方式
-        platformAddr: buyPlatformAddrOutBand,
-        contractAddr: "未部署的外部合约地址",//buyOrderContractAddrs[0], 
+        platformAddr: buyPlatformAddr,
+        contractAddr: contractAddr.buyOrder[0],
     };
     buyOrder.buyOrderId = sha256(seq.toString() + salt.toString()).toString();
     salt = salt + 1;

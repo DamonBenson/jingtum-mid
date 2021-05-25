@@ -72,11 +72,11 @@ export const userAccount = {
             secret: 'saszDK4gSFXJ8p83B3sr7x8m8q6si',
         },
     ],
-    buyPlatformAccount: [
+    platformAccount: [
         {
             address: 'jppLWezdLH7an7Jd1wWcvRNtQEuMkPJN5G',
             secret: 'snrVmjunkyidZeGUDgWjvq1BjHnQu',
-        },
+        }, // 模拟京东
         {
             address: 'jHa7hyXBe5v2qY6qMhb4SgoUmQqMYuX9Td',
             secret: 'shj2CXv1c36xM68UQGRfvnCRrMBbP',
@@ -86,20 +86,20 @@ export const userAccount = {
             secret: 'ssUCnrpk5bJS6sXpZpKWcZdmgz2XS',
         },
     ],
-    sellPlatformAccount: [
-        {
-            address: 'jJRtZaLZ28TFfRevGKXFVwGqwQ4YxdAhHr',
-            secret: 'sh8MUA9X2sfaGsB7qXSbNg5yXf1xt',
-        },
-        {
-            address: 'jEbDUTHNGCA1L6hYyShFn7o8coDHV7MYAy',
-            secret: 'sn6mZDMWccNDChyoTfV7PmmVUeLAY',
-        },
-        {
-            address: 'jMJJtctjcJ7GonDV8boFNSQvwitWyNbHJp',
-            secret: 'spobuv7XaLfZuBP4GPDw2XprvGfrG',
-        },
-    ],
+    // platformAccount: [
+    //     {
+    //         address: 'jJRtZaLZ28TFfRevGKXFVwGqwQ4YxdAhHr',
+    //         secret: 'sh8MUA9X2sfaGsB7qXSbNg5yXf1xt',
+    //     },
+    //     {
+    //         address: 'jEbDUTHNGCA1L6hYyShFn7o8coDHV7MYAy',
+    //         secret: 'sn6mZDMWccNDChyoTfV7PmmVUeLAY',
+    //     },
+    //     {
+    //         address: 'jMJJtctjcJ7GonDV8boFNSQvwitWyNbHJp',
+    //         secret: 'spobuv7XaLfZuBP4GPDw2XprvGfrG',
+    //     },
+    // ],
     normalAccount: [
         {
             address: 'jnuf1Hrd5cMZaxDHBPYPzmLvgt4svvSpjG',
@@ -233,7 +233,7 @@ export const tokenName = {
  * @description 各类合约地址。
  */
 export const contractAddr = {
-    buyOrder: [],
-    sellOrder: [],
+    buyOrder: ['jpbMGH1VJTfdi8KHkEaqk5tr8hF3Q2Svnr'],
+    sellOrder: ['jfmtPmUz9e5v9SfhFXzQZ8YiUC8vsVEz5H', 'j31Emyp5KUaoEyLhFUmp7xYfw9sdWP5byx'],
     authenticate: [],
 };

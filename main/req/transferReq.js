@@ -3,7 +3,7 @@ import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
-import * as fetch from '../../utils/fetch.js';
+import * as httpUtils from '../../utils/httpUtils.js';
 
 import {chains, mysqlConf, debugMode} from '../../utils/info.js';
 
@@ -43,7 +43,7 @@ setInterval(async function() {
             addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW',
             rcv: 'ja7En1thjN4dd3atQCRudBEuGgwY8Qdhai'
         } */
-        transferReqArr[i] = fetch.postData('http://127.0.0.1:9001/transferReq', transferReq);
+        transferReqArr[i] = httpUtils.post('http://127.0.0.1:9001/transferReq', transferReq);
         await localUtils.sleep(100);
     }
     await Promise.all(transferReqArr);

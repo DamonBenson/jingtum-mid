@@ -1,7 +1,7 @@
 import jlib from 'jingtum-lib';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
-import * as fetch from '../../utils/fetch.js';
+import * as httpUtils from '../../utils/httpUtils.js';
 import {getConsumer} from '../../utils/kafkaUtils/getConsumer.js';
 
 import {userAccount, chains, contractAddr} from '../../utils/config/jingtum.js';
@@ -41,7 +41,7 @@ async function postAuthenticateReq(msg) {
         console.log(authenticateMsg);
     }
 
-    let contructRes = await fetch.postData('http://127.0.0.1:9001/auth/copyright', authenticateMsg);
+    let contructRes = await httpUtils.post('http://127.0.0.1:9001/auth/copyright', authenticateMsg);
     let buf = Buffer.from(contructRes.body._readableState.buffer.head.data);
     let txJson = JSON.parse(buf.toString());
     let unsignedTx = {
@@ -51,7 +51,7 @@ async function postAuthenticateReq(msg) {
     jlib.Transaction.prototype.setSecret.call(unsignedTx, authenticateSecr);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
-    let submitRes = await fetch.postData('http://127.0.0.1:9001/auth/signedCopyright', blob);
+    let submitRes = await httpUtils.post('http://127.0.0.1:9001/auth/signedCopyright', blob);
 
     if(debugMode) {
         console.log(JSON.parse(Buffer.from(submitRes.body._readableState.buffer.head.data).toString()));
