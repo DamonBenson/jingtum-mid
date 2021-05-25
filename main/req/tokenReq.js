@@ -3,7 +3,7 @@ import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
-import * as fetch from '../../utils/fetch.js';
+import * as httpUtils from '../../utils/httpUtils.js';
 
 import {mysqlConf} from '../../utils/info.js';
 
@@ -28,7 +28,7 @@ setInterval(async function() {
         let uncheckId = uncheckIdArr[i].work_id;
         console.log('auth:', uncheckId);
         // auth: 7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12
-        authReqArr[i] = fetch.postData('http://127.0.0.1:9001/authReq', uncheckId);
+        authReqArr[i] = httpUtils.post('http://127.0.0.1:9001/authReq', uncheckId);
         await localUtils.sleep(50);
     }
     await Promise.all(authReqArr);

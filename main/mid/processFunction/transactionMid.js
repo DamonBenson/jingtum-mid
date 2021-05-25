@@ -16,479 +16,397 @@ import _ from 'lodash';
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
+const matchSystemAddr = userAccount.matchSystemAccount.address; // 智能交易系统（签名由中间层代替）
+const matchSystemSecr = userAccount.matchSystemAccount.secret;
+
 const authorizeAddr = userAccount.buptAuthorizeAccount.address; // 智能授权系统（中间层部分）
 const authorizeSecr = userAccount.buptAuthorizeAccount.secret;
 
-// /*----------智能授权系统发币账号----------*/
+/*----------构造上传买单的交易----------*/
 
-// const a1 = tokenChain.account.a[1].address;
-// const s1 = tokenChain.account.a[1].secret;
+/**
+ * @param {contractAddr} 买单合约地址
+ * @param {platformId} 平台标识（可以直接用平台的链上地址）
+ * @param {contact} 买方联系方式
+ * @param {orderInfo} 买单信息
+ * @return {unsignedTx} 用以在链上上传买单的待签名交易
+ */
+export async function handleBuyOrder(contractRemote, seqObj, req) {
 
-// // 卖方平台账号（模拟京东平台层）
-// const a4 = tokenChain.account.a[4].address;
-// const s4 = tokenChain.account.a[4].secret;
+    console.time('handleBuyOrder');
 
-// // 卖方平台账号（模拟外部平台）
-// const a14 = tokenChain.account.a[14].address;
-// const s14 = tokenChain.account.a[14].secret;
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-// // 智能交易系统账号
-// const a5 = tokenChain.account.a[5].address;
-// const s5 = tokenChain.account.a[5].secret;
+    let body = req.body;
+    try {
+        await transactionValidate.buyOrderReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/transaction/buy:', resInfo.data);
+        console.timeEnd('handleBuyOrder');
+        console.log('--------------------');
+        return resInfo;
+    }
 
-// /*----------构造上传买单的交易----------*/
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let abi = await getAbi(contractAddr);
 
-// /**
-//  * @param {contractAddr} 买单合约地址
-//  * @param {platformId} 平台标识（可以直接用平台的链上地址）
-//  * @param {contact} 买方联系方式
-//  * @param {orderInfo} 买单信息
-//  * @return {unsignedTx} 用以在链上上传买单的待签名交易
-//  */
-// export async function handleBuyOrder(contractRemote, seqObj, req, res) {
+    // 解析买单ID
+    let buyOrderId = body.buyOrderId;
 
-//     console.time('handleBuyOrder');
+    // 解析买方地址
+    let platformAddr = body.platformAddr;
 
-//     let resInfo = {
-//         msg: 'success',
-//         code: 0,
-//         data: {},
-//     }
-
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-//     let [validateInfoRes, validateInfo] = await transactionValidate.validateBuyOrderReq(body);
-//     if(!validateInfoRes) {
-//         resInfo.msg = 'invalid parameters',
-//         resInfo.code = 1;
-//         resInfo.data.validateInfo = validateInfo;
-//         return resInfo;
-//     }
-
-//     // 获取合约元数据
-//     let contractAddr = body.contractAddr;
-//     let abi = await getAbi(contractAddr);
-
-//     // 解析买单ID
-//     let buyOrderId = body.buyOrderId;
-
-//     // 解析买方地址
-//     let platformAddr = body.platformAddr;
-
-//     // 所有买单信息存入IPFS
-//     delete body.platformAddr;
-//     delete body.contractAddr;
-//     delete body.buyOrderId;
-//     let buyOrderInfo = Buffer.from(JSON.stringify(body)); //JSON.stringify()第二个参数问题，暂用delete
-//     let buyOrderInfoHash = await ipfsUtils.add(ipfs, buyOrderInfo);
+    // 所有买单信息存入IPFS
+    delete body.platformAddr;
+    delete body.contractAddr;
+    delete body.buyOrderId;
+    let buyOrderInfoHash = await ipfsUtils.add(body);
     
-//     // 构造交易
-//     let unsignedTx = contractRemote.invokeContract({
-//         account: platformAddr, 
-//         destination: contractAddr, // 待部署
-//         abi: abi, // 待部署
-//         func: "makeOrder('" + buyOrderId + "','" + buyOrderInfoHash + "')",
-//     });
+    // 构造交易
+    let unsignedTx = contractRemote.invokeContract({
+        account: platformAddr, 
+        destination: contractAddr,
+        abi: abi,
+        func: "makeOrder('" + buyOrderId + "','" + buyOrderInfoHash + "')",
+    });
 
-//     console.timeEnd('handleBuyOrder');
-//     console.log('--------------------');
+    resInfo.data.unsignedTx = unsignedTx.tx_json;
+    console.log('/transaction/buy:', resInfo.data);
 
-//     resInfo.data.tx_json = unsignedTx.tx_json;
-//     return resInfo;
+    console.timeEnd('handleBuyOrder');
+    console.log('--------------------');
 
-// }
+    return resInfo;
 
-// /*----------提交买方签名的买单上传交易----------*/
+}
 
-// /**
-//  * @param {signedTx} 平台签名的交易blob
-//  * @return {orderId} 订单编号
-//  */
-// export async function handleSignedBuyOrder(contractRemote, seqObj, req, res) {
+/*----------提交买方签名的买单上传交易----------*/
 
-//     console.time('handleSignedBuyOrder');
+/**
+ * @param {signedTx} 平台签名的交易blob
+ * @return {orderId} 订单编号
+ */
+export async function handleSignedBuyOrder(contractRemote, req) {
 
-//     let resInfo = {
-//         msg: 'success',
-//         code: 0,
-//         data: {},
-//     }
+    console.time('handleSignedBuyOrder');
 
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-//     let blob = body;
-//     let [validateInfoRes, validateInfo] = await transactionValidate.validateSignedTx(blob);
-//     if(!validateInfoRes) {
-//         resInfo.msg = 'invalid parameters',
-//         resInfo.code = 1;
-//         resInfo.data.validateInfo = validateInfo;
-//         return resInfo;
-//     }
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-//     // 提交交易
-//     await tx.buildSignedTx(contractRemote, blob, true);
+    let body = req.body;
+    try {
+        await transactionValidate.signedTxReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/transaction/signedBuy:', resInfo.data);
+        console.timeEnd('handleSignedBuyOrder');
+        console.log('--------------------');
+        return resInfo;
+    }
 
-//     console.timeEnd('handleSignedBuyOrder');
-//     console.log('--------------------');
+    let blob = body.blob;
 
-//     return resInfo;
+    // 提交交易
+    let txResult = await tx.buildSignedTx(contractRemote, blob, false);
+    txResult = {
+        result: txResult.engine_result,
+        message: txResult.engine_result_message,
+        seq: txResult.tx_json.Sequence,
+        hash: txResult.tx_json.hash,
+    };
 
-// }
+    resInfo.data.txResult = txResult;
+    console.log('/transaction/signedBuy:', resInfo.data);
 
-// /*----------构造买单确认接收的交易----------*/
+    console.timeEnd('handleSignedBuyOrder');
+    console.log('--------------------');
 
-// export async function handleBuyOrderConfirm(contractRemote, seqObj, req, res) {
+    return resInfo;
 
-//     console.time('handleBuyOrderConfirm');
+}
 
-//     let resInfo = {
-//         msg: 'success',
-//         code: 0,
-//         data: {},
-//     }
+/*----------构造买单接受的交易----------*/
 
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-//     let [validateInfoRes, validateInfo] = await transactionValidate.validateBuyOrderConfirm(body);
-//     if(!validateInfoRes) {
-//         resInfo.msg = 'invalid parameters',
-//         resInfo.code = 1;
-//         resInfo.data.validateInfo = validateInfo;
-//         return resInfo;
-//     }
+export async function handleBuyOrderAccept(contractRemote, seqObj, req) {
 
-//     // 获取合约元数据
-//     let contractAddr = body.contractAddr;
-//     let abi = await getAbi(contractAddr);
+    console.time('handleBuyOrderAccept');
+
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
+
+    let body = req.body;
+    try {
+        await transactionValidate.buyOrderAcceptSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/transaction/buyAccept:', resInfo.data);
+        console.timeEnd('handleBuyOrderAccept');
+        console.log('--------------------');
+        return resInfo;
+    }
+
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let abi = await getAbi(contractAddr);
     
-//     // 解析需要存入合约的卖单信息
-//     let buyOrderId = body.buyOrderId;
-//     let buyOrderHash = body.buyOrderHash;
-//     let platformAddr = body.platformAddr;
-
-//     let matchSystemAddr = body.matchSystemAddr;
+    // 解析需要存入合约的卖单信息
+    let buyOrderId = body.buyOrderId;
+    let buyOrderHash = body.buyOrderHash;
+    let platformAddr = body.platformAddr;
     
-//     // 构造交易
-//     let func = "acceptOrder('" + buyOrderId + "','" + platformAddr + "','" + buyOrderHash + "')";
-//     // let unsignedTx = contractRemote.invokeContract({
-//     //     account: platformAddr, 
-//     //     destination: contractAddr,
-//     //     abi: abi,
-//     //     func: func,
-//     // });
+    // 构造交易
+    let func = "acceptOrder('" + buyOrderId + "','" + platformAddr + "','" + buyOrderHash + "')";
 
-//     // 暂时由中间层代替
-//     let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
-//     let contractRes = {
-//         result: signedTxRes.engine_result,
-//         seq: signedTxRes.tx_json.Sequence,
-//         message: signedTxRes.engine_result_message,
-//     };
+    // 由中间层代替
+    let txResult = await contract.invokeContract(matchSystemAddr, matchSystemSecr, contractRemote, seqObj.matchSystem.contract++, abi, contractAddr, func, false);
+    txResult = {
+        result: txResult.engine_result,
+        message: txResult.engine_result_message,
+        seq: txResult.tx_json.Sequence,
+        hash: txResult.tx_json.hash,
+    };
+
+    resInfo.data.txResult = txResult;
+    console.log('/transaction/buyAccept:', resInfo.data);
     
-//     console.timeEnd('handleBuyOrderConfirm');
-//     console.log('--------------------');
+    console.timeEnd('handleBuyOrderAccept');
+    console.log('--------------------');
 
-//     resInfo.data.contractRes = contractRes;
-//     return resInfo;
+    return resInfo;
 
-//     console.timeEnd('handleBuyOrderConfirm');
-//     console.log('--------------------');
+}
 
-//     return unsignedTx.tx_json;
+/*----------构造上传卖单的交易----------*/
 
-// }
+/**
+ * @param {contractAddr} 卖单合约地址
+ * @param {platformId} 平台标识（可以直接用平台的链上地址）
+ * @param {contact} 卖方联系方式
+ * @param {orderInfo} 卖单信息
+ * @return {unsignedTx} 用以在链上上传卖单的待签名交易
+ */
+export async function handleSellOrder(contractRemote, seqObj, req) {
 
-// /*----------构造已签名买单确认接收的交易----------*/
+    console.time('handleSellOrder');
 
-// export async function handleSignedBuyOrderConfirm(contractRemote, seqObj, req, res) {
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-//     console.time('handleSignedBuyOrderConfirm');
+    let body = req.body;
+    try {
+        await transactionValidate.sellOrderReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/transaction/sell:', resInfo.data);
+        console.timeEnd('handleSellOrder');
+        console.log('--------------------');
+        return resInfo;
+    }
 
-//     let body = JSON.parse(Object.keys(req.body)[0]);
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let abi = await getAbi(contractAddr);
     
-//     // 构造交易
+    // 解析需要存入合约的卖单信息
+    let sellOrderId = '0x' + body.sellOrderId;
+    let assetId = body.assetId;
+    assetId = assetId.map(id => {
+        return '0x' + id;
+    })
+    let assetType = body.assetType;
+    let consumable = body.consumable;
+    let expireTime = body.expireTime;
 
-//     console.timeEnd('handleSignedBuyOrderConfirm');
-//     console.log('--------------------');
+    // 解析平台地址
+    let platformAddr = body.platformAddr;
 
-// }
-
-// /*----------构造上传卖单的交易----------*/
-
-// /**
-//  * @param {contractAddr} 卖单合约地址
-//  * @param {platformId} 平台标识（可以直接用平台的链上地址）
-//  * @param {contact} 卖方联系方式
-//  * @param {orderInfo} 卖单信息
-//  * @return {unsignedTx} 用以在链上上传卖单的待签名交易
-//  */
-// export async function handleSellOrder(contractRemote, seqObj, req, res) {
-
-//     console.time('handleSellOrder');
-
-//     let resInfo = {
-//         msg: 'success',
-//         code: 0,
-//         data: {},
-//     }
-
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-//     let [validateInfoRes, validateInfo] = await transactionValidate.validateSellOrderReq(body);
-//     if(!validateInfoRes) {
-//         resInfo.msg = 'invalid parameters',
-//         resInfo.code = 1;
-//         resInfo.data.validateInfo = validateInfo;
-//         return resInfo;
-//     }
-
-//     // 获取合约元数据
-//     let contractAddr = body.contractAddr;
-//     let abi = await getAbi(contractAddr);
+    // 卖单次要信息（标签、授权价格、联系方式）存入IPFS
+    delete body.assetId;
+    delete body.assetType;
+    delete body.consumable;
+    delete body.expireTime;
+    delete body.platformAddr;
+    delete body.contractAddr;
+    delete body.sellOrderId;
+    let otherClausesHash = await ipfsUtils.add(body);
     
-//     // 解析需要存入合约的卖单信息
-//     let sellOrderId = '0x' + body.sellOrderId;
-//     let assetId = body.assetId;
-//     assetId = assetId.map(id => {
-//         return '0x' + id;
-//     })
-//     let assetType = body.assetType;
-//     let consumable = body.consumable;
-//     let expireTime = body.expireTime;
+    // 构造交易
+    let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
+    let unsignedTx = contractRemote.invokeContract({
+        account: platformAddr, 
+        destination: contractAddr,
+        abi: abi,
+        func: func,
+    });
 
-//     // 解析平台地址
-//     let platformAddr = body.platformAddr;
-//     let platformIndex = userAccount.map(user => user.address).indexOf(platformAddr).toString();
-//     console.log(platformIndex);
+    resInfo.data.unsignedTx = unsignedTx.tx_json;
+    console.log('/transaction/sell:', resInfo.data);
 
-//     // 卖单次要信息（标签、授权价格、联系方式）存入IPFS
-//     delete body.assetId;
-//     delete body.assetType;
-//     delete body.consumable;
-//     delete body.expireTime;
-//     delete body.platformAddr;
-//     delete body.contractAddr;
-//     delete body.sellOrderId;
-//     let otherClauses = Buffer.from(JSON.stringify(body));
-//     let otherClausesHash = await ipfsUtils.add(ipfs, otherClauses);
-    
-//     // 构造交易
-//     let func = "makeOrder(" + sellOrderId + ",[" + assetId + "]," + assetType + "," + consumable + "," + expireTime + ",'" + otherClausesHash + "')";
-//     let unsignedTx = contractRemote.invokeContract({
-//         account: platformAddr, 
-//         destination: contractAddr,
-//         abi: abi,
-//         func: func,
-//     });
+    console.timeEnd('handleSellOrder');
+    console.log('--------------------');
 
-//     // 暂时由中间层代替
-//     let tempSecret;
-//     let tempSeq;
-//     eval("tempSecret = s" + platformIndex);
-//     eval("tempSeq = seqObj.a" + platformIndex + ".contract");
-//     let signedTxRes = await contract.invokeContract(platformAddr, tempSecret, contractRemote, tempSeq, abi, contractAddr, func, true);
-//     let contractRes = {
-//         result: signedTxRes.engine_result,
-//         seq: signedTxRes.tx_json.Sequence,
-//         message: signedTxRes.engine_result_message,
-//     };
-//     eval("seqObj.a" + platformIndex + ".contract++");
+    return resInfo;
 
-//     console.timeEnd('handleSellOrder');
-//     console.log('--------------------');
+}
 
-//     resInfo.data.contractRes = contractRes;
-//     return resInfo;
+/*----------提交卖方签名的卖单上传交易----------*/
 
-//     // console.log(unsignedTx.tx_json);
+/**
+ * @param {signedTx} 平台签名的交易blob
+ * @return {orderId} 订单编号（通证ID）
+ */
+export async function handleSignedSellOrder(contractRemote, seqObj, req) {
 
-//     console.timeEnd('handleSellOrder');
-//     console.log('--------------------');
+    console.time('handleSignedSellOrder');
 
-//     return unsignedTx.tx_json;
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-// }
+    let body = req.body;
+    try {
+        await transactionValidate.signedTxReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/transaction/signedSell:', resInfo.data);
+        console.timeEnd('handleSignedSellOrder');
+        console.log('--------------------');
+        return resInfo;
+    }
 
-// /*----------提交卖方签名的卖单上传交易----------*/
+    let blob = body.blob;
 
-// /**
-//  * @param {signedTx} 平台签名的交易blob
-//  * @return {orderId} 订单编号（通证ID）
-//  */
-// export async function handleSignedSellOrder(contractRemote, seqObj, req, res) {
+    // 提交交易
+    let txResult = await tx.buildSignedTx(contractRemote, blob, false);
+    txResult = {
+        result: txResult.engine_result,
+        message: txResult.engine_result_message,
+        seq: txResult.tx_json.Sequence,
+        hash: txResult.tx_json.hash,
+    };
 
-//     console.time('handleSignedSellOrder');
+    resInfo.data.txResult = txResult;
+    console.log('/transaction/signedSell:', resInfo.data);
 
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-//     // console.log("body:",body);
-//     let blob = body;
+    console.timeEnd('handleSignedSellOrder');
+    console.log('--------------------');
 
-//     // 提交交易
-//     await tx.buildSignedTx(contractRemote, blob, true);
+    return resInfo;
 
-//     console.timeEnd('handleSignedSellOrder');
-//     console.log('--------------------');
+}
 
-//     // return orderId;
+/*----------构造写入交易匹配结果的交易----------*/
 
-// }
+/**
+ * @param {contractAddr} 买单合约地址
+ * @param {platformId} 买方平台标识（可以直接用平台的链上地址）
+ * @param {orderId} 订单编号
+ * @param {matchInfo} 交易匹配结果
+ * @return {unsignedTx} 用以在链上写入交易匹配结果的待签名交易
+ */
+export async function handleMatch(contractRemote, seqObj, req) {
 
-// /*----------构造写入交易匹配结果的交易----------*/
+    console.time('handleMatch');
 
-// /**
-//  * @param {contractAddr} 买单合约地址
-//  * @param {platformId} 买方平台标识（可以直接用平台的链上地址）
-//  * @param {orderId} 订单编号
-//  * @param {matchInfo} 交易匹配结果
-//  * @return {unsignedTx} 用以在链上写入交易匹配结果的待签名交易
-//  */
-// export async function handleMatch(contractRemote, seqObj, req, res) {
+    let resInfo = {
+        msg: 'success',
+        code: 0,
+        data: {},
+    }
 
-//     console.time('handleMatch');
+    let body = req.body;
+    try {
+        await transactionValidate.matchReqSchema.validateAsync(body);
+    } catch(e) {
+        e.details.map((detail, index) => {
+            console.log('error message ' + index + ':', detail.message);
+        });
+        resInfo.msg = 'invalid parameters',
+        resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/transaction/match:', resInfo.data);
+        console.timeEnd('handleMatch');
+        console.log('--------------------');
+        return resInfo;
+    }
 
-//     let resInfo = {
-//         msg: 'success',
-//         code: 0,
-//         data: {},
-//     }
+    // 获取合约元数据
+    let contractAddr = body.contractAddr;
+    let abi = await getAbi(contractAddr);
 
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-//     let [validateInfoRes, validateInfo] = await transactionValidate.validateMatchReq(body);
-//     if(!validateInfoRes) {
-//         resInfo.msg = 'invalid parameters',
-//         resInfo.code = 1;
-//         resInfo.data.validateInfo = validateInfo;
-//         return resInfo;
-//     }
+    // 解析买方平台地址、买单ID、撮合信息
+    let buyOrderInfo = body.buyOrderInfo;
+    let buyOrderHash = buyOrderInfo.buyOrderHash;
+    let sellOrderInfo = body.sellOrderInfo;
+    let matchResults = {
+        buyOrderInfo: buyOrderInfo,
+        sellOrderInfo: sellOrderInfo,
+    }
+    let matchResultsHash = await ipfsUtils.add(matchResults);
 
-//     // let resInforr = [];
+    // 构造交易
+    let func = "updateMatches('" + buyOrderHash + "','" + matchResultsHash + "')";
 
-//     // body.map(async data => {
+    // 由中间层代替
+    let txResult = await contract.invokeContract(matchSystemAddr, matchSystemSecr, contractRemote, seqObj.matchSystem.contract++, abi, contractAddr, func, false);
+    txResult = {
+        result: txResult.engine_result,
+        message: txResult.engine_result_message,
+        seq: txResult.tx_json.Sequence,
+        hash: txResult.tx_json.hash,
+    };
 
-//     //     // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(data);
-//     //     // if(!validateRes) {
-//     //     //     resInforr.push(validateInfo);
-//     //     //     return;
-//     //     // }
+    resInfo.data.txResult = txResult;
+    console.log('/transaction/match:', resInfo.data);
 
-//     //     // 获取合约元数据
-//     //     let contractAddr = data.contractAddr;
-//     //     let abi = await getAbi(contractAddr);
+    console.timeEnd('handleMatch');
+    console.log('--------------------');
 
-//     //     // 获取智能交易系统账户地址
-//     //     let matchSystemAddr = data.matchSystemAddr;
+    return resInfo;
 
-//     //     // 解析买方平台地址、买单ID、撮合信息
-//     //     let buyOrderInfo = data.buyOrderInfo;
-//     //     let buyOrderHash = data.buyOrderHash;
-//     //     let buyerAddr = buyOrderInfo.buyerAddr;
-//     //     let sellOrderInfo = data.sellOrderInfo;
-//     //     let matchResults = {
-//     //         buyOrderInfo: buyOrderInfo,
-//     //         sellOrderInfo: sellOrderInfo,
-//     //     }
-//     //     /* {
-//     //         买单: {买单信息}
-//     //         卖单: [{合约地址，卖单ID}，……]
-//     //     } */
-//     //     let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
-//     //     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
-
-//     //     // 构造交易
-//     //     let func = 'updateMatches(' + buyerAddr + ',' + buyOrderHash + ',' + matchResultsHash + ')';
-//     //     // let unsignedTx = contractRemote.invokeContract({
-//     //     //     account: matchSystemAddr, 
-//     //     //     destination: contractAddr,
-//     //     //     abi: abi,
-//     //     //     func: func,
-//     //     // });
-
-//     //     // 暂时由中间层代替
-//     //     let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
-//     //     let resInfo = {
-//     //         result: signedTxRes.engine_result,
-//     //         seq: signedTxRes.tx_json.Sequence,
-//     //         message: signedTxRes.engine_result_message,
-//     //     };
-//     //     resInforr.push(resInfo);
-
-//     // });
-
-//     // return resInforr;
-
-//     // let [validateRes, validateInfo] = await validateUtils.validateMatchReq(data);
-//     // if(!validateRes) {
-//     //     resInforr.push(validateInfo);
-//     //     return;
-//     // }
-
-//     // 获取合约元数据
-//     let contractAddr = body.contractAddr;
-//     let abi = await getAbi(contractAddr);
-
-//     // 获取智能交易系统账户地址
-//     let matchSystemAddr = body.matchSystemAddr;
-
-//     // 解析买方平台地址、买单ID、撮合信息
-//     let buyOrderInfo = body.buyOrderInfo;
-//     let buyOrderHash = buyOrderInfo.buyOrderHash;
-//     let sellOrderInfo = body.sellOrderInfo;
-//     let matchResults = {
-//         buyOrderInfo: buyOrderInfo,
-//         sellOrderInfo: sellOrderInfo,
-//     }
-//     let matchResultsBuffer = Buffer.from(JSON.stringify(matchResults));
-//     let matchResultsHash = await ipfsUtils.add(ipfs, matchResultsBuffer);
-
-//     // 构造交易
-//     let func = "updateMatches('" + buyOrderHash + "','" + matchResultsHash + "')";
-//     // let unsignedTx = contractRemote.invokeContract({
-//     //     account: matchSystemAddr, 
-//     //     destination: contractAddr,
-//     //     abi: abi,
-//     //     func: func,
-//     // });
-
-//     // 暂时由中间层代替
-//     let signedTxRes = await contract.invokeContract(matchSystemAddr, s5, contractRemote, seqObj.a5.contract++, abi, contractAddr, func, true);
-//     let contractRes = {
-//         result: signedTxRes.engine_result,
-//         seq: signedTxRes.tx_json.Sequence,
-//         message: signedTxRes.engine_result_message,
-//     };
-
-//     console.timeEnd('handleMatch');
-//     console.log('--------------------');
-
-//     resInfo.data.contractRes = contractRes;
-//     return resInfo;
-
-//     console.timeEnd('handleMatch');
-//     console.log('--------------------');
-
-//     return unsignedTx.tx_json;
-
-// }
-
-// /*----------提交平台签名的交易匹配结果写入交易----------*/
-
-// /**
-//  * @param {signedTx} 平台签名的交易blob
-//  * @return {oederId} 订单编号
-//  */
-// export async function handleSignedMatch(contractRemote, seqObj, req, res) {
-
-//     console.time('handleSignedMatch');
-
-//     let body = JSON.parse(Object.keys(req.body)[0]);
-
-//     let blob = body;
-
-//     // 提交交易
-//     await tx.buildSignedTx(contractRemote, blob, true);
-
-//     console.timeEnd('handleSignedMatch');
-//     console.log('--------------------');
-
-//     return orderId;
-
-// }
+}
 
 // /*----------查询交易匹配结果----------*/
 
@@ -897,7 +815,6 @@ export async function handleApproveConfirm(tokenRemote, seqObj, req) {
         return resInfo;
     }
 
-    console.log(body);
     let buyOrderInfo = body.buyOrderInfo;
     let buyerAddr = buyOrderInfo.buyerAddr;
     let approveScene = buyOrderInfo.authorizationScene;
@@ -956,8 +873,7 @@ async function getAbi(contractAddr) {
     let sql = sqlText.table('contract_info').field('abi_hash').where({contract_addr: contractAddr}).select();
     let getAbiRes = await mysqlUtils.sql(c, sql);
     let abiHash = getAbiRes[0].abi_hash;
-    let abiJson = await ipfsUtils.get(ipfs, abiHash);
-    let abi = JSON.parse(abiJson);
+    let abi = await ipfsUtils.get(abiHash);
     return abi;
 
 }

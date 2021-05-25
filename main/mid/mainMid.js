@@ -158,49 +158,40 @@ uploadRemote.connect(async function(err, res) {
             const transactionRouter = express.Router();
 
             // 提交买单
-            // transactionRouter.post('/buy', async function(req, res) {
-            //     let unsignedTx = await transactionMid.handleBuyOrder(contractRemote, seqObj, req, res);
-            //     res.send(unsignedTx);
-            // });
+            transactionRouter.post('/buy', async function(req, res) {
+                let unsignedTx = await transactionMid.handleBuyOrder(contractRemote, seqObj, req);
+                res.send(unsignedTx);
+            });
 
-            // transactionRouter.post('/signedBuy', async function(req, res) {
-            //     let resInfo = await transactionMid.handleSignedBuyOrder(contractRemote, seqObj, req, res);
-            //     res.send(resInfo);
-            // });
+            transactionRouter.post('/signedBuy', async function(req, res) {
+                let resInfo = await transactionMid.handleSignedBuyOrder(contractRemote, req);
+                res.send(resInfo);
+            });
 
-            // transactionRouter.post('/buyOrderConfirm', async function(req, res) { // 智能交易系统签名由中间层模拟，暂时不需要
-            //     let unsignedTx = await transactionMid.handleBuyOrderConfirm(contractRemote, seqObj, req, res);
-            //     res.send(unsignedTx);
-            // });
-
-            // transactionRouter.post('/signedBuyOrderConfirm', async function(req, res) { 
-            //     let resInfo = await transactionMid.handleSignedBuyOrderComfirm(contractRemote, seqObj, req, res);
-            //     res.send(resInfo);
-            // });
+            // 买单接受
+            transactionRouter.post('/buyAccept', async function(req, res) { // 智能交易系统签名由中间层模拟，暂时不需要
+                let unsignedTx = await transactionMid.handleBuyOrderAccept(contractRemote, seqObj, req);
+                res.send(unsignedTx);
+            });
 
             // 提交卖单
-            // transactionRouter.post('/sell', async function(req, res) {
-            //     let unsignedTx = await transactionMid.handleSellOrder(contractRemote, seqObj, req, res);
-            //     res.send(unsignedTx);
-            // });
+            transactionRouter.post('/sell', async function(req, res) {
+                let unsignedTx = await transactionMid.handleSellOrder(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
+            });
 
-            // transactionRouter.post('/signedSell', async function(req, res) { // 京东平台签名由中间层模拟，暂时不需要
-            //     let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
-            //     res.send(resInfo);
-            // });
+            transactionRouter.post('/signedSell', async function(req, res) { // 京东平台签名由中间层模拟，暂时不需要
+                let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
+                res.send(resInfo);
+            });
 
-            // 提交交易服务结果
-            // transactionRouter.post('/match', async function(req, res) {
-            //     let unsignedTx = await transactionMid.handleMatch(contractRemote, seqObj, req, res);
-            //     res.send(unsignedTx);
-            // });
+            // 提交撮合结果
+            transactionRouter.post('/match', async function(req, res) {
+                let unsignedTx = await transactionMid.handleMatch(contractRemote, seqObj, req, res);
+                res.send(unsignedTx);
+            });
 
-            // transactionRouter.post('/signedMatch', async function(req, res) { // 智能交易系统签名由中间层模拟，暂时不需要
-            //     let resInfo = await transactionMid.handleSignedMatch(contractRemote, seqObj, req, res);
-            //     res.send(resInfo);
-            // });
-
-            // 获取交易服务结果
+            // 获取匹配结果
             // transactionRouter.get('/matchInfo', async function(req, res) {
             //     let resInfo = await transactionMid.handleMatchInfo(contractRemote, seqObj, req, res);
             //     res.send(resInfo);

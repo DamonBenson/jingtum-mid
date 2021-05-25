@@ -2,7 +2,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 
 import {mysqlConf, debugMode} from '../../../utils/info.js';
 
@@ -43,7 +43,7 @@ process.stdin.on('data', async function(chunk) {
         upload_time: 1608517640,
         addr: 'jL8QgMCYxZCiwwhQ6RQBbC25jd9hsdP3sW'
     } */
-    await fetch.postData('http://127.0.0.1:9000/authReq', authInfo);
+    await httpUtils.post('http://127.0.0.1:9000/authReq', authInfo);
 
     // 结束计时
     let eTs = (new Date()).valueOf();

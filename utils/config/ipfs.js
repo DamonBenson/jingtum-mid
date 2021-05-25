@@ -1,4 +1,4 @@
-const ipfsBaseAddr = 'http://118.190.39.87';
+import url from 'url';
 
-export const ipfsAddAddr = ipfsBaseAddr + ':9094';
-export const ipfsCatAddr = ipfsBaseAddr + ':5001';
+export const ipfsAddUrl = new URL('http://118.190.39.87:9094/add');
+export const ipfsCatUrl = new URL('http://118.190.39.87:5001/api/v0/cat');

@@ -1,5 +1,5 @@
 import * as localUtils from '../localUtils.js';
-import * as fetch from '../../utils/fetch.js';
+import * as httpUtils from '../../utils/httpUtils.js';
 
 import {userAccount, debugMode} from '../info.js';
 
@@ -43,6 +43,6 @@ export default function WorkInfo() {
                 workField: 0
             }
         } */
-        await fetch.postData('http://127.0.0.1:9001/uploadReq', uploadReq);
+        await httpUtils.post('http://127.0.0.1:9001/uploadReq', uploadReq);
     }).bind(this);
 }
