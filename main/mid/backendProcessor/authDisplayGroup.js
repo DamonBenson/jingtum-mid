@@ -14,132 +14,8 @@ import util from 'util';
 
 import mysql from 'mysql';
 import {c} from "../MidBackend.js";
-
-
+import {debugMode, WORKTYPE, CREATIONTYPE} from '../../../utils/info.js';
 const CONNECT = true;// When false, Send Random Response
-/**
- *
- */
-export async function handleAuthRightRate(req, res) {
-
-    console.time('handleAuthRightRate');
-    // 获取AuthRightRate
-    let [WorkAmount,RightAmount] = await getAuthRightRate();
-    let resJson = JSON.stringify({'WorkAmount':WorkAmount,"RightAmount":RightAmount});
-    console.timeEnd('handleAuthRightRate');
-    console.log('--------------------');
-    return resJson;
-
-}
-async function getAuthRightRate() {
-
-    let sqlWork = sqlText.count().table('work_info').select();
-    let sqlRight = sqlText.count().table('right_token_info').where('right_type=1').select();
-
-    let WorkAmount = await mysqlUtils.sql(c, sqlWork);
-    WorkAmount = WorkAmount[0]['COUNT(1)'];
-
-    let RightAmount = await mysqlUtils.sql(c, sqlRight);
-    RightAmount = RightAmount[0]['COUNT(1)'];
-
-
-    return [WorkAmount,RightAmount];
-
-}
-
-/**
- *
- */
- export async function handleAuthByCompany(req, res) {
-
-    console.time('handleAuthByCompany');
-    let sqlRes = await getAuthByCompany();
-    // let 
-    // for(let i=0 ; i<4 ; i++){
-    //     sqlRes
-    // }
-
-    let resJson = JSON.stringify(sqlRes);
-    console.timeEnd('handleAuthByCompany');
-    console.log('--------------------');
-    return resJson;
-}
-
-async function getAuthByCompany() {
-    let timeNow = Math.round((new Date())/ 1000);
-    let timeLastOneMonth = Math.round((new Date() - 30*24*3600)/ 1000);
-    let timeLastTwoMonth = Math.round((new Date() - 60*24*3600)/ 1000);
-    let timeLastThreeMonth = Math.round((new Date() - 90*24*3600)/ 1000);
-    let timeLastFourMonth = Math.round((new Date() - 120*24*3600)/ 1000);
-    let timeSlot = [timeNow,timeLastOneMonth,timeLastTwoMonth,timeLastThreeMonth,timeLastFourMonth];
-    let sqlRight ="";
-    let sqlRes ="";
-    let Res = {
-        0:{},
-        1:{},
-        2:{},
-        3:{},
-    };
-    for(let i = 0 ; i < 4; i++){
-        sqlRight =util.format(
-            'SELECT DISTINCT\
-                 right_token_info.address,\
-                 COUNT(right_token_info.address)\
-             FROM\
-                 right_token_info\
-                 INNER JOIN\
-                 work_info\
-                 ON \
-                     right_token_info.work_id = work_info.work_id\
-             WHERE\
-                 right_type = 1 AND\
-                 (\
-                     work_info.created_time >= %s\
-                 ) AND\
-                 (\
-                     work_info.created_time < %s\
-                 )\
-             GROUP BY\
-                 right_token_info.address\
-             ORDER BY\
-                 work_info.created_time ASC'
-            ,timeSlot[i+1],timeSlot[i]);
-        // console.log(sqlRight);
-        sqlRes = await mysqlUtils.sql(c, sqlRight);
-        // console.log(sqlRes);
-        sqlRes.forEach(value => 
-            Res[i][value['address']] = value['COUNT(right_token_info.address)']
-        );
-    }
-    console.log(Res);
-    let NeedRes ={
-        0:{},
-        1:{},
-        2:{},
-        3:{},
-    }
-    for(let i = 0 ; i < 4; i++){
-        try{
-            NeedRes[i]["JD"] = Res[i]["jG1Y4G3omHCAbAWRuuYZ5zwcftXgvfmaX3"];
-            NeedRes[i]["Baidu"] = Res[i]["jw382C55JLbLbUJNu8iJtisaqb4TAoQDGC"];
-            NeedRes[i]["Month"] = i;
-        }
-        catch{
-            NeedRes[i]["JD"] = 0;
-            NeedRes[i]["Baidu"] = 0;
-            NeedRes[i]["Month"] = i;
-        }
-        if(NeedRes[i]["JD"] == null){
-            NeedRes[i]["JD"] = 0;
-            NeedRes[i]["Baidu"] = 0;
-            NeedRes[i]["Month"] = i;
-        }
-    }
-    console.log(NeedRes);
-
-    return NeedRes;
-
-}
 
 //*****************************************************************************************************//
 // 新方案
@@ -220,11 +96,7 @@ export async function handleCertificateAmountGroupByWorkType(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-const WORKTYPE = {
-     1:"文字",2:"口述",3:"音乐",4:"戏剧",5:"曲艺",
-    6:"舞蹈",7:"杂技艺术",8:"美术",9:"建筑",10:"摄影",
-    11:"电影和类似摄制电影方法创作的作品",12:"图形",13:"模型",14:"其他"
-};
+
 async function getCertificateAmountGroupByWorkType() {
     let CertificateAmountGroupByWorkType = [];
     let WorkTypeInfo = {};
@@ -286,21 +158,6 @@ async function getCertificateAmountGroupByWorkType() {
     }
     return CertificateAmountGroupByWorkType;
 }
-function sortDict(dict) {
-    var dict2 = {},
-        keys = Object.keys(dict).sort();
-
-    for (var i = 0, n = keys.length, key; i < n; ++i) {
-        key = keys[i];
-        dict2[key] = dict[key];
-    }
-
-    return dict2;
-}
-
-// 2）	截止当前不同创作类型的存证数量分布。
-
-// 二维图（两个自变量）
 // 3）	不同作品类型的存证数量随时间的变化。workType
 export async function handleCertificateAmountGroupByWorkTypeEXchange(req, res) {
 

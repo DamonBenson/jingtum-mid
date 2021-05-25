@@ -6,7 +6,7 @@ import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import sha256 from 'crypto-js/sha256.js';
 
-import {userAccount, userAccountIndex, mysqlTestConf, debugMode} from '../../../utils/info.js';
+import {userAccount, userAccountIndex, mysqlTestConf, debugMode, WORKTYPE, CREATIONYPE} from '../../../utils/info.js';
 import util from 'util';
 
 // const c = mysql.createConnection(mysqlTestConf);
@@ -21,15 +21,7 @@ import util from 'util';
  * @example:.
  *
  */
-const WORKTYPE = {
-    1:"文字",2:"口述",3:"音乐",4:"戏剧",5:"曲艺",
-    6:"舞蹈",7:"杂技艺术",8:"美术",9:"建筑",10:"摄影",
-    11:"电影和类似摄制电影方法创作的作品",12:"图形",13:"模型",14:"其他"
-};
-const CREATIONYPE = {
-    1:"原创",2:"改编",3:"翻译",4:"汇编",5:"注释",
-    6:"整理",7:"其他"
-};
+
 function MimicAuthInsert(){
         // 发送上传请求至http服务器mainMid.js.
         let addr = userAccount[userAccountIndex[localUtils.randomSelect(["用户1", "用户2"])]].address;

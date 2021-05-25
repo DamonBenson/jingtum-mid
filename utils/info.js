@@ -269,9 +269,16 @@ export const WORKTYPE = {
  * @Description: WORKTYPE: 创作类型
  * @date 2021/5/24
  */
-export const CREATIONYPE = {
+export const CREATIONTYPE = {
     1:"原创",2:"改编",3:"翻译",4:"汇编",5:"注释",
     6:"整理",7:"其他"
+};
+/**
+ * @Description: 虚假的侵权网站
+ * @date 2021/5/24
+ */
+export const TORTSITE = {
+    1:"乐视",2:"新浪",3:"酷狗",4:"网易",5:"腾讯",
 };
 
 const debugMode = true;
