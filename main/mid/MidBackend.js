@@ -9,7 +9,17 @@ export const c = mysql.createConnection(mysqlConf);
 
 /*----------信息查询请求路由配置----------*/
 async function UseMysql(req, res, handle) {
-    c.connect();
+    try{
+        await c.connect();
+    }
+    catch(e){
+        console.log("Connect Release?");
+        res.send('数据库错误，请联系黄文伟');
+        res.end();
+        c.end();
+        return;
+    }
+
     let resJson = await handle(req, res);
     res.send({'data': resJson});
     res.end();
@@ -66,16 +76,15 @@ authRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, res) 
 /****       监测维权     ****/
 /**************************/
 
-listenRouter.get('/DetectNum', async function(req, res) {
-    try{
-        let resJson = await authDisplayGroup.handleDetectNum(req, res);
-        res.send({'data':resJson});
-    }catch{
-        reconnectMysql();
-    }
-    res.end();
+listenRouter.get('/TortCountExchange', async function(req, res) {
+    await UseMysql(req, res, listenDisplayGroup.handleTortCountExchange);
 });
-// localhost:9002/backend/listen/DetectNum
+// localhost:9002/backend/listen/TortCountExchange
+
+listenRouter.get('/TortCountGroupByWorkType', async function(req, res) {
+    await UseMysql(req, res, listenDisplayGroup.handleTortCountGroupByWorkType);
+});
+// localhost:9002/backend/listen/TortCountGroupByWorkType
 
 /*----------http服务器配置----------*/
 

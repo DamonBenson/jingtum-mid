@@ -13,59 +13,132 @@ import * as localUtils from '../../../utils/localUtils.js';
 import util from 'util';
 
 import mysql from 'mysql';
-import {mysqlConf} from '../../../utils/info.js';
-export const c = mysql.createConnection(mysqlConf);
-c.connect(); // mysql连接
+import {c} from "../MidBackend.js";
+const WORKTYPE = {
+    1:"文字",2:"口述",3:"音乐",4:"戏剧",5:"曲艺",
+    6:"舞蹈",7:"杂技艺术",8:"美术",9:"建筑",10:"摄影",
+    11:"电影和类似摄制电影方法创作的作品",12:"图形",13:"模型",14:"其他"
+};
+const CONNECT = false;// When false, Send Random Response
 
-let CONNECT = false;// When false, Send Random Response
+/*
+ * @param req: 请求
+ * @param res: 返回
+ * @author: Bernard
+ * @date: 2021/5/25 17:08
+ * @description:发现的侵权总数量随时间的变化。
+ * @example:.
+ *
+ */
+export async function handleTortCountExchange(req, res) {
 
-export async function handleDetectNum(req, res) {
-
-    console.time('handleDetectNum');
-    let sqlRes = await gethandleDetectNum();
-    console.timeEnd('handleDetectNum');
+    console.time('handleTortCountExchange');
+    let sqlRes = await getTortCountExchange();
+    console.timeEnd('handleTortCountExchange');
     console.log('--------------------');
     return sqlRes;
 }
 
-async function gethandleDetectNum() {
+async function getTortCountExchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
-    let CopyRightAmountEXchange = [];
+    let TortCountExchange = [];
+    let valueRes = 0;
     for (let index = 0; index < 12; index++) {
-        let endTimeStamp = TimeStampArray[index];
-        let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight =util.format(
-            'SELECT DISTINCT\n' +
-            '\tCOUNT(right_token_info.copyright_id)\n' +
-            'FROM\n' +
-            '\tright_token_info\n' +
-            '\tINNER JOIN\n' +
-            '\t(\n' +
-            '\t\twork_info\n' +
-            '\t)\n' +
-            '\tON \n' +
-            '\t\tright_token_info.work_id = work_info.work_id\n' +
-            'WHERE\n' +
-            '\t\twork_info.completion_time <= %s AND\n' +
-            '\t\t\twork_info.completion_time > %s\n'
-            ,endTimeStamp,startTimeStamp);
-        // console.log(sqlRight);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
-        console.log(sqlRes);
-        let valueRes = 0;
-        sqlRes.forEach(function(item,index){
-            valueRes = item['COUNT(right_token_info.copyright_id)'];
-            console.log(item['COUNT(right_token_info.copyright_id)']+'---'+index);
-        });
-        if(CONNECT == false) valueRes = localUtils.randomNumber(30,50);
+        if(CONNECT == true){
+            console.log("CONNECT =",CONNECT);
+        }
+        else{
+            valueRes = localUtils.randomNumber(30,50);
+        }
         console.log("valueRes =",valueRes);
-
         let MonthInfo = {
-            "CopyRightAmount": valueRes,
+            "TortCount": valueRes,
             "Month" : MonthArray[index + 1],
         };
-        CopyRightAmountEXchange.push(MonthInfo);
+        TortCountExchange.push(MonthInfo);
     }
-    CopyRightAmountEXchange.reverse();
-    return CopyRightAmountEXchange;
+    TortCountExchange.reverse();
+    console.log(TortCountExchange);
+    return TortCountExchange;
+}
+/*
+ * @param req: 请求
+ * @param res: 返回
+ * @return: null
+ * @author: Bernard
+ * @date: 2021/5/25 17:31
+ * @description:截止当前不同作品类型或者不同创作类型下发生的侵权数量分布。
+ * @example:.
+ *
+ */
+export async function handleTortCountGroupByCreationType(req, res) {
+
+    console.time('handleTortCountGroupByCreationType');
+    let sqlRes = await getTortCountGroupByCreationType();
+    console.timeEnd('handleTortCountGroupByCreationType');
+    console.log('--------------------');
+    return sqlRes;
+}
+
+async function getTortCountGroupByCreationType() {
+    let TortCountGroupByWorkType = [];
+    let WorkTypeInfo = {};
+    if(CONNECT == true){
+        console.log("CONNECT =",CONNECT);
+    }
+    else{
+        WorkTypeInfo = {
+            "workType":"音乐",
+            "TortCount":localUtils.randomNumber(80,100)
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":"电影",
+            "TortCount":localUtils.randomNumber(60,80)
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":"美术",
+            "TortCount":localUtils.randomNumber(40,60)
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+    }
+    console.log(TortCountGroupByWorkType);
+    return TortCountGroupByWorkType;
+}
+
+export async function handleTortCountGroupByWorkType(req, res) {
+
+    console.time('handleTortCountGroupByWorkType');
+    let sqlRes = await getTortCountGroupByWorkType();
+    console.timeEnd('handleTortCountGroupByWorkType');
+    console.log('--------------------');
+    return sqlRes;
+}
+
+async function getTortCountGroupByWorkType() {
+    let TortCountGroupByWorkType = [];
+    let WorkTypeInfo = {};
+    if(CONNECT == true){
+        console.log("CONNECT =",CONNECT);
+    }
+    else{
+        WorkTypeInfo = {
+            "workType":"音乐",
+            "TortCount":localUtils.randomNumber(80,100)
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":"电影",
+            "TortCount":localUtils.randomNumber(60,80)
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":"美术",
+            "TortCount":localUtils.randomNumber(40,60)
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+    }
+    console.log(TortCountGroupByWorkType);
+    return TortCountGroupByWorkType;
 }
