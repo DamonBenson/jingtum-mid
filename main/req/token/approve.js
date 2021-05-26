@@ -41,8 +41,7 @@ if(debugMode) {
     console.log('approveConfirmReq:', approveConfirmReq);
 }
 
-let res = await httpUtils.post('http://127.0.0.1:9001/transaction/approveConfirm', approveConfirmReq);
+let resInfo = await httpUtils.post('http://127.0.0.1:9001/transaction/approveConfirm', approveConfirmReq);
 if(debugMode) {
-    let resInfo = JSON.parse(Buffer.from(res.body._readableState.buffer.head.data).toString());
     console.log('resInfo:', resInfo.data.approveResultList);
 }

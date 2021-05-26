@@ -177,7 +177,7 @@ export const chains = [
     {
         server: [
             'ws://' + publicServerAddr[0] + ':6020',
-            'ws://' + publicServerAddr[1] + ':6020',
+            'ws://' + publicServerAddr[1] + ':6060',
             'ws://' + publicServerAddr[2] + ':6020',
         ],
         account: {

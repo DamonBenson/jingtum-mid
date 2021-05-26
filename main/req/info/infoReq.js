@@ -25,9 +25,8 @@ switch(queryMode) {
             console.log('workIds:', workIds);
         }
         
-        let workRes = await httpUtils.get('http://127.0.0.1:9001/info/work', {workIds: workIds});
+        let workResInfo = await httpUtils.get('http://127.0.0.1:9001/info/work', {workIds: workIds});
         if(debugMode) {
-            let workResInfo = JSON.parse(Buffer.from(workRes.body._readableState.buffer.head.data).toString());
             console.log('worksInfo:', workResInfo.data.certificateInfoList);
         }
         break;
@@ -43,9 +42,8 @@ switch(queryMode) {
             console.log('copyrightIds', copyrightIds);
         }
 
-        let rightRes = await httpUtils.get('http://127.0.0.1:9001/info/copyright', {copyrightIds: copyrightIds});
+        let rightResInfo = await httpUtils.get('http://127.0.0.1:9001/info/copyright', {copyrightIds: copyrightIds});
         if(debugMode) {
-            let rightResInfo = JSON.parse(Buffer.from(rightRes.body._readableState.buffer.head.data).toString());
             console.log('rightsInfo:', rightResInfo.data.copyrightInfoList);
         }
         break;
@@ -61,9 +59,8 @@ switch(queryMode) {
             console.log('approveIds', approveIds);
         }
 
-        let approveRes = await httpUtils.get('http://127.0.0.1:9001/info/approve', {approveIds: approveIds});
+        let approveResInfo = await httpUtils.get('http://127.0.0.1:9001/info/approve', {approveIds: approveIds});
         if(debugMode) {
-            let approveResInfo = JSON.parse(Buffer.from(approveRes.body._readableState.buffer.head.data).toString());
             console.log('approvesInfo:', approveResInfo.data.approvesInfo);
         }
         break;

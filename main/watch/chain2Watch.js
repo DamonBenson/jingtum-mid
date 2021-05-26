@@ -180,27 +180,20 @@ async function processBuyOrder(buyOrderTxss, loopConter) {
         buyOrderTxs.forEach(async(buyOrderTx) => {
     
             let buyOrderId = buyOrderTx.func_parms[0].replace(/\'/g,"");
-            let contractAddr = buyOrderTx.destination;
             let platformAddr = buyOrderTx.account;
             
             let buyOrderInfoHash = buyOrderTx.func_parms[1].replace(/\'/g,"");
             let buyOrderInfo = await ipfsUtils.get(buyOrderInfoHash);
             buyOrderInfo.buyOrderId = buyOrderId;
-
-            let [validateInfoRes, validateInfo] = await transactionValidate.validateBuyOrderWatch(buyOrderInfo);
-            if(!validateInfoRes) {
-                console.log(validateInfo);
-                return;
-            }
             
-            buyOrderInfo.contractAddr = contractAddr;
+            buyOrderInfo.contractAddr = buyOrderTx.destination;
             buyOrderInfo.platformAddr = platformAddr;
             buyOrderInfo.buyOrderHash = '0';
             buyOrderInfo.timeStamp = 0;
     
             console.log(buyOrderInfo);
             // 推送买单信息
-            KafkaClient_Watch2.ProducerSend(buyOrderContractAddrs[index] + '_BuyOrder', buyOrderInfo);
+            KafkaClient_Watch2.ProducerSend(contractAddr.buyOrder[index] + '_BuyOrder', buyOrderInfo);
     
         });
 
@@ -227,7 +220,7 @@ async function processBuyOrderAccept(buyOrderAcceptTxss, loopConter) {
             console.log(buyOrderAcceptInfo);
             // 推送买单信息
             // KafkaClient_Watch2.ProducerSend(buyOrderContractAddrs[0] + '_BuyOrder', buyOrderInfo);
-            KafkaClient_Watch2.ProducerSend(buyOrderContractAddrs[index] + '_buyOrderAccept', buyOrderAcceptInfo);
+            KafkaClient_Watch2.ProducerSend(contractAddr.buyOrder[index] + '_buyOrderAccept', buyOrderAcceptInfo);
     
         });
 
@@ -247,8 +240,7 @@ async function processSellOrder(sellOrderTxss, loopConter) {
             let workId = sellOrderTx.func_parms.toString().match(/(.*)\[(.*)\](.*)/)[2].replace(/\'/g,"").split(',');
             workId = workId.map(id => {
                 return id.replace(/0x/g,"");
-            })
-            let contractAddr = sellOrderTx.destination;
+            });
             
             let sellOrderInfoHash = sellOrderTx.func_parms.pop().replace(/\'/g,"");
             let sellOrderInfo = await ipfsUtils.get(sellOrderInfoHash);
@@ -260,11 +252,11 @@ async function processSellOrder(sellOrderTxss, loopConter) {
             sellOrderInfo.timeStamp = 0;
             sellOrderInfo.workId = workId;
             sellOrderInfo.matchScore = 0;
-            sellOrderInfo.contractAddr = contractAddr;
+            sellOrderInfo.contractAddr = sellOrderTx.destination;
     
             console.log(sellOrderInfo);
             // 推送卖单信息
-            KafkaClient_Watch2.ProducerSend(sellOrderContractAddrs[index] + '_SellOrder', sellOrderInfo);
+            KafkaClient_Watch2.ProducerSend(contractAddr.sellOrder[index] + '_SellOrder', sellOrderInfo);
     
         });
 
@@ -286,7 +278,7 @@ async function processMatch(matchTxss, loopConter) {
     
             console.log(matchInfo);
             // 推送交易匹配信息
-            KafkaClient_Watch2.ProducerSend(buyOrderContractAddrs[index] + '_Match', matchInfo);
+            KafkaClient_Watch2.ProducerSend(contractAddr.buyOrder[index] + '_Match', matchInfo);
     
         });
 

@@ -20,8 +20,7 @@ if(debugMode) {
     console.log('copyrightIds', copyrightIds);
 }
 
-let rightRes = await httpUtils.post('http://127.0.0.1:9001/auth/innerCopyright', {copyrightIds: copyrightIds});
+let rightResInfo = await httpUtils.post('http://127.0.0.1:9001/auth/innerCopyright', {copyrightIds: copyrightIds});
 if(debugMode) {
-    let rightResInfo = JSON.parse(Buffer.from(rightRes.body._readableState.buffer.head.data).toString());
     console.log('rightsInfo:', rightResInfo.data.authenticationInfoList);
 }

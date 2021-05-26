@@ -68,8 +68,8 @@ async function postBuyOrderReq(BUYORDER = null) {
         console.log('buyOrder:', buyOrder);
     }
 
-    let unsignedRes = await httpUtils.post(util.format('http://%s:9001/transaction/buy', ip), buyOrder);
-    let unsignedResInfo = JSON.parse(Buffer.from(unsignedRes.body._readableState.buffer.head.data).toString());
+    let unsignedResInfo = await httpUtils.post(util.format('http://%s:9001/transaction/buy', ip), buyOrder);
+    console.log(unsignedResInfo);
     let txJson = unsignedResInfo.data.unsignedTx;
     let unsignedTx = {
         tx_json: txJson,
@@ -82,9 +82,8 @@ async function postBuyOrderReq(BUYORDER = null) {
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
 
-    let signedRes = await httpUtils.post(util.format('http://%s:9001/transaction/signedBuy', ip), {blob: blob});
+    let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/signedBuy', ip), {blob: blob});
     if(debugMode) {
-        let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
         console.log('signed buy order:', resInfo);
     }
 

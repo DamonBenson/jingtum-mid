@@ -51,15 +51,6 @@ async function postSellOrderReq(SELLORDER = null) {
 
     for(let i = 0; i < sellOrderAmount; i++) {
 
-        let addrFilter = {// 为什么只有买方
-            address: sellerAddr,
-        };
-        let sql = sqlText.table('work_info').field('work_id').where(addrFilter).order('RAND()').limit(2).select();
-        let workInfoArr = await mysqlUtils.sql(c, sql);
-        let workIds = workInfoArr.map(workInfo => {
-            return workInfo.work_id;
-        });
-
         // let sql = sqlText.table('work_info').field('work_id,addr').order('RAND()').limit(localUtils.randomNumber(1,5)).select();
         // let workInfoArr = await mysqlUtils.sql(c, sql);
         // let workIds = [];
@@ -78,12 +69,12 @@ async function postSellOrderReq(SELLORDER = null) {
         // 无参时：构造
         else{
             if (outband == true){
-                sellOrder = OrderGenerate.generateSellOrderOutBand(workIds, sellerAddr);
+                sellOrder = await OrderGenerate.generateSellOrderOutBand();
     
                 console.log("generateSellOrderOutBand");
             }
             else{
-                sellOrder = OrderGenerate.generateSellOrder(workIds, sellerAddr);
+                sellOrder = await OrderGenerate.generateSellOrder();
     
                 console.log("generateSellOrder");
             }
@@ -95,8 +86,7 @@ async function postSellOrderReq(SELLORDER = null) {
             // console.log('sellOrder:', sellOrder.sellOrderId);
         }
         
-        let unsignedRes = await httpUtils.post(util.format('http://%s:9001/transaction/sell', ip), sellOrder);
-        let unsignedResInfo = JSON.parse(Buffer.from(unsignedRes.body._readableState.buffer.head.data).toString());
+        let unsignedResInfo = await httpUtils.post(util.format('http://%s:9001/transaction/sell', ip), sellOrder);
         console.log(unsignedResInfo);
         let txJson = unsignedResInfo.data.unsignedTx;
         let unsignedTx = {
@@ -107,8 +97,7 @@ async function postSellOrderReq(SELLORDER = null) {
         jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         let blob = unsignedTx.tx_json.blob;
         
-        let signedTxRes = await httpUtils.post(util.format('http://%s:9001/transaction/signedSell', ip), {blob: blob});
-        let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
+        let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/signedSell', ip), {blob: blob});
         console.log('res:', resInfo);
 
     }

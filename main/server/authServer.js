@@ -41,9 +41,7 @@ async function postAuthenticateReq(msg) {
         console.log(authenticateMsg);
     }
 
-    let contructRes = await httpUtils.post('http://127.0.0.1:9001/auth/copyright', authenticateMsg);
-    let buf = Buffer.from(contructRes.body._readableState.buffer.head.data);
-    let txJson = JSON.parse(buf.toString());
+    let txJson = await httpUtils.post('http://127.0.0.1:9001/auth/copyright', authenticateMsg);
     let unsignedTx = {
         tx_json: txJson,
     };
@@ -54,7 +52,7 @@ async function postAuthenticateReq(msg) {
     let submitRes = await httpUtils.post('http://127.0.0.1:9001/auth/signedCopyright', blob);
 
     if(debugMode) {
-        console.log(JSON.parse(Buffer.from(submitRes.body._readableState.buffer.head.data).toString()));
+        console.log(submitRes);
     }
 
     console.timeEnd('postAuthenticateReq');

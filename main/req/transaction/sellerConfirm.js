@@ -44,9 +44,7 @@ async function postSellerConfirmReq(msg) {
         buyOrderInfo: buyOrderInfo,
     }
 
-    let sellerConfirmRes = await httpUtils.post('http://127.0.0.1:9001/transaction/sellerApproveConfirm', confirmMsg);
-    let buf = Buffer.from(sellerConfirmRes.body._readableState.buffer.head.data);
-    let txJson = JSON.parse(buf.toString());
+    let txJson = await httpUtils.post('http://127.0.0.1:9001/transaction/sellerApproveConfirm', confirmMsg);
     let unsignedTx = {
         tx_json: txJson,
     };

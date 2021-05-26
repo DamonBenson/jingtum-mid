@@ -53,8 +53,7 @@ async function postBuyOrderReq() {
     let [buyOrder,classErrorNum,ErrorNum] = generateBuyOrder_Invalid();
 
     try{
-        let unsignedRes = await httpUtils.post(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
-        let unsignedResInfo = JSON.parse(Buffer.from(unsignedRes.body._readableState.buffer.head.data).toString());
+        let unsignedResInfo = await httpUtils.post(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
         let txJson = unsignedResInfo.data.tx_json;
         let unsignedTx = {
             tx_json: txJson,
@@ -70,9 +69,8 @@ async function postBuyOrderReq() {
         jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         let blob = unsignedTx.tx_json.blob;
 
-        let signedRes = await httpUtils.post(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+        let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
         if(debugMode&&!IsError) {
-            let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
             console.log('signed buy order:', resInfo);
         }
     }

@@ -24,13 +24,11 @@ async function input() {
             rl.question('输入url: ', async(url) => {
                 switch(method) {
                     case 'get':
-                        let getRes = await httpUtils.get('http://127.0.0.1:9001' + url, body);
-                        let getResInfo = JSON.parse(Buffer.from(getRes.body._readableState.buffer.head.data).toString());
+                        let getResInfo = await httpUtils.get('http://127.0.0.1:9001' + url, body);
                         console.log('resInfo:', getResInfo);
                         break;
                     case 'post':
-                        let postRes = await httpUtils.post('http://127.0.0.1:9001' + url, body);
-                        let postResInfo = JSON.parse(Buffer.from(postRes.body._readableState.buffer.head.data).toString());
+                        let postResInfo = await httpUtils.post('http://127.0.0.1:9001' + url, body);
                         console.log('resInfo:', postResInfo);
                         break;
                     default:

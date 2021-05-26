@@ -52,10 +52,7 @@ async function postBuyerConfirmReq(msg) {
         buyOrderInfo: buyOrderInfo,
     }
     //  提交买单确认信息
-    let buyerConfirmRes = await httpUtils.post('http://127.0.0.1:9001/transaction/buyerConfirm', confirmMsg);
-    //  解析出买单签名
-    let buf = Buffer.from(buyerConfirmRes.body._readableState.buffer.head.data);
-    let txsJson = JSON.parse(buf.toString());
+    let txsJson = await httpUtils.post('http://127.0.0.1:9001/transaction/buyerConfirm', confirmMsg);
     let signedTxPromises = txsJson.map(txJson => {
         let unsignedTx = {
             tx_json: txJson,
