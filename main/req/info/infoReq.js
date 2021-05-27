@@ -9,8 +9,8 @@ import {mysqlConf, debugMode} from '../../../utils/info.js';
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 
-const queryMode = 'copyright';
-const queryAmount = 2;
+const queryMode = 'approve';
+const queryAmount = 1;
 
 switch(queryMode) {
 
@@ -61,7 +61,7 @@ switch(queryMode) {
 
         let approveResInfo = await httpUtils.get('http://127.0.0.1:9001/info/approve', {approveIds: approveIds});
         if(debugMode) {
-            console.log('approvesInfo:', approveResInfo.data.approvesInfo);
+            console.log('approvesInfo:', approveResInfo.data.approveInfoList);
         }
         break;
 

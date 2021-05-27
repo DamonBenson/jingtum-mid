@@ -90,7 +90,7 @@ export function get(hash) {
         });
 
         req.write('');
-        req.end();        
+        req.end();
 
     });
     

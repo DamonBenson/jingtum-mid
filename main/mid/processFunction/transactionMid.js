@@ -845,7 +845,7 @@ export async function handleApproveConfirm(tokenRemote, seqObj, req) {
 
             approveResult.approveIds.push(approveId);
 
-            return erc721.buildPubRefTokenTx(tokenRemote, authorizeAddr, authorizeSecr, seqObj.authorize.token++, buyerAddr, tokenName.approve, approveId, tokenInfos, copyrightId, sellerAddr, sellerSecr, true);
+            return erc721.buildPubRefTokenTx(tokenRemote, authorizeAddr, authorizeSecr, seqObj.authorize.token++, buyerAddr, tokenName.approve, approveId, tokenInfos, copyrightId, sellerAddr, sellerSecr, false);
 
         });
 

@@ -1,7 +1,5 @@
 import Joi from 'joi';
 
-import {idCustom} from './base.js';
-
 /*----------数据常量----------*/
 
 const minQueryAmount = 1;
@@ -24,7 +22,9 @@ export const activateReqSchema = Joi.object().keys({
  */
 export const workQueryReqSchema = Joi.object().keys({
     workIds:
-        idCustom.id().hash().required(),
+        Joi.array().min(minQueryAmount).max(maxQueryAmount).items(
+            Joi.string().hex().length(64),
+        ).required(),
 })
 
 /**
@@ -33,7 +33,9 @@ export const workQueryReqSchema = Joi.object().keys({
  */
 export const copyrightQueryReqSchema = Joi.object().keys({
     copyrightIds:
-        idCustom.id().hash().required(),
+        Joi.array().min(minQueryAmount).max(maxQueryAmount).items(
+            Joi.string().hex().length(64),
+        ).required(),
 })
 
 /**
@@ -42,5 +44,7 @@ export const copyrightQueryReqSchema = Joi.object().keys({
  */
  export const approveQueryReqSchema = Joi.object().keys({
     approveIds:
-        idCustom.id().hash().required(),
+        Joi.array().min(minQueryAmount).max(maxQueryAmount).items(
+            Joi.string().hex().length(64),
+        ).required(),
 })
