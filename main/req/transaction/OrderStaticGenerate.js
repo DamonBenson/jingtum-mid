@@ -4,7 +4,7 @@ import sha256 from 'crypto-js/sha256.js';
 
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as localUtils from '../../../utils/localUtils.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 import util from 'util';
 import * as OrderGenerate from './OrderGenerate.js';
 import mysql from 'mysql';
@@ -252,8 +252,7 @@ async function postBuyOrderReq(BUYORDER = null) {
         console.log('buyOrder:', buyOrder);
     }
 
-    let unsignedRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
-    let unsignedResInfo = JSON.parse(Buffer.from(unsignedRes.body._readableState.buffer.head.data).toString());
+    let unsignedResInfo = await httpUtils.post(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
     let txJson = unsignedResInfo.data.tx_json;
     let unsignedTx = {
         tx_json: txJson,
@@ -266,9 +265,8 @@ async function postBuyOrderReq(BUYORDER = null) {
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
 
-    let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+    let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
     if(debugMode) {
-        let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
         console.log('signed buy order:', resInfo);
     }
 
@@ -315,9 +313,8 @@ async function postSellOrderReq(SELLORDER = null) {
             console.log('sellOrder:', sellOrder.sellOrderId);
         }
         
-        let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
+        let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
         if(debugMode) {
-            let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
             console.log('signed buy order:', resInfo);
         }
 

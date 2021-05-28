@@ -169,7 +169,7 @@ export async function handleAuthState(contractRemote, seqObj, req) {
                 licenseUrl: licenseUrl,
             }
             Object.assign(authenticationInfoList[index], authInfo);
-            return (erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authInfo, true));
+            return (erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authInfo, false));
         }
         return null;
     });
@@ -179,7 +179,7 @@ export async function handleAuthState(contractRemote, seqObj, req) {
     let txInfoPromises = authenticateResArr.map(authenticateRes => {
         if(authenticateRes) {
             let txHash = authenticateRes.tx_json.hash;
-            return requestInfo.requestTx(tokenRemote, txHash, true);
+            return requestInfo.requestTx(tokenRemote, txHash, false);
         }
         return null;
     });
@@ -188,7 +188,6 @@ export async function handleAuthState(contractRemote, seqObj, req) {
 
     txInfoResArr.forEach((txInfoRes, index) => {
         if(txInfoRes) {
-            console.log(txInfoRes);
             authenticationInfoList[index].timestamp = txInfoRes.Timestamp + 946684800;
         }
     });

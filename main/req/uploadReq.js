@@ -1,5 +1,5 @@
 import * as localUtils from '../../utils/localUtils.js';
-import * as fetch from '../../utils/fetch.js';
+import * as httpUtils from '../../utils/httpUtils.js';
 import sha256 from 'crypto-js/sha256.js';
 import util from 'util';
 
@@ -63,7 +63,7 @@ async function postUploadReq() {
         //work_id: '7EEC480EEA01B81365B24362318698E1FA372F902E9B77531202E4E8A3852A12',       
         //upload_time: 1608517640
     } */
-    await fetch.postData(util.format('http://%s:9001/upload/init', MidIP), uploadReq);
+    await httpUtils.post(util.format('http://%s:9001/upload/init', MidIP), uploadReq);
 
     // 结束计时
     console.timeEnd('uploadReq');

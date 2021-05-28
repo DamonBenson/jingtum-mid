@@ -1,19 +1,26 @@
 import sha256 from 'crypto-js/sha256.js';
+import mysql from 'mysql';
+import sqlText from 'node-transform-mysql';
+
 import * as localUtils from '../../../utils/localUtils.js';
-import {userAccount, userAccountIndex, buyOrderContractAddrs,sellOrderContractAddrs} from '../../../utils/info.js';
-const sellPlatformAddr = userAccount[userAccountIndex['卖方平台账号']].address; // 平台账号
-const sellPlatformAddrOutBand = userAccount[userAccountIndex['卖方平台2']].address; // 平台账号
+import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 
-const buyPlatformAddr = userAccount[userAccountIndex['买方平台账号']].address; // 平台账号
-const buyPlatformAddrOutBand = userAccount[userAccountIndex['买方平台2']].address; // 平台账号
+import {userAccount, contractAddr} from '../../../utils/config/jingtum.js';
+import {mysqlConf} from '../../../utils/config/mysql.js';
 
-const buyerAddr = [ userAccount[userAccountIndex['用户1']].address,
-                    userAccount[userAccountIndex['用户2']].address,
-                    userAccount[userAccountIndex['用户3']].address,
-                    userAccount[userAccountIndex['用户4']].address,
-                    userAccount[userAccountIndex['用户5']].address,
-                    userAccount[userAccountIndex['用户6']].address,];
+const sellPlatformAddr = userAccount.platformAccount[0].address;
+const sellPlatformAddrOutBand = userAccount.platformAccount[1].address;
 
+const buyPlatformAddr = userAccount.platformAccount[0].address;
+const buyPlatformAddrOutBand = userAccount.platformAccount[1].address;
+
+const buyerAddr = userAccount.normalAccount.map(acc => acc.address);
+
+const buyOrderContractAddrs = contractAddr.buyOrder;
+const sellOrderContractAddrs = contractAddr.sellOrder;
+
+const c = mysql.createConnection(mysqlConf);
+c.connect(); // mysql连接
 
 global.salt = 1 + localUtils.randomNumber(1, 9999); 
 //*****************************************************************************************************//
@@ -37,9 +44,9 @@ export function generateBuyOrderOutBand() {
         tradeStrategy: tradeStrategy,
         authorizationInfo: authorizationInfo,
         side: side,
-        buyerAddr: buyerAddr[localUtils.randomNumber(0,5)],//6个用户
+        buyerAddr: buyerAddr[localUtils.randomNumber(0,9)],//10个用户
         contact: 'phoneNumber', // 联系方式
-        platformAddr: buyPlatformAddr, // 买方平台2
+        platformAddr: buyPlatformAddrOutBand, // 买方平台2
         contractAddr: buyOrderContractAddrs[0],  // 买方平台2 跨平台买单挂在买方合约上
     };
     buyOrder.buyOrderId = sha256(seq.toString() + salt.toString()).toString();
@@ -63,10 +70,10 @@ export function generateBuyOrder() {
         tradeStrategy: tradeStrategy,
         authorizationInfo: authorizationInfo,
         side: side,
-        buyerAddr: buyerAddr[localUtils.randomNumber(0,5)],//6个用户
+        buyerAddr: buyerAddr[localUtils.randomNumber(0,9)],//10个用户
         contact: 'phoneNumber', // 联系方式
-        platformAddr: buyPlatformAddrOutBand,
-        contractAddr: "未部署的外部合约地址",//buyOrderContractAddrs[0], 
+        platformAddr: buyPlatformAddr,
+        contractAddr: contractAddr.buyOrder[0],
     };
     buyOrder.buyOrderId = sha256(seq.toString() + salt.toString()).toString();
     salt = salt + 1;
@@ -253,7 +260,16 @@ export function generateAuthorizationInfo(authorizationType) {
 //
 //*****************************************************************************************************//
 // Eg:生成京东平台挂京东公开卖单
-export function generateSellOrder(wrokIds, sellerAddr) {
+export async function generateSellOrder() {
+
+    let sql1 = sqlText.table('work_info').field('address').group('address').having('count(address)>1').order('RAND()').limit(1).select();
+    let sellerAddr = (await mysqlUtils.sql(c, sql1))[0].address;
+    let sql2 = sqlText.table('work_info').field('work_id').where({address: sellerAddr}).order('RAND()').limit(2).select();
+    let workInfoArr = await mysqlUtils.sql(c, sql2);
+    let workIds = workInfoArr.map(workInfo => {
+        return workInfo.work_id;
+    });
+
     let labelSet = generateLabelSet();
     let basePrice = localUtils.randomNumber(100, 1000);
     // basePrice = 0;
@@ -265,7 +281,7 @@ export function generateSellOrder(wrokIds, sellerAddr) {
         expectedPrice: expectedPrice,
         sellerAddr: sellerAddr,
         contact: 'phoneNumber', // 联系方式
-        assetId: wrokIds,// TODO 缺乏workID
+        assetId: workIds,// TODO 缺乏workID
         assetType: 0,
         consumable: false,
         expireTime: 86400,
@@ -278,7 +294,16 @@ export function generateSellOrder(wrokIds, sellerAddr) {
     return sellOrder;
 
 }
-export function generateSellOrderOutBand(wrokIds, sellerAddr) {
+export async function generateSellOrderOutBand() {
+
+    let sql1 = sqlText.table('work_info').field('address').group('address').having('count(address)>1').order('RAND()').limit(1).select();
+    let sellerAddr = (await mysqlUtils.sql(c, sql1))[0].address;
+    let sql2 = sqlText.table('work_info').field('work_id').where({address: sellerAddr}).order('RAND()').limit(2).select();
+    let workInfoArr = await mysqlUtils.sql(c, sql2);
+    let workIds = workInfoArr.map(workInfo => {
+        return workInfo.work_id;
+    });
+
     let labelSet = generateLabelSet();
     let basePrice = localUtils.randomNumber(100, 1000);
     // basePrice = 0;
@@ -290,7 +315,7 @@ export function generateSellOrderOutBand(wrokIds, sellerAddr) {
         expectedPrice: expectedPrice,
         sellerAddr: sellerAddr,
         contact: 'phoneNumber', // 联系方式
-        assetId: wrokIds,
+        assetId: workIds,
         assetType: 0,
         consumable: false,
         expireTime: 86400,

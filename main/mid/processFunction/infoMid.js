@@ -107,7 +107,7 @@ export async function handleWorkInfo(req) {
         return resInfo;
     }
 
-    let workIds = body.workIds.split(',');
+    let workIds = body.workIds;
     console.log(workIds);
     let sqlPromises = workIds.map(async workId => {
         let filter = {
@@ -159,7 +159,7 @@ export async function handleCopyrightInfo(req) {
         return resInfo;
     }
 
-    let copyrightIds = body.copyrightIds.split(',');
+    let copyrightIds = body.copyrightIds;
     let rightTokenSqlPromises = copyrightIds.map(async copyrightId => {
         let filter = {
             copyright_id: copyrightId,
@@ -223,10 +223,10 @@ export async function handleApproveInfo(req) {
         return resInfo;
     }
 
-    let approveIds = body.approveIds.split(',');
+    let approveIds = body.approveIds;
     let sqlPromises = approveIds.map(async approveId => {
         let filter = {
-            appr_token_id: approveId,
+            approve_id: approveId,
         }
         let sql = sqlText.table('appr_token_info').where(filter).select();
         return mysqlUtils.sql(c, sql);

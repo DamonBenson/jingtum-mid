@@ -19,8 +19,10 @@ export function buildSignedTx(remote, blob, showRes) {
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildSignTx:', result);
-                    console.log('buildSignTx:', result.engine_result + "_" + result.tx_json.Sequence);
+                    console.log('buildSignedTx:', result);
+                }
+                else {
+                    console.log('buildSignedTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
@@ -68,7 +70,9 @@ export function buildSignedTx(remote, blob, showRes) {
             }
             else if(result){
                 if(showRes) {
-                    // console.log('buildPaymentTx:', result);
+                    console.log('buildPaymentTx:', result);
+                }
+                else {
                     console.log('buildPaymentTx:', result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);

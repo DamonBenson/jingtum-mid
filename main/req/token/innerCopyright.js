@@ -2,7 +2,7 @@ import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 
 import {mysqlConf, debugMode} from '../../../utils/info.js';
 
@@ -20,8 +20,7 @@ if(debugMode) {
     console.log('copyrightIds', copyrightIds);
 }
 
-let rightRes = await fetch.postData('http://127.0.0.1:9001/auth/innerCopyright', {copyrightIds: copyrightIds});
+let rightResInfo = await httpUtils.post('http://127.0.0.1:9001/auth/innerCopyright', {copyrightIds: copyrightIds});
 if(debugMode) {
-    let rightResInfo = JSON.parse(Buffer.from(rightRes.body._readableState.buffer.head.data).toString());
     console.log('rightsInfo:', rightResInfo.data.authenticationInfoList);
 }

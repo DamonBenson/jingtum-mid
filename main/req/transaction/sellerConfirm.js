@@ -1,7 +1,7 @@
 import jlib from 'jingtum-lib';
 
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 import {getConsumer} from '../../../utils/kafkaUtils/getConsumer.js';
 
 import {chains, userAccount, sellOrderContractAddrs, debugMode} from '../../../utils/info.js';
@@ -44,9 +44,7 @@ async function postSellerConfirmReq(msg) {
         buyOrderInfo: buyOrderInfo,
     }
 
-    let sellerConfirmRes = await fetch.postData('http://127.0.0.1:9001/transaction/sellerApproveConfirm', confirmMsg);
-    let buf = Buffer.from(sellerConfirmRes.body._readableState.buffer.head.data);
-    let txJson = JSON.parse(buf.toString());
+    let txJson = await httpUtils.post('http://127.0.0.1:9001/transaction/sellerApproveConfirm', confirmMsg);
     let unsignedTx = {
         tx_json: txJson,
     };
@@ -54,7 +52,7 @@ async function postSellerConfirmReq(msg) {
     jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
-    await fetch.postData('http://127.0.0.1:9001/transaction/signedSellerApproveConfirm', blob);
+    await httpUtils.post('http://127.0.0.1:9001/transaction/signedSellerApproveConfirm', blob);
 
     console.timeEnd('sellerConfirmReq');
     console.log('--------------------');

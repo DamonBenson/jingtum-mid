@@ -75,10 +75,8 @@ export async function postBuyerConfirmReq(msg) {
         buyOrderInfo: buyOrderInfo,
     }
     //  提交买单确认信息
-    let buyerConfirmRes = await fetch.postData('http://127.0.0.1:9001/transaction/buyerConfirm', confirmMsg);
+    let txsJson = await httpUtils.post('http://127.0.0.1:9001/transaction/buyerConfirm', confirmMsg);
     //  解析出买单签名
-    let buf = Buffer.from(buyerConfirmRes.body._readableState.buffer.head.data);
-    let txsJson = JSON.parse(buf.toString());
     let signedTxPromises = txsJson.map(txJson => {
         let unsignedTx = {
             tx_json: txJson,
@@ -87,7 +85,7 @@ export async function postBuyerConfirmReq(msg) {
         jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
         jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         let blob = unsignedTx.tx_json.blob;
-        return fetch.postData('http://127.0.0.1:9001/transaction/signedBuyerConfirm/sellOrder', blob);
+        return httpUtils.post('http://127.0.0.1:9001/transaction/signedBuyerConfirm/sellOrder', blob);
     })
     //  提交买单签名
     await Promise.all(signedTxPromises);

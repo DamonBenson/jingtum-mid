@@ -3,29 +3,24 @@ import sha256 from 'crypto-js/sha256.js';
 
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as localUtils from '../../../utils/localUtils.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 import util from 'util';
 import * as OrderGenerate from './OrderGenerate.js';
 
+import {userAccount, chains} from '../../../utils/config/jingtum.js';
+import {debugMode} from '../../../utils/config/project.js';
 
-import {chains, userAccount, userAccountIndex, buyOrderContractAddrs, debugMode} from '../../../utils/info.js';
-const MidIP = '39.102.93.47';// 中间层服务器IP
-// const MidIP = 'localhost';// 本地IP
+const ip = 'localhost';
 const msPerBuyOrder = 5000;
 // const subBuyOrderListAmount = 3; 随机个数
-const platformAddr = userAccount[userAccountIndex['买方平台账号']].address; // 平台账号
-const platformSecret = userAccount[userAccountIndex['买方平台账号']].secret;
-const buyerAddr = [ userAccount[userAccountIndex['用户1']].address,
-                    userAccount[userAccountIndex['用户2']].address,
-                    userAccount[userAccountIndex['用户3']].address,
-                    userAccount[userAccountIndex['用户4']].address,
-                    userAccount[userAccountIndex['用户5']].address,
-                    userAccount[userAccountIndex['用户6']].address,];
+const platformAddr = userAccount.platformAccount[0].address; // 平台账号
+const platformSecret = userAccount.platformAccount[0].secret;
+const buyerAddr = userAccount.normalAccount.map(acc => acc.address);
 
 
 // setInterval(postBuyOrderReq, msPerBuyOrder);
 
-const contractChain = chains[1];
+const contractChain = chains[2];
 const Remote = jlib.Remote;
 const contractRemote = new Remote({server: contractChain.server[0], local_sign: true});
 const outband = false;
@@ -33,7 +28,7 @@ const outband = false;
 contractRemote.connect(async function(err, res) {
 
     if(err) {
-        return console.log('err: ', err);
+        return console.log('connect err: ', err);
     }
     else if(res) {
         console.log('connect: ', res);
@@ -52,17 +47,17 @@ async function postBuyOrderReq(BUYORDER = null) {
     console.time('buyOrderReq');
     
     let buyOrder = null;
-    if(BUYORDER != null){
+    if(BUYORDER != null) {
         buyOrder = BUYORDER;
     }
     // 无参时：构造
-    else{
+    else {
         if(outband == true){
             buyOrder = OrderGenerate.generateBuyOrderOutBand();
 
             console.log('generateBuyOrderOutBand');
         }
-        else{
+        else {
             buyOrder = OrderGenerate.generateBuyOrder();
             
             console.log('generateBuyOrder');
@@ -73,23 +68,22 @@ async function postBuyOrderReq(BUYORDER = null) {
         console.log('buyOrder:', buyOrder);
     }
 
-    let unsignedRes = await fetch.postData(util.format('http://%s:9001/transaction/buy', MidIP), buyOrder);
-    let unsignedResInfo = JSON.parse(Buffer.from(unsignedRes.body._readableState.buffer.head.data).toString());
-    let txJson = unsignedResInfo.data.tx_json;
+    let unsignedResInfo = await httpUtils.post(util.format('http://%s:9001/transaction/buy', ip), buyOrder);
+    console.log(unsignedResInfo);
+    let txJson = unsignedResInfo.data.unsignedTx;
     let unsignedTx = {
         tx_json: txJson,
     };
     if(debugMode) {
-        console.log('unsigned buy order:', unsignedResInfo);
+        console.log('unsigned buy order:', unsignedResInfo.data.unsignedTx);
     }
     jlib.Transaction.prototype.setSequence.call(unsignedTx, seq++);
     jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
     jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
     let blob = unsignedTx.tx_json.blob;
 
-    let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/signedBuy', MidIP), blob);
+    let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/signedBuy', ip), {blob: blob});
     if(debugMode) {
-        let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
         console.log('signed buy order:', resInfo);
     }
 

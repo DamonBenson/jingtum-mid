@@ -6,7 +6,7 @@ import util from 'util';
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as localUtils from '../../../utils/localUtils.js';
-import * as fetch from '../../../utils/fetch.js';
+import * as httpUtils from '../../../utils/httpUtils.js';
 
 import {chains, userAccount, userAccountIndex, mysqlConf, sellOrderContractAddrs, debugMode, availableSellAddr} from '../../../utils/info.js';
 
@@ -60,11 +60,10 @@ async function postSellOrderReq() {
 
         let [sellOrder,classErrorNum,ErrorNum] = generateSellOrder_Invalid(workIds, sellerAddr); 
 
-        let signedRes = await fetch.postData(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
+        let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/sell', MidIP), sellOrder);
         if(debugMode) {
-            console.log('Buffer:', Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
+            console.log('Buffer:', resInfo);
 
-            let resInfo = JSON.parse(Buffer.from(signedRes.body._readableState.buffer.head.data).toString());
             // console.log('signed buy order:', resInfo);
             if(resInfo.code == 1){
                 IsError = true;
@@ -80,19 +79,15 @@ async function postSellOrderReq() {
             console.log("ExceptionRemind");
         }
         
-        // let buf = Buffer.from(sellOrderRes.body._readableState.buffer.head.data);
-        // // if(debugMode) console.log('buf.toString():', buf.toString());
-        // let txJson = JSON.parse(buf.toString());
         // let unsignedTx = {
-        //     tx_json: txJson,
+        //     tx_json: resInfo,
         // };
         // jlib.Transaction.prototype.setSequence.call(unsignedTx, seq++);
         // jlib.Transaction.prototype.setSecret.call(unsignedTx, platformSecret);
         // jlib.Transaction.prototype.sign.call(unsignedTx, () => {});
         // let blob = unsignedTx.tx_json.blob;
         
-        // let signedTxRes = await fetch.postData(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
-        // let resInfo = JSON.parse(Buffer.from(signedTxRes.body._readableState.buffer.head.data).toString());
+        // let resInfo = await httpUtils.post(util.format('http://%s:9001/transaction/signedSell', MidIP), blob);
         // console.log('res:', resInfo);
 
     }
