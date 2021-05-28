@@ -6,6 +6,12 @@ import mysql from 'mysql';
 
 import {mysqlConf} from '../../utils/info.js';
 export const c = mysql.createConnection(mysqlConf);
+await c.connect();
+const reconnectInterval = 60*60000;//1h
+setInterval(async function() {
+    c.end();
+    await c.connect();
+}, reconnectInterval);
 
 /*----------信息查询请求路由配置----------*/
 async function UseMysql(req, res, handle) {
@@ -41,41 +47,41 @@ const listenRouter = express.Router({
     caseSensitive: false,// 不区分大小写
 });
 authRouter.get('/authRightRate', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleAuthRightRate);
+    await NoUseMysql(req, res, authDisplayGroup.handleAuthRightRate);
 });
 // localhost:9002/backend/authRightRate
 authRouter.get('/authByCompany', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleAuthByCompany);
+    await NoUseMysql(req, res, authDisplayGroup.handleAuthByCompany);
 });
 // localhost:9002/backend/authByCompany
 
 authRouter.get('/certificateAmountEXchange', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleCertificateAmountEXchange);
+    await NoUseMysql(req, res, authDisplayGroup.handleCertificateAmountEXchange);
 });
 // localhost:9002/backend/certificateAmountEXchange
 
 authRouter.get('/certificateAmountGroupByWorkType', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleCertificateAmountGroupByWorkType);
+    await NoUseMysql(req, res, authDisplayGroup.handleCertificateAmountGroupByWorkType);
 });
 // localhost:9002/backend/certificateAmountGroupByWorkType
 
 authRouter.get('/certificateAmountGroupByWorkTypeEXchange', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleCertificateAmountGroupByWorkTypeEXchange);
+    await NoUseMysql(req, res, authDisplayGroup.handleCertificateAmountGroupByWorkTypeEXchange);
 });
 // localhost:9002/backend/certificateAmountGroupByWorkTypeEXchange
 
 authRouter.get('/copyRightAmountEXchange', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleCopyRightAmountEXchange);
+    await NoUseMysql(req, res, authDisplayGroup.handleCopyRightAmountEXchange);
 });
 // localhost:9002/backend/copyRightAmountEXchange
 
 authRouter.get('/copyRightAmountGroupByIDtype', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleCopyRightAmountGroupByIDtype);
+    await NoUseMysql(req, res, authDisplayGroup.handleCopyRightAmountGroupByIDtype);
 });
 // localhost:9002/backend/copyRightAmountGroupByIDtype
 
 authRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, res) {
-    await UseMysql(req, res, authDisplayGroup.handleCopyRightAmountGroupByCopyrightType);
+    await NoUseMysql(req, res, authDisplayGroup.handleCopyRightAmountGroupByCopyrightType);
 });
 // localhost:9002/backend/copyRightAmountGroupByCopyrightType
 
