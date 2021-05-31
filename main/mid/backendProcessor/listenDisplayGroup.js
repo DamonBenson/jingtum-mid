@@ -9,6 +9,7 @@ import sqlText from 'node-transform-mysql';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
+import {selectGroupBy} from "./SelectUtil.js";
 
 import util from 'util';
 
@@ -365,7 +366,7 @@ async function getTortCountGroupByTortSiteEXchange() {
  * @param req: 请求
  * @param res: 返回
  * @return: null
- * @author: Bernard
+ * @author: Bernard1
  * @date: 2021/5/25 17:31
  * @description:截止当前，前N个侵权站点发现的侵权数量在不同作品类型下的分布。
  */
@@ -381,6 +382,7 @@ async function getTortGroupByTortSiteGroupByWorkType() {
     let TortCountGroupByWorkType = [];
     let WorkTypeInfo = {};
     if(CONNECT == true){
+        selectGroupBy("tort_info","WorkType",6)
         console.log("CONNECT =",CONNECT);
     }
     else{

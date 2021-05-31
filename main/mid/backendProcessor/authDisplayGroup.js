@@ -15,6 +15,7 @@ import util from 'util';
 import mysql from 'mysql';
 import {c} from "../MidBackend.js";
 import {debugMode, WORKTYPE, CREATIONTYPE} from '../../../utils/info.js';
+import {selectGroupBy} from "./SelectUtil.js";
 const CONNECT = true;// When false, Send Random Response
 
 //*****************************************************************************************************//
@@ -102,42 +103,19 @@ async function getCertificateAmountGroupByWorkType() {
     let WorkTypeInfo = {};
 
     if(CONNECT == true){
-        let sqlRight =util.format(
-            'SELECT\n' +
-            '\t*\n' +
-            'FROM\n' +
-            '\t(\n' +
-            '\t\tSELECT\n' +
-            '\t\t\twork_info.work_type, \n' +
-            '\t\t\tCOUNT(work_info.work_id) AS num\n' +
-            '\t\tFROM\n' +
-            '\t\t\twork_info\n' +
-            '\t\tGROUP BY\n' +
-            '\t\t\twork_info.work_type\n' +
-            '\t) AS Type\n' +
-            'ORDER BY\n' +
-            '\tnum DESC\n' +
-            'LIMIT 3');
-        console.log("sqlRight:",sqlRight);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
-        console.log("sqlRes:",sqlRes);
-        let Res = {};
-        sqlRes.forEach(value =>
-            Res[WORKTYPE[value['work_type']]] = value['num']
-        );
+        let Res = await selectGroupBy("work_info", "work_type");
         console.log("Res:",Res);
         let keys = Object.keys(Res);
         console.log("keys:",keys);
         for (let i = 0, n = keys.length, key; i < n; ++i) {
             key = keys[i];
             WorkTypeInfo = {
-                "workType":key,
+                "workType":WORKTYPE[key],
                 "CertificateAmount":Res[key]
             };
             CertificateAmountGroupByWorkType.push(WorkTypeInfo);
         }
         console.log("CertificateAmountGroupByWorkType:",CertificateAmountGroupByWorkType);
-
     }
     else{
         WorkTypeInfo = {
@@ -156,6 +134,8 @@ async function getCertificateAmountGroupByWorkType() {
         };
         CertificateAmountGroupByWorkType.push(WorkTypeInfo);
     }
+
+
     return CertificateAmountGroupByWorkType;
 }
 // 3）	不同作品类型的存证数量随时间的变化。workType

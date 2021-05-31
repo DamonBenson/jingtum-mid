@@ -71,7 +71,7 @@ export function LearnAboutDateUtil(){
 export function getPastDay(Day = null){
     let now = new moment(); //当前日期
     if( Day == null ){
-        let offset = localUtils.randomNumber(1,60*60*24*30*12);
+        let offset = localUtils.randomNumber(1,60*60*24*30*12);//一年前
         now.subtract(offset, 'seconds');
     }
     else{
