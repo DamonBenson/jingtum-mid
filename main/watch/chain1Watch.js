@@ -16,6 +16,8 @@ const u = jlib.utils;
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
+setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+
 const tokenChain = chains[1]; // 交易链
 
 const flagAddrs = userAccount.superviseAccount.map(acc => acc.address);

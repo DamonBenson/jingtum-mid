@@ -113,6 +113,24 @@ uploadRemote.connect(async function(err, res) {
                 res.send(resInfo);
             });
 
+            // 用户的所有作品信息查询
+            infoRouter.get('/user/work', async function(req, res) {
+                let resInfo = await infoMid.handleWorkInfoOfUser(req);
+                res.send(resInfo);
+            });
+
+            // 用户作品的许可发放信息查询
+            infoRouter.get('/user/work/issueApprove', async function(req, res) {
+                let resInfo = await infoMid.handleIssueApproveInfoOfWork(req);
+                res.send(resInfo);
+            });
+
+            // 用户作品的许可获得信息查询
+            infoRouter.get('/user/work/ownApprove', async function(req, res) {
+                let resInfo = await infoMid.handleOwnApproveInfoOfWork(req);
+                res.send(resInfo);
+            });
+
             /**
              * @description 确权相关请求路由。
              */
@@ -147,10 +165,16 @@ uploadRemote.connect(async function(err, res) {
             // });
 
             // 内部版权确权请求
-            authRouter.post('/innerCopyright', async function(req, res) {
-                let resInfo = await authMid.handleInnerCopyrightAuth(tokenRemote, seqObj, req);
+            authRouter.post('/innerWork', async function(req, res) {
+                let resInfo = await authMid.handleInnerWorkAuth(tokenRemote, seqObj, req);
                 res.send(resInfo);
             });
+
+            // // 内部版权确权请求
+            // authRouter.post('/innerCopyright', async function(req, res) {
+            //     let resInfo = await authMid.handleInnerCopyrightAuth(tokenRemote, seqObj, req);
+            //     res.send(resInfo);
+            // });
 
             /**
              * @description 交易相关请求路由。
@@ -169,7 +193,7 @@ uploadRemote.connect(async function(err, res) {
             });
 
             // 买单接受
-            transactionRouter.post('/buyAccept', async function(req, res) { // 智能交易系统签名由中间层模拟，暂时不需要
+            transactionRouter.post('/buyAccept', async function(req, res) { // 智能交易系统签名由中间层模拟
                 let unsignedTx = await transactionMid.handleBuyOrderAccept(contractRemote, seqObj, req);
                 res.send(unsignedTx);
             });
@@ -180,13 +204,13 @@ uploadRemote.connect(async function(err, res) {
                 res.send(unsignedTx);
             });
 
-            transactionRouter.post('/signedSell', async function(req, res) { // 京东平台签名由中间层模拟，暂时不需要
+            transactionRouter.post('/signedSell', async function(req, res) {
                 let resInfo = await transactionMid.handleSignedSellOrder(contractRemote, seqObj, req, res);
                 res.send(resInfo);
             });
 
             // 提交撮合结果
-            transactionRouter.post('/match', async function(req, res) {
+            transactionRouter.post('/match', async function(req, res) { // 智能交易系统签名由中间层模拟
                 let unsignedTx = await transactionMid.handleMatch(contractRemote, seqObj, req, res);
                 res.send(unsignedTx);
             });

@@ -15,6 +15,8 @@ const u = jlib.utils;
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
+setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+
 const uploadChain = chains[0]; // 存证链
 
 /*----------创建链接(存证链服务器3)----------*/
