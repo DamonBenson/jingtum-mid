@@ -6,7 +6,7 @@ import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import sha256 from 'crypto-js/sha256.js';
 
-import {userAccount, userAccountIndex, mysqlTestConf, debugMode, WORKTYPE, CREATIONYPE} from '../../../utils/info.js';
+import {userAccount, userAccountIndex, mysqlTestConf, debugMode, WORKTYPE} from '../../../utils/info.js';
 import util from 'util';
 
 // const c = mysql.createConnection(mysqlTestConf);
