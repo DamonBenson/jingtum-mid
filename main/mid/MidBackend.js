@@ -89,6 +89,15 @@ authRouter.get('/copyRightAmountGroupByCopyrightType', async function(req, res) 
 /**************************/
 /****       监测维权     ****/
 /**************************/
+listenRouter.get('/TortCount', async function(req, res) {
+    await NoUseMysql(req, res, listenDisplayGroup.handleTortCount);
+});
+// localhost:9002/backend/listen/TortCount
+
+listenRouter.get('/TortClickCount', async function(req, res) {
+    await NoUseMysql(req, res, listenDisplayGroup.handleTortClickCount);
+});
+// localhost:9002/backend/listen/TortClickCount
 
 listenRouter.get('/TortCountEXchange', async function(req, res) {
     await NoUseMysql(req, res, listenDisplayGroup.handleTortCountEXchange);
@@ -129,6 +138,11 @@ listenRouter.get('/TortCountGroupByTortSiteGroupByWorkType', async function(req,
     await NoUseMysql(req, res, listenDisplayGroup.handleTortCountGroupByTortSiteGroupByWorkType);
 });
 // localhost:9002/backend/listen/TortCountGroupByTortSiteGroupByWorkType
+
+listenRouter.get('/Tort_AND_ClaimCountGroupByWorkType', async function(req, res) {
+    await NoUseMysql(req, res, listenDisplayGroup.handleTort_AND_ClaimCountGroupByWorkType);
+});
+// localhost:9002/backend/listen/Tort_AND_ClaimCountGroupByWorkType
 
 
 /*----------http服务器配置----------*/

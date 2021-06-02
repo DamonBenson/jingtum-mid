@@ -18,7 +18,58 @@ import {c} from "../MidBackend.js";
 import {debugMode, WORKTYPE, CREATIONTYPE, TORTSITE} from '../../../utils/info.js';
 
 const CONNECT = false;// When false, Send Random Response
+/*
+ * @param req: 请求
+ * @param res: 返回
+ * @author: Bernard
+ * @date: 2021/6/2 17:08
+ * @description:发现的侵权总数量。
+ */
+export async function handleTortCount(req, res) {
+    console.time('handleTortCountEXchange');
+    let sqlRes = await getTortCount();
+    console.timeEnd('handleTortCountEXchange');
+    console.log('--------------------');
+    return sqlRes;
+}
 
+async function getTortCount() {
+    let tortCount = 0;
+    if(CONNECT == true){
+        console.log("CONNECT =",CONNECT);
+    }
+    else{
+        tortCount = localUtils.randomNumber(2000,5000);
+    }
+    console.log("tortCount =",tortCount);
+    return tortCount;
+}
+/*
+ * @param req: 请求
+ * @param res: 返回
+ * @author: Bernard
+ * @date: 2021/6/2 17:08
+ * @description:发现的侵权总数量的总点击次数。
+ */
+export async function handleTortClickCount(req, res) {
+    console.time('handleTortClickCount');
+    let sqlRes = await getTortClickCount();
+    console.timeEnd('handleTortClickCount');
+    console.log('--------------------');
+    return sqlRes;
+}
+
+async function getTortClickCount() {
+    let TortClickCount = 0;
+    if(CONNECT == true){
+        console.log("CONNECT =",CONNECT);
+    }
+    else{
+        TortClickCount = localUtils.randomNumber(100,200);
+    }
+    console.log("TortClickCount =",TortClickCount);
+    return TortClickCount;
+}
 /*
  * @param req: 请求
  * @param res: 返回
@@ -381,41 +432,70 @@ export async function handleTortCountGroupByTortSiteGroupByWorkType(req, res) {
 async function getTortGroupByTortSiteGroupByWorkType() {
     let TortCountGroupByWorkType = [];
     let WorkTypeInfo = {};
+    let totalTortCount = 0;
     if(CONNECT == true){
         selectGroupBy("tort_info","WorkType",6)
         console.log("CONNECT =",CONNECT);
     }
     else{
-        WorkTypeInfo = {
-            "workType":WORKTYPE["1"],
-            "TortCount":localUtils.randomNumber(40,100)
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["2"],
-            "TortCount":localUtils.randomNumber(40,100)
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["3"],
-            "TortCount":localUtils.randomNumber(40,100)
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["4"],
-            "TortCount":localUtils.randomNumber(40,100)
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["5"],
-            "TortCount":localUtils.randomNumber(40,100)
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["6"],
-            "TortCount":localUtils.randomNumber(40,100)
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
+        totalTortCount = localUtils.randomNumber(2000,5000);
+        for(let i = 1;i <= 6;i++){
+            let noise = Math.floor(totalTortCount * 0.01 - localUtils.randomNumber(20,90));
+            if(noise < 0) noise = 0;
+            let TORTCOUNTRATE = (localUtils.randomNumber(20,90)/100);
+            let tortCount = Math.floor(TORTCOUNTRATE * (totalTortCount - noise)) ;
+            WorkTypeInfo = {
+                "workType":WORKTYPE[i],
+                "TortCount":tortCount,
+            };
+            TortCountGroupByWorkType.push(WorkTypeInfo);
+        }
+    }
+    console.log(TortCountGroupByWorkType);
+    return TortCountGroupByWorkType;
+}
+
+/*
+ * @param req: 请求
+ * @param res: 返回
+ * @return: null
+ * @author: Bernard1
+ * @date: 2021/5/25 17:31
+ * @description:截止当前，在不同作品类型下的侵权维权分布。
+ */
+export async function handleTort_AND_ClaimCountGroupByWorkType(req, res) {
+
+    console.time('handleTort_AND_ClaimCountGroupByWorkType');
+    let sqlRes = await getTortTort_AND_ClaimCountGroupByWorkType();
+    console.timeEnd('handleTort_AND_ClaimCountGroupByWorkType');
+    console.log('--------------------');
+    return sqlRes;
+}
+async function getTortTort_AND_ClaimCountGroupByWorkType() {
+    let TortCountGroupByWorkType = [];
+    let WorkTypeInfo = {};
+    let totalTortCount = 0;
+    if(CONNECT == true){
+        selectGroupBy("tort_info","WorkType",6)
+        console.log("CONNECT =",CONNECT);
+    }
+    else{
+        totalTortCount = localUtils.randomNumber(2000,5000);
+        for(let i = 1;i <= 6;i++){
+            let noise = Math.floor(totalTortCount * 0.01 - localUtils.randomNumber(20,90));
+            if(noise < 0) noise = 0;
+            let TORTCOUNTRATE = (localUtils.randomNumber(20,90)/100);
+            let TORTCLAIMRATE = (localUtils.randomNumber(20,90)/100);
+            let tortCount = Math.floor(TORTCOUNTRATE * (totalTortCount - noise)) ;
+            let claimCount = Math.floor(TORTCLAIMRATE * (tortCount- noise)) ;
+            WorkTypeInfo = {
+                "workType":WORKTYPE[i],
+                "TortCount":tortCount,
+                "TotalTortCount":totalTortCount,
+                "ClaimCount":claimCount
+            };
+            TortCountGroupByWorkType.push(WorkTypeInfo);
+        }
     }
     console.log(TortCountGroupByWorkType);
     return TortCountGroupByWorkType;
