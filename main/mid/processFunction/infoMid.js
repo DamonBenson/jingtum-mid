@@ -271,6 +271,7 @@ export async function handleWorkInfoOfUser(req) {
     }
 
     let body = req.query;
+    console.log(body);
     try {
         await infoValidate.workOfUserQueryReqSchema.validateAsync(body);
     } catch(e) {
@@ -381,6 +382,7 @@ export async function handleIssueApproveInfoOfWork(req) {
     }
 
     let body = req.query;
+    console.log(body);
     try {
         await infoValidate.issueApproveOfWorkQueryReqSchema.validateAsync(body);
     } catch(e) {
@@ -454,6 +456,7 @@ export async function handleOwnApproveInfoOfWork(req) {
     }
 
     let body = req.query;
+    console.log(body);
     try {
         await infoValidate.issueApproveOfWorkQueryReqSchema.validateAsync(body);
     } catch(e) {

@@ -801,6 +801,7 @@ export async function handleApproveConfirm(tokenRemote, seqObj, req) {
     }
 
     let body = req.body;
+    console.log(body);
     try {
         await transactionValidate.approveConfirmReqSchema.validateAsync(body);
     } catch(e) {
