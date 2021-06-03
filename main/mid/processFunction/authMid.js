@@ -149,6 +149,7 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
     }
 
     let body = req.body;
+    console.log(body);
     try {
         await authValidate.innerWorkAuthReqSchema.validateAsync(body);
     } catch(e) {
