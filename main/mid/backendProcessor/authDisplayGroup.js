@@ -134,7 +134,7 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
         let index = 0;
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
-        let Res = await countGroupBy("work_info", "work_type",endTimeStamp ,startTimeStamp);
+        let Res = await countGroupBy("work_info", "work_type", endTimeStamp ,startTimeStamp);
         let keys = Object.keys(Res);
 
         for (let i = 0, n = keys.length, key; i < n; ++i) {

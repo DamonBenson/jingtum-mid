@@ -33,13 +33,13 @@ async function MimicTortInsert() {
         let tortInfo = {
             sample_Id : sha256(localUtils.randomNumber(100, 2000000000).toString()).toString(),
             tort_num : localUtils.randomNumber(1, 300000),
-            monitor_time : now.getTime(), //时间戳
+            monitor_time : now.getTime()/1000, //时间戳
             tort_url : TORTURL[tortSite],
             work_id : work_id,
-            site_name : TORTSITE[tortSite],
             tort_title : sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
+            site_name : TORTSITE[tortSite],
             author : sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),
-            pub_time : now.getTime(),
+            pub_time : now.getTime()/1000,
             click_count : localUtils.randomNumber(100, 200000),
             duration : localUtils.randomNumber(15, 2000)
         }
@@ -63,5 +63,4 @@ export async function generateTort() {
     let sql = sqlText.table('work_info').limit(offset, 1).field(['work_id']).select()
     let Res = await mysqlUtils.sql(c, sql);
     return Res;
-
 }

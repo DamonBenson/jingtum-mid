@@ -12,8 +12,9 @@ import {WORKTYPE} from "../../../utils/info.js";
  * @author Bernard
  * @date 2021/5/31
  */
-export async function countGroupBy(table, byKey, endTimeStamp = null,startTimeStamp = null, limit = 3){
-    let sqlRight = _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , limit);
+export async function countGroupBy(table, byKey, endTimeStamp = null,startTimeStamp = null,
+                                   timeName = "completion_time", limit = 3){
+    let sqlRight = _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp ,timeName, limit);
     let sqlRes = await mysqlUtils.sql(c, sqlRight);
     let Res = {};
     sqlRes.forEach(value =>
@@ -21,7 +22,8 @@ export async function countGroupBy(table, byKey, endTimeStamp = null,startTimeSt
     );
     return Res;
 }
-function _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , limit) {
+
+function _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , timeName, limit) {
     let sqlRight = util.format(
         'SELECT\n' +
         '\t*\n' +
@@ -39,9 +41,10 @@ function _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , limit) {
     if(endTimeStamp != null){
         sqlRight = sqlRight+util.format(
             '\t\tWHERE\n' +
-            '\t\t\twork_info.completion_time <= %s AND\n' +
-            '\t\t\twork_info.completion_time > %s\n',
-            endTimeStamp,startTimeStamp);
+            '\t\t\t%s.%s <= %s AND\n' +
+            '\t\t\t%s.%s > %s\n',
+            table,timeName,endTimeStamp,
+            table,timeName,startTimeStamp);
     }
 
     sqlRight = sqlRight + util.format(
@@ -67,24 +70,21 @@ function _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , limit) {
 export async function countNum(table, key="work_id", endTimeStamp = null,startTimeStamp = null) {
     let sqlRight = _sqlNum(table, key, endTimeStamp,startTimeStamp);
     let sqlRes = await mysqlUtils.sql(c, sqlRight);
-    let Res = {};
-    sqlRes.forEach(value =>
-        Res['num'] = value['num']
-    );
-    return Res;
+    return _getAnum_from_Res(sqlRes);
 }
 export async function countNumJoinRight(table, key, joinTable, joinKey, endTimeStamp = null,startTimeStamp = null) {
     let sqlRight = _sqlNum(table, key, endTimeStamp, startTimeStamp,joinTable, joinKey,true,true);
     let sqlRes = await mysqlUtils.sql(c, sqlRight);
-    let Res = {};
-    sqlRes.forEach(value =>
-        Res['num'] = value['num']
-    );
-    return Res;
+    return _getAnum_from_Res(sqlRes);
+
 }
 export async function countNumJoinRightAll(table, key, joinTable, joinKey, endTimeStamp = null,startTimeStamp = null) {
     let sqlRight = _sqlNum(table, key, endTimeStamp, startTimeStamp,joinTable, joinKey,true,false);
     let sqlRes = await mysqlUtils.sql(c, sqlRight);
+    return _getAnum_from_Res(sqlRes);
+
+}
+function _getAnum_from_Res(sqlRes) {
     let Res = {};
     sqlRes.forEach(value =>
         Res['num'] = value['num']
