@@ -8,10 +8,14 @@ import {mysqlConf} from '../../utils/info.js';
 export const c = mysql.createConnection(mysqlConf);
 await c.connect();
 const reconnectInterval = 60*60000;//1h
+const pulseInterval = 60000;//1min
+
 setInterval(async function() {
     c.end();
     await c.connect();
 }, reconnectInterval);
+setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), pulseInterval);
+
 
 /*----------信息查询请求路由配置----------*/
 async function UseMysql(req, res, handle) {
