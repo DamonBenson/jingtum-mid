@@ -5,12 +5,23 @@ import {WORKTYPE} from "../../../utils/info.js";
 
 /**
  * @file: SelectUtil.js
+ * @param table:选择表
+ * @param byKey:选择的键
+ * @param_default limit:前limit个分类
  * @Description: 按日期查询；单字段分组查询；多字段分组查询
  * @author Bernard
  * @date 2021/5/31
  */
-
-export async function selectGroupBy(table, byKey,limit = 3) {
+export async function countGroupBy(table, byKey, endTimeStamp = null,startTimeStamp = null, limit = 3){
+    let sqlRight = _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , limit);
+    let sqlRes = await mysqlUtils.sql(c, sqlRight);
+    let Res = {};
+    sqlRes.forEach(value =>
+        Res[[value[byKey]]] = value['num']
+    );
+    return Res;
+}
+function _sqlGroupBy(table, byKey , endTimeStamp , startTimeStamp , limit) {
     let sqlRight = util.format(
         'SELECT\n' +
         '\t*\n' +
@@ -20,23 +31,94 @@ export async function selectGroupBy(table, byKey,limit = 3) {
         '\t\t\t%s.%s, \n' +
         '\t\t\tCOUNT(%s.%s) AS num\n' +
         '\t\tFROM\n' +
-        '\t\t\t%s\n' +
+        '\t\t\t%s\n',
+        table, byKey,
+        table, byKey,
+        table);
+
+    if(endTimeStamp != null){
+        sqlRight = sqlRight+util.format(
+            '\t\tWHERE\n' +
+            '\t\t\twork_info.completion_time <= %s AND\n' +
+            '\t\t\twork_info.completion_time > %s\n',
+            endTimeStamp,startTimeStamp);
+    }
+
+    sqlRight = sqlRight + util.format(
         '\t\tGROUP BY\n' +
         '\t\t\t%s.%s\n' +
         '\t) AS Type\n' +
         'ORDER BY\n' +
         '\tnum DESC\n' +
-        'LIMIT %d', table, byKey,
+        'LIMIT %d',
         table, byKey,
-        table,
-        table, byKey, limit
-    );
-    console.log("sqlRight:", sqlRight);
+        limit);
+    return sqlRight;
+}
+/*
+ * @param null:
+ * @return: null
+ * @author: Bernard
+ * @date: 2021/6/18 13:19
+ * @description:
+ * @example:.
+ *
+ */
+export async function countNum(table, key="work_id", endTimeStamp = null,startTimeStamp = null) {
+    let sqlRight = _sqlNum(table, key, endTimeStamp,startTimeStamp);
     let sqlRes = await mysqlUtils.sql(c, sqlRight);
-    console.log("sqlRes:", sqlRes);
     let Res = {};
     sqlRes.forEach(value =>
-        Res[[value[byKey]]] = value['num']
+        Res['num'] = value['num']
     );
     return Res;
+}
+export async function countNumJoinRight(table, key, joinTable, joinKey, endTimeStamp = null,startTimeStamp = null) {
+    let sqlRight = _sqlNum(table, key, endTimeStamp, startTimeStamp,joinTable, joinKey,true,true);
+    let sqlRes = await mysqlUtils.sql(c, sqlRight);
+    let Res = {};
+    sqlRes.forEach(value =>
+        Res['num'] = value['num']
+    );
+    return Res;
+}
+export async function countNumJoinRightAll(table, key, joinTable, joinKey, endTimeStamp = null,startTimeStamp = null) {
+    let sqlRight = _sqlNum(table, key, endTimeStamp, startTimeStamp,joinTable, joinKey,true,false);
+    let sqlRes = await mysqlUtils.sql(c, sqlRight);
+    let Res = {};
+    sqlRes.forEach(value =>
+        Res['num'] = value['num']
+    );
+    return Res;
+}
+function _sqlNum(table, key, endTimeStamp, startTimeStamp, joinTable=null, joinKey=null, inner_join = false, right = false) {
+    let sqlRight =util.format(
+        'SELECT DISTINCT\n' +
+        '\tCOUNT(%s.%s) AS num\n' +
+        'FROM\n' +
+        '\t%s\n' ,
+        table,key,
+        table);
+    if(inner_join){
+        sqlRight = sqlRight+util.format(
+            '\tINNER JOIN\n' +
+            '\t(\n' +
+            '\t\t%s\n' +
+            '\t)\n' +
+            '\tON \n' +
+            '\t\t%s.%s = %s.%s\n',
+            joinTable,
+            table,joinKey,joinTable,joinKey);
+    }
+    if(endTimeStamp != null){
+        sqlRight = sqlRight+util.format(
+            '\t\tWHERE\n' +
+            '\t\t\twork_info.completion_time <= %s AND\n' +
+            '\t\t\twork_info.completion_time > %s\n',
+            endTimeStamp,startTimeStamp);
+        if(right==true){//确权
+            sqlRight = sqlRight+'\tAND right_token_info.copyright_type = 1 \n';
+        }
+    }
+    return sqlRight;
 }

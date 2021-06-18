@@ -50,14 +50,14 @@ const authRouter = express.Router({
 const listenRouter = express.Router({
     caseSensitive: false,// 不区分大小写
 });
-authRouter.get('/authRightRate', async function(req, res) {
-    await NoUseMysql(req, res, authDisplayGroup.handleAuthRightRate);
-});
-// localhost:9002/backend/authRightRate
-authRouter.get('/authByCompany', async function(req, res) {
-    await NoUseMysql(req, res, authDisplayGroup.handleAuthByCompany);
-});
-// localhost:9002/backend/authByCompany
+// authRouter.get('/authRightRate', async function(req, res) {
+//     await NoUseMysql(req, res, authDisplayGroup.handleAuthRightRate);
+// });
+// // localhost:9002/backend/authRightRate
+// authRouter.get('/authByCompany', async function(req, res) {
+//     await NoUseMysql(req, res, authDisplayGroup.handleAuthByCompany);
+// });
+// // localhost:9002/backend/authByCompany
 
 authRouter.get('/certificateAmountEXchange', async function(req, res) {
     await NoUseMysql(req, res, authDisplayGroup.handleCertificateAmountEXchange);

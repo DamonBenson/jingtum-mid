@@ -9,7 +9,7 @@ import sqlText from 'node-transform-mysql';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as DateUtil from './DateUtil.js';
 import * as localUtils from '../../../utils/localUtils.js';
-import {selectGroupBy} from "./SelectUtil.js";
+import {countGroupBy} from "./SelectUtil.js";
 
 import util from 'util';
 
@@ -18,6 +18,19 @@ import {c} from "../MidBackend.js";
 import {debugMode, WORKTYPE, CREATIONTYPE, TORTSITE} from '../../../utils/info.js';
 
 const CONNECT = false;// When false, Send Random Response
+// export{
+//     handleTortCount,// 发现的侵权总数量
+//     handleTortClickCount,// 发现的侵权的总点击次数
+//     handleTortCountEXchange,// 发现的侵权总数量随时间的变化
+//     handleTortCountGroupByWorkType,// 截止当前不同作品类型或者不同作品类型下发生的侵权数量分布
+//     handleTortCountGroupByCreationType,// 截止当前不同作品类型或者不同创作类型下发生的侵权数量分布
+//     handleTortCountGroupByWorkTypeEXchange,// 不同作品类型的侵权数量随时间的变化
+//     handleTortCountGroupByCreationTypeEXchange,// 不同创作类型的侵权数量随时间的变化
+//     handleTortCountGroupByTortSite,// 截止当前，在前N个侵权站点，发现的侵权数量分布
+//     handleTortCountGroupByTortSiteEXchange,// 截止当前，在前N个侵权站点，发现的侵权数量分布。
+//     handleTortCountGroupByTortSiteGroupByWorkType,// 截止当前，前N个侵权站点发现的侵权数量在不同作品类型下的分布
+//     handleTort_AND_ClaimCountGroupByWorkType,// 截止当前，在不同作品类型下的侵权维权分布
+// }
 /*
  * @param req: 请求
  * @param res: 返回
@@ -32,7 +45,6 @@ export async function handleTortCount(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCount() {
     let tortCount = 0;
     if(CONNECT == true){
@@ -44,6 +56,7 @@ async function getTortCount() {
     console.log("tortCount =",tortCount);
     return tortCount;
 }
+
 /*
  * @param req: 请求
  * @param res: 返回
@@ -58,7 +71,6 @@ export async function handleTortClickCount(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortClickCount() {
     let TortClickCount = 0;
     if(CONNECT == true){
@@ -70,6 +82,7 @@ async function getTortClickCount() {
     console.log("TortClickCount =",TortClickCount);
     return TortClickCount;
 }
+
 /*
  * @param req: 请求
  * @param res: 返回
@@ -85,7 +98,6 @@ export async function handleTortCountEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCountEXchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     let TortCountEXchange = [];
@@ -125,7 +137,6 @@ export async function handleTortCountGroupByWorkType(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCountGroupByWorkType() {
     let TortCountGroupByWorkType = [];
     let WorkTypeInfo = {};
@@ -184,7 +195,6 @@ export async function handleTortCountGroupByCreationType(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCountGroupByCreationType() {
     let TortCountGroupByCreationType = [];
     let CreationTypeInfo = {};
@@ -212,7 +222,6 @@ async function getTortCountGroupByCreationType() {
     return TortCountGroupByCreationType;
 }
 
-
 /*
  * @param req: 请求
  * @param res: 返回
@@ -229,7 +238,6 @@ export async function handleTortCountGroupByWorkTypeEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCountGroupByWorkTypeEXchange() {
     let TortCountGroupByWorkTypeEXchange = [];
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
@@ -283,7 +291,6 @@ export async function handleTortCountGroupByCreationTypeEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCountGroupByCreationTypeEXchange() {
     let TortCountGroupByCreationTypeEXchange = [];
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
@@ -364,6 +371,7 @@ async function getTortCountGroupByTortSite() {
     console.log(TortCountGroupByTortSite);
     return TortCountGroupByTortSite;
 }
+
 /*
  * @param req: 请求
  * @param res: 返回
@@ -415,6 +423,7 @@ async function getTortCountGroupByTortSiteEXchange() {
     console.log(TortCountGroupByTortSiteEXchange);
     return TortCountGroupByTortSiteEXchange;
 }
+
 /*
  * @param req: 请求
  * @param res: 返回
@@ -436,7 +445,7 @@ async function getTortGroupByTortSiteGroupByWorkType() {
     let WorkTypeInfo = {};
     let totalTortCount = 0;
     if(CONNECT == true){
-        selectGroupBy("tort_info","WorkType",6)
+        countGroupBy("tort_info","WorkType",6)
         console.log("CONNECT =",CONNECT);
     }
     else{
@@ -478,7 +487,7 @@ async function getTortTort_AND_ClaimCountGroupByWorkType() {
     let WorkTypeInfo = {};
     let totalTortCount = 0;
     if(CONNECT == true){
-        selectGroupBy("tort_info","WorkType",6)
+        countGroupBy("tort_info","WorkType",6)
         console.log("CONNECT =",CONNECT);
     }
     else{
