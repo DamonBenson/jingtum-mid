@@ -42,7 +42,7 @@ export function buildTokenIssueTx(remote, publisher, seq, name, num, flag, flagA
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:', err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -91,7 +91,7 @@ export function buildPubTokenTx(remote, publisher, secret, seq, dest, name, id, 
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -149,7 +149,7 @@ export function buildPubRefTokenTx(remote, publisher, secret, seq, dest, name, i
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -194,7 +194,7 @@ export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -239,7 +239,7 @@ export function buildTokenInfoChangeTx(remote, src, secret, seq, id, tokenInfos,
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -284,7 +284,7 @@ export function buildTokenInfoChangeTx(remote, src, secret, seq, id, tokenInfos,
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -316,8 +316,8 @@ export function requestTokenInfo(remote, id, showRes) {
     return new Promise((resolve, reject) => {
         req.submit(function(err, result) {
             if(err) {
-                console.log('err:',err);
-                reject('err');
+                console.log('err:', err);
+                reject(err);
             }
             else if(result){
                 if(showRes) {

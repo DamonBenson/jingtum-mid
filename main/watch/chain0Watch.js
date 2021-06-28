@@ -98,6 +98,7 @@ r.connect(async function(err, result) {
 
         // 筛选存证交易
         let uploadTxs = [];
+        let monitorTxs = [];
 
         for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
@@ -112,6 +113,10 @@ r.connect(async function(err, result) {
                         src == userAccount.fakeBaiduAuthorizeAccount.address) {
                         uploadTxs.push(processedTx);
                     }
+                    else if(src == userAccount.baiduMonitorAccount.address ||
+                        src == userAccount.fakeBaiduMonitorAccount.address) {
+                        monitorTxs.push(processedTx);
+                    }
                 default:
                     break;
             }
@@ -119,6 +124,7 @@ r.connect(async function(err, result) {
 
         // 存证交易入数据库
         await processUpload(uploadTxs, uploadTxs.length);
+        await processMonitor(monitorTxs, monitorTxs.length);
 
         // 结束计时
         console.timeEnd('chain0Watch');
@@ -169,5 +175,32 @@ async function processUpload(uploadTxs, loopConter) {
     });
 
     await Promise.all(workInfoPromises);
+    
+}
+
+async function processMonitor(monitorTxs, loopConter) {
+
+    if(debugMode == true) {
+        console.log('monitorTxs:', monitorTxs);
+    }
+
+    let monitorInfoPromises = [];
+
+    monitorTxs.forEach(async(monitorTx) => {
+
+        let monitorInfo = JSON.parse(monitorTx.memos[0].MemoData);
+
+        monitorInfo.uploadTime = uploadTx.date;
+        monitorInfo.address = uploadTx.counterparty;
+
+        console.log("monitorInfo:", monitorInfo);
+        localUtils.toMysqlObj(monitorInfo);
+
+        let sql = sqlText.table('monitor_info').data(monitorInfo).insert();
+        monitorInfoPromises.push(mysqlUtils.sql(c, sql));
+
+    });
+
+    await Promise.all(monitorInfoPromises);
     
 }

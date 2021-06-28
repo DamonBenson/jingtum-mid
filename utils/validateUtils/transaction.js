@@ -356,7 +356,32 @@ export const sellerApproveConfrimReqSchema = Joi.any();
  * @param {Object}buyOrderInfo 买单信息，包括：买方地址buyerAddr、授权场景authorizationScene、授权渠道authorizationChannel、授权范围authorizationArea、授权时间authorizationTime
  * @param {Object[]}sellOrderInfoList 卖单信息列表，包括：卖方地址sellerAddr、卖方私钥sellerSecret、作品标识workId
  */
-export const approveConfirmReqSchema = Joi.any();
+export const approveConfirmReqSchema = Joi.object().keys({
+    buyOrderInfo:
+        Joi.object().keys({
+            buyerAddr:
+                jingtumCustom.jingtum().address().required(),
+            authorizationScene:
+                Joi.number().integer().min(0).max(9).required(),
+            authorizationChannel:
+                Joi.number().integer().min(0).max(3).required(),
+            authorizationArea:
+                Joi.number().integer().min(0).max(3).required(),
+            authorizationTime:
+                Joi.number().integer().min(0).max(3).required(),
+        }).required(),
+    sellOrderInfoList:
+        Joi.array().items(
+            Joi.object().keys({
+                sellerAddr:
+                    jingtumCustom.jingtum().address().required(),
+                sellerSecret:
+                    jingtumCustom.jingtum().secret().required(),
+                workId:
+                    Joi.string().hex(),
+            }),
+        ).required(),
+});
 
 // 买单监听
 export const buyOrderWatchSchema = delJoiKeys(buyOrderReqSchema, ['platformAddr', 'contractAddr']);

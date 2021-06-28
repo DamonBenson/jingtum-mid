@@ -10,7 +10,7 @@ export function requestAccountInfo(a, r, showRes) {
         req.submit(function(err, result) {
             if(err) {
                 console.log('err:', err);
-                reject('err');
+                reject(err);
             }
             else if(result) {
                 if(showRes) {
@@ -33,7 +33,7 @@ export function requestLedgerClosed(r, showRes) {
         req.submit(function(err, result) {
             if(err) {
                 console.log('err:', err);
-                reject('err');
+                reject(err);
             }
             else if(result) {
                 if(showRes) {
@@ -56,7 +56,7 @@ export function requestServerInfo(r, showRes) {
         req.submit(function(err, result) {
             if(err) {
                 console.log('err:', err);
-                reject('err');
+                reject(err);
             }
             else if(result) {
                 if(showRes) {
@@ -82,7 +82,7 @@ export function requestLedger(r, index, tx, showRes) {
         req.submit(function(err, result) {
             if(err) {
                 console.log('err:', err);
-                reject('err');
+                reject(err);
             }
             else if(result) {
                 if(showRes) {
@@ -107,7 +107,7 @@ export function requestTx(r, hash, showRes) {
         req.submit(function(err, result) {
             if(err) {
                 console.log('err:', err);
-                reject('err');
+                reject(err);
             }
             else if(result) {
                 if(showRes) {

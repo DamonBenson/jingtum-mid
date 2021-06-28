@@ -26,6 +26,10 @@ export const userAccount = {
         address: 'jB7rxgh43ncbTX4WeMoeadiGMfmfqY2xLZ',
         secret: '',
     },
+    baiduMonitorAccount: {
+        address: '',
+        secret: '',
+    },
     buptAuthorizeAccount: {
         address: 'jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6',
         secret: 'saBoC8kDkPMxR4Z4eom4LCprhopw8',
@@ -43,6 +47,10 @@ export const userAccount = {
     fakeBaiduAuthorizeAccount: {
         address: 'jGt4jgACfyFaW7AkPb48PRsD64491M85GF',
         secret: 'spzH4oxRN1DhnkfYbohgbTyufQ43C',
+    },
+    fakeBaiduMonitorAccount: {
+        address: 'jUGPB5wbeVCR2YqnPmRg2Ct6BVzPyexCzi',
+        secret: 'sshHBqn6EcBiTmxrmhtwkZL8Ux8pq',
     },
     authenticateAccount: [
         {
