@@ -3,10 +3,10 @@ import moment from "moment";
 import * as localUtils from '../../../utils/localUtils.js';
 
 // LearnAboutDateUtil();
-
+let now = new Date(); //当前日期
 // console.log(getMonthTimeStampMap());
 // console.log(getMonthTimeStampArray());
-// console.log((new Date()));
+console.log(now.getTime());
 // console.log(transMonthName(new Date()));
 export function LearnAboutDateUtil(){
     let timeToday = Math.round((new Date())/ 1000);

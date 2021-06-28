@@ -8,10 +8,14 @@ import {mysqlConf} from '../../utils/info.js';
 export const c = mysql.createConnection(mysqlConf);
 await c.connect();
 const reconnectInterval = 60*60000;//1h
+const pulseInterval = 60000;//1min
+
 setInterval(async function() {
     c.end();
     await c.connect();
 }, reconnectInterval);
+setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), pulseInterval);
+
 
 /*----------信息查询请求路由配置----------*/
 async function UseMysql(req, res, handle) {
@@ -46,14 +50,14 @@ const authRouter = express.Router({
 const listenRouter = express.Router({
     caseSensitive: false,// 不区分大小写
 });
-authRouter.get('/authRightRate', async function(req, res) {
-    await NoUseMysql(req, res, authDisplayGroup.handleAuthRightRate);
-});
-// localhost:9002/backend/authRightRate
-authRouter.get('/authByCompany', async function(req, res) {
-    await NoUseMysql(req, res, authDisplayGroup.handleAuthByCompany);
-});
-// localhost:9002/backend/authByCompany
+// authRouter.get('/authRightRate', async function(req, res) {
+//     await NoUseMysql(req, res, authDisplayGroup.handleAuthRightRate);
+// });
+// // localhost:9002/backend/authRightRate
+// authRouter.get('/authByCompany', async function(req, res) {
+//     await NoUseMysql(req, res, authDisplayGroup.handleAuthByCompany);
+// });
+// // localhost:9002/backend/authByCompany
 
 authRouter.get('/certificateAmountEXchange', async function(req, res) {
     await NoUseMysql(req, res, authDisplayGroup.handleCertificateAmountEXchange);

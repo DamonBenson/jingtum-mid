@@ -15,9 +15,16 @@ import util from 'util';
 import mysql from 'mysql';
 import {c} from "../MidBackend.js";
 import {debugMode, WORKTYPE, CREATIONTYPE} from '../../../utils/info.js';
-import {selectGroupBy} from "./SelectUtil.js";
+import {countGroupBy, countNumJoinRight, countNumJoinRightAll} from "./SelectUtil.js";
 const CONNECT = true;// When false, Send Random Response
-
+// export{
+//     handleCertificateAmountEXchange,// 1）	存证总数量随时间的变化。
+//     handleCertificateAmountGroupByWorkType,// 2）	截止当前不同作品类型。workType
+//     handleCertificateAmountGroupByWorkTypeEXchange,// 3）	不同作品类型的存证数量随时间的变化。workType
+//     handleCopyRightAmountEXchange,// 1）	版权通证总数量随时间的变化。 Amount
+//     handleCopyRightAmountGroupByIDtype,// 1）	截止当前，在已生成的全部版权通证中，个人账户作为存证时的版权接收者 id_type
+//     handleCopyRightAmountGroupByCopyrightType// 1)	截止当前，不同类别通证的数量分布。 copyrightType Amount
+// }
 //*****************************************************************************************************//
 // 新方案
 // 1.1 存证总数量随时间变化 折线图
@@ -38,7 +45,6 @@ export async function handleCertificateAmountEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getCertificateAmountEXchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     // console.log([TimeStampArray, MonthArray]);
@@ -46,40 +52,11 @@ async function getCertificateAmountEXchange() {
     for (let index = 0; index < 12; index++) {
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight =util.format(
-            'SELECT DISTINCT\n' +
-            '\tCOUNT(right_token_info.work_id)\n' +
-            'FROM\n' +
-            '\tright_token_info\n' +
-            '\tINNER JOIN\n' +
-            '\t(\n' +
-            '\t\twork_info\n' +
-            '\t)\n' +
-            '\tON \n' +
-            '\t\tright_token_info.work_id = work_info.work_id\n' +
-            'WHERE\n' +
-            '\tright_token_info.copyright_type = 1 AND\n' +
-            '\t(\n' +
-            '\t\twork_info.completion_time <= %s AND\n' +
-            '\t\t(\n' +
-            '\t\t\twork_info.completion_time > %s\n' +
-            '\t\t)\n' +
-            '\t)'
-            ,endTimeStamp,startTimeStamp);
-        console.log("sqlRight:",sqlRight);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
-        console.log("sqlRes:",sqlRes);
-        let valueRes = 0;
-
-        sqlRes.forEach(function(item,index){
-            valueRes = item['COUNT(right_token_info.work_id)'];
-            console.log(item['COUNT(right_token_info.work_id)']+'---'+index);
-        });
-        console.log("valueRes =",valueRes);
+        let valueRes = await countNumJoinRight("right_token_info", "work_id", "work_info", "work_id",
+            endTimeStamp,startTimeStamp);
         if(CONNECT == false)valueRes = localUtils.randomNumber(30,50);
-
         let MonthInfo = {
-            "CertificateAmount": valueRes,
+            "CertificateAmount": valueRes["num"],
             "Month" : MonthArray[index + 1],
         };
         CertificateAmountEXchange.push(MonthInfo);
@@ -88,6 +65,7 @@ async function getCertificateAmountEXchange() {
     console.log(CertificateAmountEXchange);
     return CertificateAmountEXchange;
 }
+
 // 2）	截止当前不同作品类型
 export async function handleCertificateAmountGroupByWorkType(req, res) {
 
@@ -97,13 +75,12 @@ export async function handleCertificateAmountGroupByWorkType(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getCertificateAmountGroupByWorkType() {
     let CertificateAmountGroupByWorkType = [];
     let WorkTypeInfo = {};
 
     if(CONNECT == true){
-        let Res = await selectGroupBy("work_info", "work_type");
+        let Res = await countGroupBy("work_info", "work_type");
         console.log("Res:",Res);
         let keys = Object.keys(Res);
         console.log("keys:",keys);
@@ -118,26 +95,21 @@ async function getCertificateAmountGroupByWorkType() {
         console.log("CertificateAmountGroupByWorkType:",CertificateAmountGroupByWorkType);
     }
     else{
-        WorkTypeInfo = {
-            "workType":"音乐",
-            "CertificateAmount":localUtils.randomNumber(80,100)
-        };
-        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":"电影",
-            "CertificateAmount":localUtils.randomNumber(60,80)
-        };
-        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":"美术",
-            "CertificateAmount":localUtils.randomNumber(40,60)
-        };
-        CertificateAmountGroupByWorkType.push(WorkTypeInfo);
+        CertificateAmountGroupByWorkType = [{
+                "workType":"音乐",
+                "CertificateAmount":0
+            },{
+                "workType":"电影",
+                "CertificateAmount":0
+            },{
+                "workType":"美术",
+                "CertificateAmount":0
+            }]
     }
-
 
     return CertificateAmountGroupByWorkType;
 }
+
 // 3）	不同作品类型的存证数量随时间的变化。workType
 export async function handleCertificateAmountGroupByWorkTypeEXchange(req, res) {
 
@@ -150,7 +122,6 @@ export async function handleCertificateAmountGroupByWorkTypeEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getCertificateAmountGroupByWorkTypeEXchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     let CertificateAmountGroupByWorkTypeEXchange = [];
@@ -163,40 +134,14 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
         let index = 0;
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight =util.format(
-            'SELECT\n' +
-            '\t*\n' +
-            'FROM\n' +
-            '\t(\n' +
-            '\t\tSELECT\n' +
-            '\t\t\twork_info.work_type, \n' +
-            '\t\t\tCOUNT(work_info.work_id) AS num\n' +
-            '\t\tFROM\n' +
-            '\t\t\twork_info\n' +
-            '\t\tWHERE\n' +
-            '\t\t\twork_info.completion_time <= %s AND\n' +
-            '\t\t\twork_info.completion_time > %s\n' +
-            '\t\tGROUP BY\n' +
-            '\t\t\twork_info.work_type\n' +
-            '\t) AS Type\n' +
-            'ORDER BY\n' +
-            '\tnum DESC\n' +
-            'LIMIT 3'
-            ,endTimeStamp,startTimeStamp);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
-        let Res = {};
-        sqlRes.forEach(value =>
-            Res[WORKTYPE[value['work_type']]] = value['num']
-        );
-        console.log("Res =",Res);
-
+        let Res = await countGroupBy("work_info", "work_type", endTimeStamp ,startTimeStamp);
         let keys = Object.keys(Res);
-        console.log("keys:",keys);
+
         for (let i = 0, n = keys.length, key; i < n; ++i) {
             key = keys[i];
             if(Res[key]==null)Res[key]=0;
             let MonthInfo = {
-                "workType":key,
+                "workType":WORKTYPE[key],
                 "CertificateAmount":Res[key],
                 "Month" : MonthArray[index + MonthGap],
             };
@@ -207,40 +152,13 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
         for (; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
-            sqlRight =util.format(
-                'SELECT\n' +
-                '\t*\n' +
-                'FROM\n' +
-                '\t(\n' +
-                '\t\tSELECT\n' +
-                '\t\t\twork_info.work_type, \n' +
-                '\t\t\tCOUNT(work_info.work_id) AS num\n' +
-                '\t\tFROM\n' +
-                '\t\t\twork_info\n' +
-                '\t\tWHERE\n' +
-                '\t\t\twork_info.completion_time <= %s AND\n' +
-                '\t\t\twork_info.completion_time > %s\n' +
-                '\t\tGROUP BY\n' +
-                '\t\t\twork_info.work_type\n' +
-                '\t) AS Type\n' +
-                'ORDER BY\n' +
-                '\tnum DESC\n' +
-                'LIMIT 3'
-                ,endTimeStamp,startTimeStamp);
-            console.log("sqlRight:",sqlRight);
-            sqlRes = await mysqlUtils.sql(c, sqlRight);
-            console.log("sqlRes:",sqlRes);
-            Res = {};
-            sqlRes.forEach(value =>
-                Res[WORKTYPE[value['work_type']]] = value['num']
-            );
-            console.log("Res =",Res);
+            let Res = await countGroupBy("work_info", "work_type",endTimeStamp ,startTimeStamp);
             CertificateAmountGroupByWorkType =[];
             for (let i = 0, n = keys.length, key; i < n; ++i) {
                 key = keys[i];
                 if(Res[key]==null)Res[key]=0;
                 let MonthInfo = {
-                    "workType":key,
+                    "workType":WORKTYPE[key],
                     "CertificateAmount":Res[key],
                     "Month" : MonthArray[index + MonthGap],
                 };
@@ -290,51 +208,29 @@ export async function handleCopyRightAmountEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getCopyRightAmountEXchange() {
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     let CopyRightAmountEXchange = [];
     for (let index = 0; index < 12; index++) {
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight =util.format(
-            'SELECT DISTINCT\n' +
-            '\tCOUNT(right_token_info.copyright_id)\n' +
-            'FROM\n' +
-            '\tright_token_info\n' +
-            '\tINNER JOIN\n' +
-            '\t(\n' +
-            '\t\twork_info\n' +
-            '\t)\n' +
-            '\tON \n' +
-            '\t\tright_token_info.work_id = work_info.work_id\n' +
-            'WHERE\n' +
-            '\t\twork_info.completion_time <= %s AND\n' +
-            '\t\t\twork_info.completion_time > %s\n'
-            ,endTimeStamp,startTimeStamp);
-        // console.log(sqlRight);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
-        console.log(sqlRes);
-        let valueRes = 0;
-        sqlRes.forEach(function(item,index){
-            valueRes = item['COUNT(right_token_info.copyright_id)'];
-            console.log(item['COUNT(right_token_info.copyright_id)']+'---'+index);
-        });
-        if(CONNECT == false) valueRes = localUtils.randomNumber(30,50);
-        console.log("valueRes =",valueRes);
-
+        let valueRes = await countNumJoinRightAll("right_token_info", "work_id", "work_info", "work_id",
+            endTimeStamp,startTimeStamp);
         let MonthInfo = {
-            "CopyRightAmount": valueRes,
+            "CopyRightAmount": valueRes["num"],
             "Month" : MonthArray[index + 1],
         };
         CopyRightAmountEXchange.push(MonthInfo);
     }
     CopyRightAmountEXchange.reverse();
+    console.log(CopyRightAmountEXchange);
     return CopyRightAmountEXchange;
 }
+
 // 1）	截止当前，在已生成的全部版权通证中，个人账户作为存证时的版权接收者（版权持有者证件类型为居民身份证、军官证与护照）
 // 与非个人账户作为存证时的版权接收者（版权持有者证件类型为营业执照、企业法人营业执照、组织机构代码证书、事业单位法人证书、社团法人证书、其他有效证件）
 // 的通证数量分布。 id_type
+// 1..9   1.2.4为个人
 export async function handleCopyRightAmountGroupByIDtype(req, res) {
 
     console.time('handleCopyRightAmountGroupByIDtype');
@@ -343,7 +239,6 @@ export async function handleCopyRightAmountGroupByIDtype(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-// 1..9   1.2.4为个人
 async function getCopyRightAmountGroupByIDtype() {
     let CopyRightAmountGroupByIDtype = {};
     if(CONNECT == false){
@@ -396,6 +291,7 @@ async function getCopyRightAmountGroupByIDtype() {
     }
     return CopyRightAmountGroupByIDtype;
 }
+
 // 二维图（两个自变量）
 // 2）	不同类型的账户作为版权通证接收者的通证数量随时间的变化。 IDType NeedTime
 // 4.	版权信息-copyrightType
@@ -409,7 +305,6 @@ export async function handleCopyRightAmountGroupByCopyrightType(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getCopyRightAmountGroupByCopyrightType() {
     let CopyRightAmountGroupByIDtype = {};
     if(CONNECT == true){
