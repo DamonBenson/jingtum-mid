@@ -10,6 +10,7 @@ import * as transactionMid from './processFunction/transactionMid.js';
 import * as contractMid from './processFunction/contractMid.js';
 import * as serviceMid from './processFunction/serviceMid.js';
 import * as signedTxMid from './processFunction/signedTxMid.js';
+import * as monitorMid from './processFunction/monitorMid.js';
 
 import {userAccount, chains} from '../../utils/config/jingtum.js';
 
@@ -20,6 +21,7 @@ const contractChain = chains[2]; // 权益链
 const authorizeAddr = userAccount.buptAuthorizeAccount.address; // 智能授权系统（中间层部分）
 const matchSystemAddr = userAccount.matchSystemAccount.address; // 智能交易系统
 const midAddr = userAccount.midAccount.address; // 中间层
+const monitorAddr = userAccount.buptMonitorAccount.address; // 中间层-监测
 
 const Remote = jlib.Remote;
 const uploadRemote = new Remote({server: uploadChain.server[0], local_sign: false});
@@ -72,6 +74,7 @@ uploadRemote.connect(async function(err, res) {
                 authorize: {},
                 matchSystem: {},
                 mid: {},
+                monitor: {},
             };
             seqObj.authorize.upload = (await requestInfo.requestAccountInfo(authorizeAddr, uploadRemote, false)).account_data.Sequence;
             seqObj.authorize.token = (await requestInfo.requestAccountInfo(authorizeAddr, tokenRemote, false)).account_data.Sequence;
@@ -82,6 +85,9 @@ uploadRemote.connect(async function(err, res) {
             seqObj.mid.upload = (await requestInfo.requestAccountInfo(midAddr, uploadRemote, false)).account_data.Sequence;
             seqObj.mid.token = (await requestInfo.requestAccountInfo(midAddr, tokenRemote, false)).account_data.Sequence;
             seqObj.mid.contract = (await requestInfo.requestAccountInfo(midAddr, contractRemote, false)).account_data.Sequence;
+            seqObj.monitor.upload = (await requestInfo.requestAccountInfo(monitorAddr, uploadRemote, false)).account_data.Sequence;
+            seqObj.monitor.token = (await requestInfo.requestAccountInfo(monitorAddr, tokenRemote, false)).account_data.Sequence;
+            seqObj.monitor.contract = (await requestInfo.requestAccountInfo(monitorAddr, contractRemote, false)).account_data.Sequence;
             console.log('seq:', seqObj);
 
             /**
@@ -314,6 +320,19 @@ uploadRemote.connect(async function(err, res) {
             //     res.send(resInfo);
             // });
 
+            /**
+             * @description 音乐监测相关请求路由。
+             */
+            const monitorRouter = express.Router();
+
+            // 证据上链
+            monitorRouter.post('/evidence', async function(req, res) {
+                let resInfo = await monitorMid.handleEvidence(uploadRemote, seqObj, req);
+                res.send(resInfo);
+            })
+
+
+
             // /*----------提交已签名交易----------*/
 
             // app.post('/signedTx', async function(req, res) {
@@ -328,6 +347,7 @@ uploadRemote.connect(async function(err, res) {
             app.use('/transaction', transactionRouter);
             app.use('/contract', contractRouter);
             app.use('/service', serviceRouter);
+            app.use('/monitor', monitorRouter);
 
             /*----------启动http服务器----------*/
 

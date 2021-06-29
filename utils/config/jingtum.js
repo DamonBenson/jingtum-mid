@@ -34,6 +34,10 @@ export const userAccount = {
         address: 'jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6',
         secret: 'saBoC8kDkPMxR4Z4eom4LCprhopw8',
     },
+    buptMonitorAccount: {
+        address: 'jEuVbvfCXayJY79hbUZLxMaN6KrMuguMok',
+        secret: 'ssrEKS2SZ5AweA8YRPofbSNJY7BYd',
+    },
     midAccount: {
         address: 'j3Ztxf6SRsAmubze8i8sd1TWeadoazDpPz',
         secret: 'ssMENrDFyyoGSmnrKHfz3jLn714rq',

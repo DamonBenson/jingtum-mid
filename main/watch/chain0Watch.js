@@ -98,7 +98,8 @@ r.connect(async function(err, result) {
 
         // 筛选存证交易
         let uploadTxs = [];
-        let monitorTxs = [];
+        let picMonitorTxs = [];
+        let musicMonitorTxs = [];
 
         for(let i = txLoopConter; i >= 0; i--) {
             let tx = txs[i];
@@ -115,7 +116,10 @@ r.connect(async function(err, result) {
                     }
                     else if(src == userAccount.baiduMonitorAccount.address ||
                         src == userAccount.fakeBaiduMonitorAccount.address) {
-                        monitorTxs.push(processedTx);
+                        picMonitorTxs.push(processedTx);
+                    }
+                    else if(src == userAccount.buptMonitorAccount.address) {
+                        musicMonitorTxs.push(processedTx);
                     }
                 default:
                     break;
@@ -124,7 +128,8 @@ r.connect(async function(err, result) {
 
         // 存证交易入数据库
         await processUpload(uploadTxs, uploadTxs.length);
-        await processMonitor(monitorTxs, monitorTxs.length);
+        // await processPicMonitor(picMonitorTxs, picMonitorTxs.length);
+        await processMusicMonitor(musicMonitorTxs, musicMonitorTxs.length);
 
         // 结束计时
         console.timeEnd('chain0Watch');
@@ -178,25 +183,51 @@ async function processUpload(uploadTxs, loopConter) {
     
 }
 
-async function processMonitor(monitorTxs, loopConter) {
+async function processPicMonitor(picMonitorTxs, loopConter) {
 
     if(debugMode == true) {
-        console.log('monitorTxs:', monitorTxs);
+        console.log('picMonitorTxs:', picMonitorTxs);
     }
 
     let monitorInfoPromises = [];
 
-    monitorTxs.forEach(async(monitorTx) => {
+    picMonitorTxs.forEach(async(picMonitorTx) => {
 
-        let monitorInfo = JSON.parse(monitorTx.memos[0].MemoData);
+        let monitorInfo = JSON.parse(picMonitorTx.memos[0].MemoData);
 
-        monitorInfo.uploadTime = uploadTx.date;
-        monitorInfo.address = uploadTx.counterparty;
+        monitorInfo.uploadTime = picMonitorTx.date;
 
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);
 
         let sql = sqlText.table('monitor_info').data(monitorInfo).insert();
+        monitorInfoPromises.push(mysqlUtils.sql(c, sql));
+
+    });
+
+    await Promise.all(monitorInfoPromises);
+    
+}
+
+async function processMusicMonitor(musicMonitorTxs, loopConter) {
+
+    if(debugMode == true) {
+        console.log('musicMonitorTxs:', musicMonitorTxs);
+    }
+
+    let monitorInfoPromises = [];
+
+    musicMonitorTxs.forEach(async(musicMonitorTx) => {
+
+        let monitorInfo = JSON.parse(musicMonitorTx.memos[0].MemoData);
+
+        monitorInfo.uploadTime = musicMonitorTx.date;
+        monitorInfo.hash = musicMonitorTx.hash;
+
+        console.log("monitorInfo:", monitorInfo);
+        localUtils.toMysqlObj(monitorInfo);
+
+        let sql = sqlText.table('music_monitor_info').data(monitorInfo).insert();
         monitorInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
