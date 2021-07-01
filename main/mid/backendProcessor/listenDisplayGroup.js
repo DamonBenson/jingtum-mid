@@ -319,48 +319,47 @@ async function getTortCountGroupByWorkTypeEXchange() {
     let MonthGap = 1;
     let WorkTypeInfo = {};
     let TortCountGroupByWorkType = [];
+    let endTimeStamp = TimeStampArray[0];
+    let startTimeStamp = TimeStampArray[1];
     if(CONNECT == true){
-        // TODO 第一个月确定选中的类型
-        let index = 0;
-        let endTimeStamp = TimeStampArray[index];
-        let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight = util.format("SELECT\n" +
-            "\tType.work_type, \n" +
-            "\tCOUNT(Type.work_id) AS num\n" +
-            "FROM\n" +
-            "\t(\n" +
-            "\t\tSELECT DISTINCT\n" +
-            "\t\t\ttort_info.work_id, \n" +
-            "\t\t\twork_info.work_type\n" +
-            "\t\tFROM\n" +
-            "\t\t\ttort_info\n" +
-            "\t\t\tINNER JOIN\n" +
-            "\t\t\twork_info\n" +
-            "\t\t\tON \n" +
-            "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
-            "\t\tWHERE\n" +
-            "\t\t\ttort_info.monitor_time <= %s AND\n" +
-            "\t\t\ttort_info.monitor_time > %s\n" +
-            "\t) AS Type\n" +
-            "GROUP BY\n" +
-            "\tType.work_type\n" +
-            "ORDER BY\n" +
-            "\tnum DESC\n" +
-            "LIMIT 3",endTimeStamp,startTimeStamp);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        // TODO 确定选中的类型
         let keys = [];
-        sqlRes.forEach(function(item){
-            let MonthInfo = {
-                "workType":WORKTYPE[item['work_type']],
-                "TortCount":item['num'],
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(MonthInfo);
-            keys.push(item['work_type']);
-        });
-        TortCountGroupByWorkTypeEXchange.push(TortCountGroupByWorkType);
-        index = index + MonthGap;
-        for (; index < 12; index = index + MonthGap) {
+        let index = 0;
+        while(keys.length < 3 && index < 12){
+            keys=[]
+            endTimeStamp = TimeStampArray[index];
+            startTimeStamp = TimeStampArray[(index + 1)];
+            let TortCountGroupByWorkType = [];
+            let sqlRight = util.format("SELECT\n" +
+                "\tType.work_type, \n" +
+                "\tCOUNT(Type.work_id) AS num\n" +
+                "FROM\n" +
+                "\t(\n" +
+                "\t\tSELECT DISTINCT\n" +
+                "\t\t\ttort_info.work_id, \n" +
+                "\t\t\twork_info.work_type\n" +
+                "\t\tFROM\n" +
+                "\t\t\ttort_info\n" +
+                "\t\t\tINNER JOIN\n" +
+                "\t\t\twork_info\n" +
+                "\t\t\tON \n" +
+                "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
+                "\t\tWHERE\n" +
+                "\t\t\ttort_info.monitor_time <= %s AND\n" +
+                "\t\t\ttort_info.monitor_time > %s\n" +
+                "\t) AS Type\n" +
+                "GROUP BY\n" +
+                "\tType.work_type\n" +
+                "ORDER BY\n" +
+                "\tnum DESC\n" +
+                "LIMIT 3",endTimeStamp,startTimeStamp);
+            let sqlRes = await mysqlUtils.sql(c, sqlRight);
+            sqlRes.forEach(function(item){
+                keys.push(item['work_type']);
+            });
+            index = index + MonthGap
+        }
+        for (let index = 0; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
             let TortCountGroupByWorkType = [];
@@ -454,49 +453,48 @@ async function getTortCountGroupByCreationTypeEXchange() {
     let TortCountGroupByCreationTypeEXchange = [];
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     let MonthGap = 1;
-    let TortCountGroupByCreationType = [];
+    let index = 0;
+    let endTimeStamp = TimeStampArray[index];
+    let startTimeStamp = TimeStampArray[(index + 1)];
     if(CONNECT == true){
-        // TODO 第一个月确定选中的类型
-        let index = 0;
-        let endTimeStamp = TimeStampArray[index];
-        let startTimeStamp = TimeStampArray[(index + 1)];
-        let sqlRight = util.format("SELECT\n" +
-            "\tType.creation_type, \n" +
-            "\tCOUNT(Type.work_id) AS num\n" +
-            "FROM\n" +
-            "\t(\n" +
-            "\t\tSELECT DISTINCT\n" +
-            "\t\t\ttort_info.work_id, \n" +
-            "\t\t\twork_info.creation_type\n" +
-            "\t\tFROM\n" +
-            "\t\t\ttort_info\n" +
-            "\t\t\tINNER JOIN\n" +
-            "\t\t\twork_info\n" +
-            "\t\t\tON \n" +
-            "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
-            "\t\tWHERE\n" +
-            "\t\t\ttort_info.monitor_time <= %s AND\n" +
-            "\t\t\ttort_info.monitor_time > %s\n" +
-            "\t) AS Type\n" +
-            "GROUP BY\n" +
-            "\tType.creation_type\n" +
-            "ORDER BY\n" +
-            "\tnum DESC\n" +
-            "LIMIT 3",endTimeStamp,startTimeStamp);
-        let sqlRes = await mysqlUtils.sql(c, sqlRight);
+        // TODO 确定选中的类型
         let keys = [];
-        sqlRes.forEach(function(item){
-            let MonthInfo = {
-                "creationType":WORKTYPE[item['creation_type']],
-                "TortCount":item['num'],
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByCreationType.push(MonthInfo);
-            keys.push(item['creation_type']);
-        });
-        TortCountGroupByCreationTypeEXchange.push(TortCountGroupByCreationType);
-        index = index + MonthGap;
-        for (; index < 12; index = index + MonthGap) {
+        while(keys.length<3 && index<12){
+            keys = [];
+            endTimeStamp = TimeStampArray[index];
+            startTimeStamp = TimeStampArray[(index + 1)];
+            let sqlRight = util.format("SELECT\n" +
+                "\tType.creation_type, \n" +
+                "\tCOUNT(Type.work_id) AS num\n" +
+                "FROM\n" +
+                "\t(\n" +
+                "\t\tSELECT DISTINCT\n" +
+                "\t\t\ttort_info.work_id, \n" +
+                "\t\t\twork_info.creation_type\n" +
+                "\t\tFROM\n" +
+                "\t\t\ttort_info\n" +
+                "\t\t\tINNER JOIN\n" +
+                "\t\t\twork_info\n" +
+                "\t\t\tON \n" +
+                "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
+                "\t\tWHERE\n" +
+                "\t\t\ttort_info.monitor_time <= %s AND\n" +
+                "\t\t\ttort_info.monitor_time > %s\n" +
+                "\t) AS Type\n" +
+                "GROUP BY\n" +
+                "\tType.creation_type\n" +
+                "ORDER BY\n" +
+                "\tnum DESC\n" +
+                "LIMIT 3",endTimeStamp,startTimeStamp);
+            let sqlRes = await mysqlUtils.sql(c, sqlRight);
+            sqlRes.forEach(function(item){
+                keys.push(item['creation_type']);
+            });
+            index = index + MonthGap;
+        }
+
+
+        for (let index = 0; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
             let TortCountGroupByCreationType = [];
