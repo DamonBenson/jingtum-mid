@@ -27,7 +27,7 @@ export const userAccount = {
         secret: '',
     },
     baiduMonitorAccount: {
-        address: '',
+        address: 'jn1BJ3fNqHJYAnRWrGDJz5XNVkS8ymX2zp',
         secret: '',
     },
     buptAuthorizeAccount: {

@@ -128,7 +128,7 @@ r.connect(async function(err, result) {
 
         // 存证交易入数据库
         await processUpload(uploadTxs, uploadTxs.length);
-        // await processPicMonitor(picMonitorTxs, picMonitorTxs.length);
+        await processPicMonitor(picMonitorTxs, picMonitorTxs.length);
         await processMusicMonitor(musicMonitorTxs, musicMonitorTxs.length);
 
         // 结束计时
@@ -196,11 +196,12 @@ async function processPicMonitor(picMonitorTxs, loopConter) {
         let monitorInfo = JSON.parse(picMonitorTx.memos[0].MemoData);
 
         monitorInfo.uploadTime = picMonitorTx.date;
+        monitorInfo.hash = musicMonitorTx.hash;
 
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);
 
-        let sql = sqlText.table('monitor_info').data(monitorInfo).insert();
+        let sql = sqlText.table('tort_info').data(monitorInfo).insert();
         monitorInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
@@ -224,10 +225,14 @@ async function processMusicMonitor(musicMonitorTxs, loopConter) {
         monitorInfo.uploadTime = musicMonitorTx.date;
         monitorInfo.hash = musicMonitorTx.hash;
 
+        // 统一字段名
+        monitorInfo.tortNum = monitorInfo.evidenceNo;
+        delete monitorInfo.evidenceNo;
+
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);
 
-        let sql = sqlText.table('music_monitor_info').data(monitorInfo).insert();
+        let sql = sqlText.table('tort_info').data(monitorInfo).insert();
         monitorInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
