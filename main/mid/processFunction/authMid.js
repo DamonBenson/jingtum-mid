@@ -172,9 +172,18 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
     }
     let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
     let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+    if(copyrightInfoArr.length == 0) {
+        resInfo.msg = 'no data',
+        resInfo.code = 6;
+        console.log('/auth/innerWork:', resInfo);
+        console.timeEnd('handleInnerWorkAuth');
+        console.log('--------------------');
+        return resInfo;
+    }
     let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
 
-    let auditResult = localUtils.randomSelect([true, false], [0.8, 0.2]);
+    // let auditResult = localUtils.randomSelect([true, false], [0.8, 0.2]);
+    let auditResult = true;
     if(auditResult == false) {
         resInfo.data.authenticationInfo = {
             auditResult: false,

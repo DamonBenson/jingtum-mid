@@ -12,6 +12,7 @@ const midAddr = userAccount.midAccount.address; // 中间层
  * @param {int}workId 作品标识
  * @param {String}sampleId 监测文件标识
  * @param {String}evidenceNo 侵权证据标识
+ * @param {String}url 侵权网页地址
  * @param {String}ipfsAddress 侵权证据文件IPFS地址
  * @returns {Object[]} 证据上链结果，包括：交易哈希hash
  */
