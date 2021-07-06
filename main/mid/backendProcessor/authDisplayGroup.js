@@ -123,33 +123,27 @@ export async function handleCertificateAmountGroupByWorkTypeEXchange(req, res) {
     return sqlRes;
 }
 async function getCertificateAmountGroupByWorkTypeEXchange() {
-    let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
+    let [TimeStampArray,MonthArray] = DateUtil.getSeasonTimeStampArray();
     let CertificateAmountGroupByWorkTypeEXchange = [];
     let CertificateAmountGroupByWorkType = [];
-    let MonthGap = 3;
+    let SeasonGap = 1;
     let WorkTypeInfo = {};
     // console.log([TimeStampArray, MonthArray]);
     if(CONNECT == true){
-        // TODO 第一个月确定选中的类型
+        // TODO 确定选中的类型
         let index = 0;
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
-        let Res = await countGroupBy("work_info", "work_type", endTimeStamp ,startTimeStamp);
-        let keys = Object.keys(Res);
-
-        for (let i = 0, n = keys.length, key; i < n; ++i) {
-            key = keys[i];
-            if(Res[key]==null)Res[key]=0;
-            let MonthInfo = {
-                "workType":WORKTYPE[key],
-                "CertificateAmount":Res[key],
-                "Month" : MonthArray[index + MonthGap],
-            };
-            CertificateAmountGroupByWorkType.push(MonthInfo);
+        let keys = [];
+        while(keys.length<3 && index<3){
+            endTimeStamp = TimeStampArray[index];
+            startTimeStamp = TimeStampArray[(index + 1)];
+            let Res = await countGroupBy("work_info", "work_type", endTimeStamp ,startTimeStamp);
+            keys = Object.keys(Res);
+            index = index + SeasonGap;
         }
-        CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);
-        index = index + MonthGap;
-        for (; index < 12; index = index + MonthGap) {
+
+        for (let index = 0; index < 4; index = index + SeasonGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
             let Res = await countGroupBy("work_info", "work_type",endTimeStamp ,startTimeStamp);
@@ -160,7 +154,7 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
                 let MonthInfo = {
                     "workType":WORKTYPE[key],
                     "CertificateAmount":Res[key],
-                    "Month" : MonthArray[index + MonthGap],
+                    "Month" : MonthArray[index],
                 };
                 CertificateAmountGroupByWorkType.push(MonthInfo);
             }
@@ -169,25 +163,25 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
         }
     }
     else{
-        for (let index = 0; index < 12; index = index + MonthGap) {
+        for (let index = 0; index < 3; index = index + SeasonGap) {
             let CertificateAmountGroupByWorkType = [];
 
             WorkTypeInfo = {
                 "workType":"音乐",
                 "CertificateAmount":localUtils.randomNumber(80,100),
-                "Month" : MonthArray[index + MonthGap],
+                "Month" : MonthArray[index + SeasonGap],
             };
             CertificateAmountGroupByWorkType.push(WorkTypeInfo);
             WorkTypeInfo = {
                 "workType":"电影",
                 "CertificateAmount":localUtils.randomNumber(60,80),
-                "Month" : MonthArray[index + MonthGap],
+                "Month" : MonthArray[index + SeasonGap],
             };
             CertificateAmountGroupByWorkType.push(WorkTypeInfo);
             WorkTypeInfo = {
                 "workType":"美术",
                 "CertificateAmount":localUtils.randomNumber(40,60),
-                "Month" : MonthArray[index + MonthGap],
+                "Month" : MonthArray[index + SeasonGap],
             };
             CertificateAmountGroupByWorkType.push(WorkTypeInfo);
             CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);

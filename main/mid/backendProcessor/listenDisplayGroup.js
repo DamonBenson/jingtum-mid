@@ -190,43 +190,54 @@ async function getTortCountGroupByWorkType() {
             };
             TortCountGroupByWorkType.push(WorkTypeInfo);
         });
+
+        // 空数据库保护
+        if(TortCountGroupByWorkType.length < 6){
+            PROTOTECT_getTortCountGroupByWorkType(TortCountGroupByWorkType);
+        }
     }
     else{
-        WorkTypeInfo = {
-            "workType":WORKTYPE["1"],
-            "TortCount":0
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["2"],
-            "TortCount":0
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["3"],
-            "TortCount":0
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["4"],
-            "TortCount":0
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["5"],
-            "TortCount":0
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["6"],
-            "TortCount":0
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
+        PROTOTECT_getTortCountGroupByWorkType(TortCountGroupByWorkType);
     }
     console.log(TortCountGroupByWorkType);
     return TortCountGroupByWorkType;
 }
+function PROTOTECT_getTortCountGroupByWorkType(TortCountGroupByWorkType) {
+    console.log("PROTOTECT_getTortCountGroupByWorkType");
 
+    let WorkTypeInfo = {};
+    WorkTypeInfo = {
+        "workType":WORKTYPE["1"],
+        "TortCount":0
+    };
+    TortCountGroupByWorkType.push(WorkTypeInfo);
+    WorkTypeInfo = {
+        "workType":WORKTYPE["2"],
+        "TortCount":0
+    };
+    TortCountGroupByWorkType.push(WorkTypeInfo);
+    WorkTypeInfo = {
+        "workType":WORKTYPE["3"],
+        "TortCount":0
+    };
+    TortCountGroupByWorkType.push(WorkTypeInfo);
+    WorkTypeInfo = {
+        "workType":WORKTYPE["4"],
+        "TortCount":0
+    };
+    TortCountGroupByWorkType.push(WorkTypeInfo);
+    WorkTypeInfo = {
+        "workType":WORKTYPE["5"],
+        "TortCount":0
+    };
+    TortCountGroupByWorkType.push(WorkTypeInfo);
+    WorkTypeInfo = {
+        "workType":WORKTYPE["6"],
+        "TortCount":0
+    };
+    TortCountGroupByWorkType.push(WorkTypeInfo);
+    return TortCountGroupByWorkType;
+}
 /*
  * @param req: 请求
  * @param res: 返回
@@ -245,7 +256,8 @@ export async function handleTortCountGroupByCreationType(req, res) {
 }
 async function getTortCountGroupByCreationType() {
     let TortCountGroupByCreationType = [];
-    let CreationTypeInfo = {};
+
+
     if(CONNECT == true){
         let sqlRight = util.format("SELECT\n" +
             "\tType.creation_type, \n" +
@@ -266,7 +278,7 @@ async function getTortCountGroupByCreationType() {
             "\tType.creation_type\n" +
             "ORDER BY\n" +
             "\tnum DESC\n" +
-            "LIMIT 6");
+            "LIMIT 3");
         let sqlRes = await mysqlUtils.sql(c, sqlRight);
         sqlRes.forEach(function(item){
             let CreationTypeInfo = {
@@ -275,28 +287,40 @@ async function getTortCountGroupByCreationType() {
             };
             TortCountGroupByCreationType.push(CreationTypeInfo);
         });
+
+        // 空数据库保护
+        if(TortCountGroupByCreationType.length < 3){
+            PROTECT_getTortCountGroupByCreationType(TortCountGroupByCreationType);
+        }
+
+
     }
     else{
-        CreationTypeInfo = {
-            "creationType":CREATIONTYPE["3"],
-            "TortCount":0
-        };
-        TortCountGroupByCreationType.push(CreationTypeInfo);
-        CreationTypeInfo = {
-            "creationType":CREATIONTYPE["2"],
-            "TortCount":0
-        };
-        TortCountGroupByCreationType.push(CreationTypeInfo);
-        CreationTypeInfo = {
-            "creationType":CREATIONTYPE["1"],
-            "TortCount":0
-        };
-        TortCountGroupByCreationType.push(CreationTypeInfo);
+        PROTECT_getTortCountGroupByCreationType(TortCountGroupByCreationType);
     }
     console.log(TortCountGroupByCreationType);
     return TortCountGroupByCreationType;
 }
+function  PROTECT_getTortCountGroupByCreationType(TortCountGroupByCreationType){
+    console.log("PROTECT_getTortCountGroupByCreationType");
 
+    let CreationTypeInfo={};
+    CreationTypeInfo = {
+        "creationType":CREATIONTYPE["3"],
+        "TortCount":0
+    };
+    TortCountGroupByCreationType.push(CreationTypeInfo);
+    CreationTypeInfo = {
+        "creationType":CREATIONTYPE["2"],
+        "TortCount":0
+    };
+    TortCountGroupByCreationType.push(CreationTypeInfo);
+    CreationTypeInfo = {
+        "creationType":CREATIONTYPE["1"],
+        "TortCount":0
+    };
+    TortCountGroupByCreationType.push(CreationTypeInfo);
+}
 /*
  * @param req: 请求
  * @param res: 返回
@@ -329,7 +353,6 @@ async function getTortCountGroupByWorkTypeEXchange() {
             keys=[]
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
-            let TortCountGroupByWorkType = [];
             let sqlRight = util.format("SELECT\n" +
                 "\tType.work_type, \n" +
                 "\tCOUNT(Type.work_id) AS num\n" +
@@ -358,6 +381,11 @@ async function getTortCountGroupByWorkTypeEXchange() {
                 keys.push(item['work_type']);
             });
             index = index + MonthGap
+        }
+        if(keys.length < 3){
+            _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray);
+            TortCountGroupByWorkTypeEXchange.reverse();
+            return TortCountGroupByWorkTypeEXchange;
         }
         for (let index = 0; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
@@ -405,34 +433,39 @@ async function getTortCountGroupByWorkTypeEXchange() {
         }
     }
     else{
-        for (let index = 0; index < 12; index = index + MonthGap) {
-            let TortCountGroupByWorkType = [];
-            WorkTypeInfo = {
-                "workType":WORKTYPE["1"],
-                "TortCount":0,
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(WorkTypeInfo);
-            WorkTypeInfo = {
-                "workType":WORKTYPE["2"],
-                "TortCount":0,
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(WorkTypeInfo);
-            WorkTypeInfo = {
-                "workType":WORKTYPE["3"],
-                "TortCount":0,
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(WorkTypeInfo);
-            TortCountGroupByWorkTypeEXchange.push(TortCountGroupByWorkType);
-        }
+        _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray);
     }
     TortCountGroupByWorkTypeEXchange.reverse();
     console.log(TortCountGroupByWorkTypeEXchange);
     return TortCountGroupByWorkTypeEXchange;
 }
+function _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray) {
+    console.log("_PROTECT_getTortCountGroupByWorkTypeEXchange");
 
+    for (let index = 0; index < 12; index = index + MonthGap) {
+        let TortCountGroupByWorkType = [];
+        let WorkTypeInfo = {};
+        WorkTypeInfo = {
+            "workType":WORKTYPE["1"],
+            "TortCount":0,
+            "Month" : MonthArray[index + MonthGap],
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":WORKTYPE["2"],
+            "TortCount":0,
+            "Month" : MonthArray[index + MonthGap],
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        WorkTypeInfo = {
+            "workType":WORKTYPE["3"],
+            "TortCount":0,
+            "Month" : MonthArray[index + MonthGap],
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+        TortCountGroupByWorkTypeEXchange.push(TortCountGroupByWorkType);
+    }
+}
 /*
  * @param req: 请求
  * @param res: 返回
@@ -492,6 +525,12 @@ async function getTortCountGroupByCreationTypeEXchange() {
             });
             index = index + MonthGap;
         }
+        if(keys.length < 3){
+            _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange, MonthGap, MonthArray)
+            TortCountGroupByCreationTypeEXchange.reverse();
+            return TortCountGroupByCreationTypeEXchange;
+        }
+
 
 
         for (let index = 0; index < 12; index = index + MonthGap) {
@@ -540,35 +579,39 @@ async function getTortCountGroupByCreationTypeEXchange() {
         }
     }
     else{
-        for (let index = 0; index < 12; index = index + MonthGap) {
-            let TortCountGroupByWorkType = [];
-            let MonthInfo = {};
-            MonthInfo = {
-                "creationType":CREATIONTYPE["1"],
-                "TortCount":0,
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(MonthInfo);
-            MonthInfo = {
-                "creationType":CREATIONTYPE["2"],
-                "TortCount":0,
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(MonthInfo);
-            MonthInfo = {
-                "creationType":CREATIONTYPE["3"],
-                "TortCount":0,
-                "Month" : MonthArray[index + MonthGap],
-            };
-            TortCountGroupByWorkType.push(MonthInfo);
-            TortCountGroupByCreationTypeEXchange.push(TortCountGroupByWorkType);
-        }
+        _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange, MonthGap, MonthArray)
     }
     TortCountGroupByCreationTypeEXchange.reverse();
     console.log(TortCountGroupByCreationTypeEXchange);
     return TortCountGroupByCreationTypeEXchange;
 }
+function _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange, MonthGap, MonthArray) {
+    console.log("_PROTECT_getTortCountGroupByCreationTypeEXchange");
 
+    for (let index = 0; index < 12; index = index + MonthGap) {
+        let TortCountGroupByWorkType = [];
+        let MonthInfo = {};
+        MonthInfo = {
+            "creationType":CREATIONTYPE["1"],
+            "TortCount":0,
+            "Month" : MonthArray[index + MonthGap],
+        };
+        TortCountGroupByWorkType.push(MonthInfo);
+        MonthInfo = {
+            "creationType":CREATIONTYPE["2"],
+            "TortCount":0,
+            "Month" : MonthArray[index + MonthGap],
+        };
+        TortCountGroupByWorkType.push(MonthInfo);
+        MonthInfo = {
+            "creationType":CREATIONTYPE["3"],
+            "TortCount":0,
+            "Month" : MonthArray[index + MonthGap],
+        };
+        TortCountGroupByWorkType.push(MonthInfo);
+        TortCountGroupByCreationTypeEXchange.push(TortCountGroupByWorkType);
+    }
+}
 /*
  * @param req: 请求d
  * @param res: 返回
@@ -585,7 +628,6 @@ export async function handleTortCountGroupByTortSite(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-
 async function getTortCountGroupByTortSite() {
     let TortCountGroupByTortSite = [];
     let TortSiteInfo = {};
@@ -600,26 +642,34 @@ async function getTortCountGroupByTortSite() {
             };
             TortCountGroupByTortSite.push(TortSiteInfo);
         }
+        if(keys.length<3){
+            _PROTECT_getTortCountGroupByTortSite(TortCountGroupByTortSite);
+        }
     }
     else{
-        TortSiteInfo = {
-            "TortSite":TORTSITE["3"],
-            "TortCount":0
-        };
-        TortCountGroupByTortSite.push(TortSiteInfo);
-        TortSiteInfo = {
-            "TortSite":TORTSITE["2"],
-            "TortCount":0
-        };
-        TortCountGroupByTortSite.push(TortSiteInfo);
-        TortSiteInfo = {
-            "TortSite":TORTSITE["1"],
-            "TortCount":0
-        };
-        TortCountGroupByTortSite.push(TortSiteInfo);
+        _PROTECT_getTortCountGroupByTortSite(TortCountGroupByTortSite);
     }
     console.log(TortCountGroupByTortSite);
     return TortCountGroupByTortSite;
+}
+function _PROTECT_getTortCountGroupByTortSite(TortCountGroupByTortSite) {
+    console.log("_PROTECT_getTortCountGroupByTortSite");
+    let TortSiteInfo = {};
+    TortSiteInfo = {
+        "TortSite":TORTSITE["3"],
+        "TortCount":0
+    };
+    TortCountGroupByTortSite.push(TortSiteInfo);
+    TortSiteInfo = {
+        "TortSite":TORTSITE["2"],
+        "TortCount":0
+    };
+    TortCountGroupByTortSite.push(TortSiteInfo);
+    TortSiteInfo = {
+        "TortSite":TORTSITE["1"],
+        "TortCount":0
+    };
+    TortCountGroupByTortSite.push(TortSiteInfo);
 }
 
 /*
@@ -727,8 +777,8 @@ async function getTortGroupByTortSiteGroupByWorkType() {
     let TortCountGroupByWorkType = [];
     let WorkTypeInfo = {};
     let totalTortCount = 0;
-    if(CONNECT == true){
-        let Res = await countGroupBy("tort_info","site_name",null,null,null,6);
+    if(CONNECT == true) {
+        let Res = await countGroupBy("tort_info", "site_name", null, null, null, 6);
         let keys = Object.keys(Res);
         let sqlRight = util.format("SELECT\n" +
             "\tCOUNT(Type.work_id) AS num, \n" +
@@ -753,34 +803,36 @@ async function getTortGroupByTortSiteGroupByWorkType() {
             "\twork_type\n" +
             "ORDER BY\n" +
             "\tnum DESC\n" +
-            "LIMIT 6",keys[0],keys[1],keys[2]);
+            "LIMIT 6", keys[0], keys[1], keys[2]);
         let sqlRes = await mysqlUtils.sql(c, sqlRight);
-        sqlRes.forEach(function(item){
+        sqlRes.forEach(function (item) {
             let WorkTypeInfo = {
-                "workType":WORKTYPE[item['work_type']],
-                "TortCount":item['num'],
+                "workType": WORKTYPE[item['work_type']],
+                "TortCount": item['num'],
             };
             TortCountGroupByWorkType.push(WorkTypeInfo);
         });
+        if (TortCountGroupByWorkType.length < 6) {
+            _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType);
+        }
     }
     else{
-        totalTortCount = localUtils.randomNumber(2000,5000);
-        for(let i = 1;i <= 6;i++){
-            let noise = Math.floor(totalTortCount * 0.01 - localUtils.randomNumber(20,90));
-            if(noise < 0) noise = 0;
-            let TORTCOUNTRATE = (localUtils.randomNumber(20,90)/100);
-            let tortCount = Math.floor(TORTCOUNTRATE * (totalTortCount - noise)) ;
-            WorkTypeInfo = {
-                "workType":WORKTYPE[i],
-                "TortCount":0,
-            };
-            TortCountGroupByWorkType.push(WorkTypeInfo);
-        }
+        _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType);
     }
     console.log(TortCountGroupByWorkType);
     return TortCountGroupByWorkType;
 }
+function _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType) {
+    console.log("_PROTECT_getTortGroupByTortSiteGroupByWorkType");
 
+    for(let i = 1;i <= 6;i++){
+        let WorkTypeInfo = {
+            "workType":WORKTYPE[i],
+            "TortCount":0,
+        };
+        TortCountGroupByWorkType.push(WorkTypeInfo);
+    }
+}
 /*
  * @param req: 请求
  * @param res: 返回
@@ -834,17 +886,18 @@ async function getTortTort_AND_ClaimCountGroupByWorkType() {
             };
             TortCountGroupByWorkType.push(WorkTypeInfo);
         });
+        if(TortCountGroupByWorkType.length<6){
+            _PROTECT_(TortCountGroupByWorkType);
+        }
     }
     else{
-        totalTortCount = localUtils.randomNumber(2000,5000);
+        _PROTECT_(TortCountGroupByWorkType);
+    }
+    console.log(TortCountGroupByWorkType);
+    return TortCountGroupByWorkType;
+    function _PROTECT_(TortCountGroupByWorkType){
         for(let i = 1;i <= 6;i++){
-            let noise = Math.floor(totalTortCount * 0.01 - localUtils.randomNumber(20,90));
-            if(noise < 0) noise = 0;
-            let TORTCOUNTRATE = (localUtils.randomNumber(20,90)/100);
-            let TORTCLAIMRATE = (localUtils.randomNumber(20,90)/100);
-            let tortCount = Math.floor(TORTCOUNTRATE * (totalTortCount - noise)) ;
-            let claimCount = Math.floor(TORTCLAIMRATE * (tortCount- noise)) ;
-            WorkTypeInfo = {
+            let WorkTypeInfo = {
                 "workType":WORKTYPE[i],
                 "TortCount":0,
                 "TotalTortCount":0,
@@ -853,6 +906,5 @@ async function getTortTort_AND_ClaimCountGroupByWorkType() {
             TortCountGroupByWorkType.push(WorkTypeInfo);
         }
     }
-    console.log(TortCountGroupByWorkType);
-    return TortCountGroupByWorkType;
 }
+
