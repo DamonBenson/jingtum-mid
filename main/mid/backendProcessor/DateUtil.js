@@ -3,10 +3,11 @@ import moment from "moment";
 import * as localUtils from '../../../utils/localUtils.js';
 
 // LearnAboutDateUtil();
-let now = new Date(); //当前日期
+// let now = new Date(); //当前日期
+// console.log(now.getTime());
+
 // console.log(getMonthTimeStampMap());
 // console.log(getMonthTimeStampArray());
-console.log(now.getTime());
 // console.log(transMonthName(new Date()));
 export function LearnAboutDateUtil(){
     let timeToday = Math.round((new Date())/ 1000);
@@ -201,6 +202,33 @@ export function getMonthTimeStampArray(MonthsAmong = 12,MonthOrWeek = true){
     }
     return [TimeStampArray, MonthArray];
 }
+
+export function getSeasonTimeStampArray(MonthsAmong = 12,MonthOrWeek = true){
+    let TimeStampArray = [];
+    let MonthArray = [];
+
+    const MonthName = {0:"一月",1:"二月",2:"三月",3:"四月",4:"五月",5:"六月",
+        6:"七月",7:"八月",8:"九月",9:"十月",10:"十一月",11:"十二月"}
+    const SeasonName = {0:"一季度",3:"二季度",6:"三季度",9:"四季度"}
+    let now = new Date(); //当前日期
+    let nowMonth = now.getMonth(); //当前月
+    let nowYear = now.getFullYear(); //当前年
+    MonthArray.push(transSeasonName(now));
+    TimeStampArray.push(Date.parse(now)/1000);
+    for (let index = 0; index < MonthsAmong; index++) {
+        let time = new Date(nowYear, nowMonth - index);
+        let timeStart = Date.parse(time)/1000;//s
+        if(false == MonthArray.includes(transSeasonName(time))){
+            MonthArray.push(transSeasonName(time));
+            TimeStampArray.push(timeStart);
+        }
+        /* example:
+        * console.log("time",time,"Month",index,"timeStart",timeStart,"time.getMonth",time.getMonth());
+        * time 2021-04-30T16:00:00.000Z Month 0 timeStart 1619798400 time.getMonth 4
+        */
+    }
+    return [TimeStampArray, MonthArray];
+}
 /*
  * @param A_Date : like 2021-05-16T12:53:39.400Z
  * @return theMonth : like 五月
@@ -213,6 +241,21 @@ export function getMonthTimeStampArray(MonthsAmong = 12,MonthOrWeek = true){
 export function transMonthName(A_Date){
     const MonthName = {0:"一月",1:"二月",2:"三月",3:"四月",4:"五月",5:"六月",
                         6:"七月",7:"八月",8:"九月",9:"十月",10:"十一月",11:"十二月"};
+    let theMonth = MonthName[A_Date.getMonth()];
+    return theMonth;
+}
+/*
+ * @param A_Date : like 2021-05-16T12:53:39.400Z
+ * @return: like 三季度
+ * @author: Bernard
+ * @date: 2021/7/1 20:28
+ * @description:
+ * @example:.
+ *
+ */
+export function transSeasonName(A_Date){
+    const MonthName = {0:"一季度",1:"一季度",2:"一季度",3:"二季度",4:"二季度",5:"二季度",
+        6:"三季度",7:"三季度",8:"三季度",9:"四季度",10:"四季度",11:"四季度"};
     let theMonth = MonthName[A_Date.getMonth()];
     return theMonth;
 }
