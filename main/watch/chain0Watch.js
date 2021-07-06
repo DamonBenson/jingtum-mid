@@ -200,7 +200,7 @@ async function processPicMonitor(picMonitorTxs, loopConter) {
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);
 
-        let sql = sqlText.table('monitor_info').data(monitorInfo).insert();
+        let sql = sqlText.table('tort_info').data(monitorInfo).insert();
         monitorInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
@@ -227,7 +227,7 @@ async function processMusicMonitor(musicMonitorTxs, loopConter) {
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);
 
-        let sql = sqlText.table('music_monitor_info').data(monitorInfo).insert();
+        let sql = sqlText.table('tort_info').data(monitorInfo).insert();
         monitorInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
