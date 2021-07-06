@@ -15,7 +15,7 @@ export function buildSignedTx(remote, blob, showRes) {
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {
@@ -66,7 +66,7 @@ export function buildSignedTx(remote, blob, showRes) {
         tx.submit(function(err, result) {
             if(err) {
                 console.log('err:',err);
-                reject('err');
+                reject(err);
             }
             else if(result){
                 if(showRes) {

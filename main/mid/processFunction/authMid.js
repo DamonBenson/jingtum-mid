@@ -186,7 +186,7 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
     }
 
     let authenticationId = 'DCI' + sha256(copyrightIds).toString().substring(0, 8);
-    let licenseUrl = 'http://auth.com/' + authenticationId + '.pdf';
+    let licenseUrl = 'http://118.190.39.87:5001/api/v0/cat?arg=QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
     let authenticationInfo = {
         authenticationId: authenticationId,
         licenseUrl: licenseUrl,

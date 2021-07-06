@@ -312,6 +312,7 @@ export async function handleWorkInfoOfUser(req) {
                     address = '" + address + "'\
             ) AS temp\
         INNER JOIN work_info ON temp.work_id = work_info.work_id\
+        ORDER BY completion_time DESC\
     ";
     let copyrightWorkInfoArr =  await mysqlUtils.sql(c, copyrightWorkSql);
     copyrightWorkInfoArr.forEach(copyrightWorkInfo => {
@@ -343,6 +344,7 @@ export async function handleWorkInfoOfUser(req) {
                 INNER JOIN right_token_info ON right_token_info.copyright_id = temp1.copyright_id\
             ) AS temp2\
         INNER JOIN work_info ON work_info.work_id = temp2.work_id\
+        ORDER BY completion_time DESC\
     ";
     let approveWorkInfoArr =  await mysqlUtils.sql(c, approveWorkSql);
     approveWorkInfoArr.forEach(approveWorkInfo => {
@@ -421,6 +423,7 @@ export async function handleIssueApproveInfoOfWork(req) {
                 AND address = '" + address + "'\
             ) AS temp\
         INNER JOIN appr_token_info ON temp.copyright_id = appr_token_info.copyright_id\
+        ORDER BY start_time DESC\
     ";
     let userApproveInfoList =  await mysqlUtils.sql(c, issueApproveSql);
     userApproveInfoList.forEach(issueApproveInfo => {
@@ -497,6 +500,7 @@ export async function handleOwnApproveInfoOfWork(req) {
         INNER JOIN appr_token_info ON temp.copyright_id = appr_token_info.copyright_id\
         WHERE\
             appr_token_info.address = '" + address + "'\
+        ORDER BY start_time DESC\
     ";
     let userApproveInfoList =  await mysqlUtils.sql(c, ownApproveSql);
     userApproveInfoList.forEach(ownApproveInfo => {

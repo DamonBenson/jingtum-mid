@@ -5,7 +5,7 @@ import * as tx from '../utils/jingtum/tx.js';
 
 import {chains} from '../utils/config/jingtum.js';
 
-const addAmount = 3;
+const addAmount = 1;
 const addLoopCounter = addAmount - 1;
 
 const Remote = jlib.Remote;
