@@ -33,6 +33,7 @@ async function MimicTortInsert() {
         let tortInfo = {
             sample_Id : sha256(localUtils.randomNumber(100, 2000000000).toString()).toString(),
             tort_num : localUtils.randomNumber(1, 300000),
+            upload_time : now.getTime()/1000, //时间戳
             monitor_time : now.getTime()/1000, //时间戳
             tort_url : TORTURL[tortSite],
             work_id : work_id,

@@ -1,10 +1,6 @@
 import * as kafka from 'kafka-node';
 import {buyOrderContractAddrs, sellOrderContractAddrs, debugMode} from '../info.js';
-const kafkaHostIP = ["39.102.93.47:9092",
-"39.102.91.224:9092",
-"39.102.92.249:9092",
-"39.102.90.153:9092",
-"39.102.92.229:9092"];//L
+const kafkaHostIP = [""];//L
 // const debugMode = 0;
  /*  初始化消费者option    */
 export class Client {
