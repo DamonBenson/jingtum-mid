@@ -12,10 +12,15 @@ import {userAccount} from '../../../utils/config/jingtum.js';
 import {mysqlConf} from '../../../utils/config/mysql.js';
 import {handleCertificateAmountGroupByWorkTypeEXchange} from "../backendProcessor/authDisplayGroup";
 import {query} from "node-transform-mysql/build/curd";
+import {debugMode, ipfsConf} from "../../../utils/info";
+import * as httpUtils from "../../../utils/httpUtils";
+import * as ipfsUtils from "../../../utils/ipfsUtils";
+import ipfsAPI from "ipfs-api";
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
 setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 
 const authenticateAddr = userAccount.authenticateAccount[0].address;
 const authenticateSecr = userAccount.authenticateAccount[0].secret;
@@ -296,7 +301,7 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
 
 // }
 /**
- * @description 通过北版完成同步作品确权。
+ * @description 通过北版完成作品确权。
  * @param {int}workId 作品标识
  * @param {String}address 确权用户地址
  * @returns {Object} 确权信息，包括：审核结果auditResult、确权标识authenticationId、登记确权证书索引licenseUrl、确权时间戳timestamp
@@ -313,23 +318,33 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     /****           业务三           ****/
 
     /****           查审核情况           ****/
+    // 异步返回京东
+
     IntervalId_F = setInterval(query_F,3000);
 }
 /**
  * @description 查询审核的轮询函数。
  */
-function query_F(){
+async function query_F() {
     // 请求接口
+    let batchNo = 0;
+    let approveResInfo = await httpUtils.get('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
+    if (debugMode) {
+        console.log('approvesInfo:', approveResInfo.data.approveInfoList);
+    }
     let resJson = requestInfo;
-    if( code == 200 ){
+    if (code == 200) {
         clearInterval(IntervalId_F);
         // 获取证书
         let certificateBytes = resJson;
 
-        // 上链
+        // 证书上链
         erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false);
+        // 证书存入IPFS
+        let work = Buffer.from(JSON.stringify(body));
+        let workHash = await ipfsUtils.add(ipfs, work);
 
         // 异步返回京东
-
+        // TODO
     }
 }
