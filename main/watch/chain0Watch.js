@@ -198,6 +198,11 @@ async function processPicMonitor(picMonitorTxs, loopConter) {
         monitorInfo.uploadTime = picMonitorTx.date;
         monitorInfo.hash = musicMonitorTx.hash;
 
+        let monitorTime = monitorInfo.monitorTime;
+        let pubTime = monitorInfo.pubTime;
+        monitorInfo.monitorTime = moment(monitorTime).unix();
+        monitorInfo.pubTime = moment(pubTime).unix();
+
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);
 
