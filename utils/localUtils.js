@@ -1,3 +1,4 @@
+import fs from 'fs';
 import jlib from 'jingtum-lib';
 const u = jlib.utils;
 
@@ -176,7 +177,7 @@ export function toRolesArr(flagAddrs, tokenInfosAddrs) {
  * @param {Object[]}arr 链上的ERC721memos数据，包括MemoType属性名、MemoData属性值
  * @returns {Object} MemoType作为key，MemoData作为value的js对象
  */
- export function memos2obj(arr) {
+export function memos2obj(arr) {
     let obj = new Object();
     for(let i = arr.length - 1; i >= 0; i--) {
         let k = arr[i].MemoType;
@@ -184,4 +185,25 @@ export function toRolesArr(flagAddrs, tokenInfosAddrs) {
         obj[k] = v;
     }
     return obj;
+}
+
+export function saveJson(json, path) {
+
+    path = new URL(path);
+
+    return new Promise((resolve, reject) => {
+
+        fs.open(path, 'w', (err, fd) => {
+            if (err) reject(err);
+            fs.appendFile(fd, json, 'utf8', (err) => {
+                if (err) reject(err);
+            });
+            fs.close(fd, (err) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+
+    })
+
 }

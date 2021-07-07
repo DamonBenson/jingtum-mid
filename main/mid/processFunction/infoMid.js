@@ -352,7 +352,7 @@ export async function handleWorkInfoOfUser(req) {
         approveWorkInfo.fileHashList = JSON.parse(approveWorkInfo.fileInfoList).map(fileInfo => fileInfo.fileHash);
         delete approveWorkInfo.fileInfoList;
         approveWorkInfo.authenticationStatus = 0;
-        approveWorkInfo.ownershipType = 0;
+        approveWorkInfo.ownershipType = 1;
     });
 
     let userWorkInfoList = copyrightWorkInfoArr.concat(approveWorkInfoArr);

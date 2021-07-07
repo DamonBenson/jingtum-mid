@@ -90,6 +90,21 @@ uploadRemote.connect(async function(err, res) {
             seqObj.monitor.contract = (await requestInfo.requestAccountInfo(monitorAddr, contractRemote, false)).account_data.Sequence;
             console.log('seq:', seqObj);
 
+            let filter = (req, res, next) => {
+                try {
+                    next();
+                } catch(e) {
+                    resInfo = {
+                        msg: 'inner error',
+                        code: 3,
+                        data: {},
+                    };
+                    res.send(resInfo);
+                }
+            }
+
+            app.use(filter);
+
             /**
              * @description 信息查询相关请求路由。
              */
