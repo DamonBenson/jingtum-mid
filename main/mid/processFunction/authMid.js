@@ -9,18 +9,14 @@ import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
 import * as erc721 from '../../../utils/jingtum/erc721.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
-import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as authValidate from '../../../utils/validateUtils/auth.js';
-import * as httpUtils from '../../../utils/httpUtils.js';
-
+import * as httpUtils from "../../../utils/httpUtils.js";
+import * as ipfsUtils from "../../../utils/ipfsUtils.js";
 import {userAccount} from '../../../utils/config/jingtum.js';
 import {mysqlConf} from '../../../utils/config/mysql.js';
-import {handleCertificateAmountGroupByWorkTypeEXchange} from "../backendProcessor/authDisplayGroup";
-import {query} from "node-transform-mysql/build/curd";
-import {debugMode, ipfsConf} from "../../../utils/info";
-import * as httpUtils from "../../../utils/httpUtils";
-import * as ipfsUtils from "../../../utils/ipfsUtils";
+import {debugMode, ipfsConf} from "../../../utils/info.js";
 import ipfsAPI from "ipfs-api";
+import {addFile} from "../../../utils/ipfsUtils.js";
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -314,61 +310,15 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
 //     return resInfo;
 
 // }
-<<<<<<< HEAD
-/**
- * @description 通过北版完成作品确权。
- * @param {int}workId 作品标识
- * @param {String}address 确权用户地址
- * @returns {Object} 确权信息，包括：审核结果auditResult、确权标识authenticationId、登记确权证书索引licenseUrl、确权时间戳timestamp
- */
-let IntervalId_1;// 第一步业务
-let IntervalId_2;// 第二步业务
-let IntervalId_3;// 第三步业务
-let IntervalId_F;// 审核的定时器
-export async function handleWorkAuth(tokenRemote, seqObj, req) {
-    /****           业务一           ****/
-
-    /****           业务二           ****/
-
-    /****           业务三           ****/
-
-    /****           查审核情况           ****/
-    // 异步返回京东
-
-    IntervalId_F = setInterval(query_F,3000);
-}
-/**
- * @description 查询审核的轮询函数。
- */
-async function query_F() {
-    // 请求接口
-    let batchNo = 0;
-    let approveResInfo = await httpUtils.get('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
-    if (debugMode) {
-        console.log('approvesInfo:', approveResInfo.data.approveInfoList);
-    }
-    let resJson = requestInfo;
-    if (code == 200) {
-        clearInterval(IntervalId_F);
-        // 获取证书
-        let certificateBytes = resJson;
-
-        // 证书上链
-        erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false);
-        // 证书存入IPFS
-        let work = Buffer.from(JSON.stringify(body));
-        let workHash = await ipfsUtils.add(ipfs, work);
-
-        // 异步返回京东
-        // TODO
-    }
-=======
 
 /**
  * @description 不通过合约完成同步作品确权。
  * @param {int}workId 作品标识
  * @param {String}address 确权用户地址
  */
+let IntervalId_1;// 第一步业务
+let IntervalId_2;// 第二步业务
+let IntervalId_3;// 第三步业务
 export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     console.time('handleWorkAuth');
@@ -570,6 +520,41 @@ function getNeedUpload(checkRes) {
     }).filter(fileInfo => !fileInfo.fileStatus);
 
     return fileHashArr;
+}
+let IntervalId_AuthResult;// 审核的定时器
+export async function handleAuthResult(tokenRemote, seqObj, req) {
+    /****           查审核情况           ****/
+    // 启动定时器
+    IntervalId_AuthResult = setInterval(queryAuthResult,3000,[]);
+}
+/**
+ * @description 查询审核的轮询函数。
+ */
+async function queryAuthResult() {
+    // 请求接口
+    let batchNo = 0;
+    let approveResInfo = await httpUtils.get('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
+    if (debugMode) {
+        console.log('approvesInfo:', approveResInfo.data.approveInfoList);
+    }
+    let resJson = requestInfo;
+    if (code == 200) {
+        // 清除定时器
+        clearInterval(IntervalId_AuthResult);
 
->>>>>>> QiuMufei
+        // 获取证书
+        let certificateBytes = resJson;
+
+        // 证书上链
+        // TODO
+        erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false);
+
+        // 证书存入IPFS
+        const workFilePath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
+        let workFileHash = await ipfsUtils.addFile(workFilePath);
+
+        // 异步返回京东
+        // TODO
+
+    }
 }

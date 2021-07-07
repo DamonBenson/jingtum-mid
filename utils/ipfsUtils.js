@@ -1,7 +1,8 @@
 import http from 'http';
 import formData from 'form-data';
-
+import request from 'request';
 import {ipfsAddUrl, ipfsCatUrl} from './config/ipfs.js';
+import * as fs from "fs";
 
 /**
  * @description 将可被JSON序列化的数据上传到IPFS。
@@ -58,7 +59,7 @@ export function add(obj) {
  export function addFile(filePath) {
 
     let form = new formData();
-    form.append('data', fs.createReadStream(filePath));
+    form.append('data',fs.readFileSync(filePath));
 
     let options = {
         host: ipfsAddUrl.hostname,
@@ -74,27 +75,26 @@ export function add(obj) {
 
             res.setEncoding('utf8');
             let data = '';
-    
+
             res.on('data', chunk => {
                 data += chunk;
             });
-    
+
             res.on('end', () => {
                 let cid = JSON.parse(data).cid['/'];
                 resolve(cid);
             });
-        
+
         });
 
         req.on('error', e => {
             reject(e.message);
         });
-
         req.write(form.getBuffer());
-        req.end();        
+        req.end();
 
     });
-    
+
 }
 
 /**
