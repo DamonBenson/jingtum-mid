@@ -142,7 +142,7 @@ let pakage_json ={
             "works_name": "ImageSelector_20190107_191612.JPEG",
             "works_path": "/storage/emulated/0/ImageSelector/CameraImage/ImageSelector_20190107_191612.JPEG",
             "works_size": "2317117",
-            "works_type": "10"
+            "works_type": ""
         }
     ],
     "copyright_rights_get": "0",
