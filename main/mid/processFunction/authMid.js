@@ -898,9 +898,11 @@ async function uploadFiles(checkRes) {
 }
 
 
-let IntervalId_AuthResult; // 审核的定时器
 
-export async function handleAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
+
+
+let IntervalId_AuthResult;// 审核的定时器
+export async function handleAuthResult(tokenRemote, seqObj, req) {
     /****           查审核情况           ****/
     // 启动定时器
     IntervalId_AuthResult = setInterval(queryAuthResult, 3000, [tokenRemote, seqObj, workId, address, batchNo]);
@@ -915,7 +917,9 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     if (debugMode) {
         console.log('requestInfo:', certificateRes.body);
     }
-    if (certificateRes.body.code === 200) {
+    // TODO verify
+    if (certificateRes.code === 200) {
+        let body = req.body;// 确权请求
         // 清除定时器
         clearInterval(IntervalId_AuthResult);
         /****获取证书后****/
@@ -959,7 +963,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
                 examineMessage : null,
                 authenticationId : workFileHash,
                 licenseUrl: ipfsUrl,
-                timestamp:timestamp//确权信息填入通证链的链上时间戳
+                timestamp:timestamp//确权信息填入通证链的链上时间戳,暂取首次
             }
 
         }
