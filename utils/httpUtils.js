@@ -219,7 +219,7 @@ export function downloadToIPFS(urlString = "http://i1.hexun.com/2019-12-30/19982
             });
 
             res.on('end', () => {
-                let ipfsUrl = ipfsUtils.addRaw(data);
+                let ipfsUrl = ipfsUtils.addRaw(data);//这里的addRaw 相当于 addFile（测试过，一样的hash）
                 resolve(ipfsUrl);
             });
 
