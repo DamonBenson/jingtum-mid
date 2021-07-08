@@ -200,10 +200,20 @@ export function saveJson(json, path) {
             });
             fs.close(fd, (err) => {
                 if (err) reject(err);
-                resolve();
+                let hash = getFileHash(path)
+                resolve(hash);
             });
         });
 
     })
+
+}
+
+export function getFileHash(filePath) {
+
+    let file = fs.readFileSync(filePath);
+    let sha256 = crypto.createHash('sha256');
+    let hash = sha256.update(file).digest('hex');
+    return hash;
 
 }

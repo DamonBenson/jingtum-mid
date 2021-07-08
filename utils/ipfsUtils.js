@@ -1,9 +1,7 @@
 import http from 'http';
 import fs from 'fs';
 import formData from 'form-data';
-import request from 'request';
 import {ipfsAddUrl, ipfsCatUrl} from './config/ipfs.js';
-import * as fs from "fs";
 
 /**
  * @description 将可被JSON序列化的数据上传到IPFS。
