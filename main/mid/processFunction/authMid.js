@@ -1,5 +1,5 @@
 import fs from 'fs';
-import crypto from 'crypto-js';
+import crypto from 'crypto';
 import sha256 from 'crypto-js/sha256.js';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
@@ -15,6 +15,7 @@ import * as httpUtils from '../../../utils/httpUtils.js';
 
 import {userAccount} from '../../../utils/config/jingtum.js';
 import {mysqlConf} from '../../../utils/config/mysql.js';
+import {subjectInfo} from '../../../utils/config/auth.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -22,6 +23,7 @@ setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
 
 const authenticateAddr = userAccount.authenticateAccount[0].address;
 const authenticateSecr = userAccount.authenticateAccount[0].secret;
+const basePath = "E:/Git/Projects/jingtum-mid-1";
 
 // /*----------作品确权请求----------*/
 
@@ -324,7 +326,6 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     }
 
     let body = req.body;
-    console.log(body);
     try {
         await authValidate.innerWorkAuthReqSchema.validateAsync(body);
     } catch(e) {
@@ -344,7 +345,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let workId = body.workId;
     let address = body.address;
 
-    let basePath = "";
+    // step1
 
     let package1 = await genPackage1(workId, address);
     let package1Path = basePath + "/authFiles/package/" + package1.params.package_token + ".json";
@@ -354,25 +355,62 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express1Path = basePath + "/authFiles/express/" + package1.params.package_token + ".json";
     let express1Hash = localUtils.saveJson(express1, express1Path);
 
-    let detSn = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package1Path, express1Path]});
+    let packageRes = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package1Path, express1Path]});
+    let detSn = packageRes.det_sn;
 
     await localUtils.sleep(5000);
 
     let checkRes = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn});
 
-    let fileHashArr = getNeedUpload(checkRes);
+    let fileHashArr = await uploadFiles(checkRes);
 
-    for(let i in fileHashArr) {
-        let uploadFileInfo = {
-            files: fileHashArr[i],
-            det_sn: detSn,
-            packageHash: package1Hash,
-            is_split: 0
-        }
-        let uploadRes = await httpUtils.post("http://117.107.213.242:8888/spaceUpload/uploadDETFile", uploadFileInfo);
-    }
+
+
+    await localUtils.sleep(5000);
+
+    let batchRes = await httpUtils.post("http://117.107.213.242:8124/cr/reg/query/batch_no", {packageToken: package1.params.package_token});
+    let batchNo = batchRes.batch_no
+
+    // step2
+
+    let package2 = await genPackage2(workId, address, batchNo);
+    let package2Path = basePath + "/authFiles/package/" + package2.params.package_token + ".json";
+    let package2Hash = localUtils.saveJson(package2, package2Path);
+
+    let express2 = genExpress2(package2, package2Hash);
+    let express2Path = basePath + "/authFiles/express/" + package2.params.package_token + ".json";
+    let express2Hash = localUtils.saveJson(express2, express2Path);
+
+    let packageRes = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package2Path, express2Path]});
+    let detSn = packageRes.det_sn;
+
+    await localUtils.sleep(5000);
+
+    let checkRes = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn});
+
+    let fileHashArr = await uploadFiles(checkRes);
+
+    // step3
+
+    let package3 = await genPackage3(workId, address);
+    let package3Path = basePath + "/authFiles/package/" + package3.params.package_token + ".json";
+    let package3Hash = localUtils.saveJson(package3, package3Path);
+
+    let express3 = genExpress3(package3, package3Hash);
+    let express3Path = basePath + "/authFiles/express/" + package3.params.package_token + ".json";
+    let express3Hash = localUtils.saveJson(express3, express3Path);
+
+    let packageRes = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package3Path, express3Path]});
+    let detSn = packageRes.det_sn;
+
+    await localUtils.sleep(5000);
+
+    let checkRes = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn});
+
+    let fileHashArr = await uploadFiles(checkRes);
 
     
+
     console.log('/auth/work:', resInfo);
 
     console.timeEnd('handleWorkAuth');
@@ -387,75 +425,71 @@ async function genPackage1(workId, address) {
     let name = workId + address;
 
     let copyrightFilter = {
-        work_id: body.workId,
-        address: body.address,
+        work_id: workId,
+        address: address,
     }
 
     let sql = sqlText.table('work_info').where(copyrightFilter).select();
-    let workInfo = await mysqlUtils.sql(c, sql)[0];
-    let fileInfo = workInfo.file_info_list[0];
+    let workInfo = await mysqlUtils.sql(c, sql);
+    workInfo = workInfo[0];
+    let fileInfo = JSON.parse(workInfo.file_info_list)[0];
     let workPath = fileInfo.fileHash;
 
+
+
+    workPath = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+
+
+
+
     let localWorkPath = basePath + "/authFiles/work/" + workPath;
-    await ipfsUtils.getFile(workPath, localWorkPath);
+    let res = await ipfsUtils.getFile(workPath, localWorkPath);
 
-    let fd = fs.createReadStream(localWorkPath);
-    let hash = crypto.createHash('sha256');
-    hash.setEncoding('hex');
+    let workHash = await getFileHash(localWorkPath);
 
-    fd.on('end', function() {
-        
-        hash.end();
-        let workHash = hash.read();
-
-        let package1 = {
-            "cover": cover,
-            "cover_hash": coverHash,
-            "name": name,
-            "subject": [
-                {
-                    "name": subjectName,
-                    "type": subjectType,
-                    "usn": subjectUsn
-                }
-            ],
-            "object": [
-                {
-                    "is_split": 0,
-                    "split_num": "",
-                    "works_hash": workHash,
-                    "works_name": workName,
-                    "works_path": workPath,
-                    "works_size": 0,
-                    "works_type": workType
-                }
-            ],
-            "copyright_rights_get": 0,
-            "params": {
-                "batch_name": name,
-                "det_business_code": "C001_01_01",
-                "package_token": packageToken,
-                "step": 1,
-                "submit_usn": subjectUsn,
-                "works_count": 1
-            }
-        }
-    
-        return package1;
-
-    });
-
-    fd.pipe(hash);
+    let workSize = fs.statSync(localWorkPath).size;
 
     let workName = workInfo.work_name;
-    let workType = fileInfo.work_type;
+    let workType = workInfo.work_type;
 
-    let cover = base + "/resource/test.jpg";
+    let cover = basePath + "/resource/test.jpg";
     let coverHash = "017ec8060ae3cd8d7419b73f4f0bf77a7b963dd41a7af2deda1b4bf556835099";
-    let subjectName = "";
-    let subjectType = "";
-    let subjectUsn = "";
-    let packageToken = sha256(subjectUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+
+    let package1 = {
+        "cover": cover,
+        "cover_hash": coverHash,
+        "name": name,
+        "subject": [
+            {
+                "name": subjectInfo.name,
+                "type": subjectInfo.type,
+                "usn": subjectInfo.usn
+            }
+        ],
+        "object": [
+            {
+                "is_split": 0,
+                "split_num": "",
+                "works_hash": workHash,
+                "works_name": workName,
+                "works_path": workPath,
+                "works_size": workSize,
+                "works_type": workType
+            }
+        ],
+        "copyright_rights_get": 0,
+        "params": {
+            "batch_name": name,
+            "det_business_code": "C001_01_01",
+            "package_token": packageToken,
+            "step": 1,
+            "submit_usn": subjectInfo.usn,
+            "works_count": 1
+        }
+    }
+
+    return package1;
 
 }
 
@@ -463,7 +497,7 @@ function genExpress1(package1, package1Hash) {
 
     let detPackageName = package1.name;
     let detTime = moment().format('YYYY-MM-DD');
-    let fromSpaceUser = package1.subject[0].usn;
+    let fromSpaceUser = package1.params.submit_usn;
     let fileHash1 = package1.object[0].workHash;
     let fileName1 = package1.object[0].workName;
     let filePath1 = package1.object[0].workPath;
@@ -504,7 +538,79 @@ function genExpress1(package1, package1Hash) {
 
 }
 
-function getNeedUpload(checkRes) {
+function genPackage2(workId, address, batchNo) {
+
+    let copyrightFilter = {
+        work_id: workId,
+        address: address,
+    };
+
+    let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
+    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+    let copyrightTypes = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_type);
+    let rights = [];
+    for(let i in copyrightTypes) {
+        rights.push({
+            rights_category: copyrightTypes[i],
+            rights_explain: "",
+        });
+    }
+    let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+
+    let package2 = {
+        "rights_category": [
+            {
+            "rights_owner_name": subjectInfo.name,
+            "rights_owner_type": subjectInfo.type,
+            "rights_owner_usn": subjectInfo.usn,
+            "rights": rights
+            },
+        ],
+        "copyright_produce_mode": 0,
+        "params": {
+            "det_business_code": "C001_01_02",
+            "submit_usn": subjectInfo.usn,
+            "package_token": packageToken,
+            "step": 2
+        },
+        "batch_no": batchNo
+    }
+
+    return package2;
+
+}
+
+function genExpress1(package1, package2, package2Hash) {
+
+    let detPackageName = package1.name;
+    let detTime = moment().format('YYYY-MM-DD');
+    let fromSpaceUser = package2.params.submit_usn;
+    let fileHash1 = package2.object[0].workHash;
+    let fileName1 = package2.object[0].workName;
+    let filePath1 = package2.object[0].workPath;
+    let fileSize1 = package2.object[0].workSize;
+    let packageToken = package2.params.package_token;
+
+    let express2 = {
+        "det_business_code": "C001_01_02",
+        "det_package_name": detPackageName,
+        "det_package_num": 1,
+        "det_time": detTime,
+        "from_space_address": "",
+        "from_space_device": "",
+        "from_space_ip": "",
+        "from_space_user": fromSpaceUser,
+        "package_list": [],
+        "to_space_address": "",
+        "to_space_user": ""
+    }
+      
+    return express2;
+
+}
+
+
+async function uploadFiles(checkRes) {
 
     let fileHashArr = checkRes.data.package_list.file_list.map(fileInfo => {
         return {
@@ -513,6 +619,34 @@ function getNeedUpload(checkRes) {
         }
     }).filter(fileInfo => !fileInfo.fileStatus);
 
-    return fileHashArr;
+    for(let i in fileHashArr) {
+        let uploadFileInfo = {
+            files: fileHashArr[i],
+            det_sn: detSn,
+            packageHash: package1Hash,
+            is_split: 0
+        }
+        let uploadRes = await httpUtils.post("http://117.107.213.242:8888/spaceUpload/uploadDETFile", uploadFileInfo);
+    }
 
+    return true;
+
+}
+
+
+function getFileHash(filePath) {
+    
+    return new Promise((resolve, reject) => {
+        const stream = fs.createReadStream(filePath);
+        const fsHash = crypto.createHash('sha256');
+ 
+        stream.on('data', function (d) {
+            fsHash.update(d);
+        });
+ 
+        stream.on('end', function () {
+            const hash = fsHash.digest('hex');
+            resolve(hash);
+        });
+    })
 }
