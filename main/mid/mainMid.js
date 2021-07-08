@@ -158,10 +158,15 @@ uploadRemote.connect(async function(err, res) {
             const authRouter = express.Router();
 
             // 作品确权请求
-            // authRouter.post('/work', async function(req, res) {
-            //     let unsignedTx = await authMid.handleWorkAuth(contractRemote, seqObj, req, res);
-            //     res.send(unsignedTx);
-            // });
+            authRouter.post('/work', async function(req, res) {
+                let resInfo = {
+                    msg: 'success',
+                    code: 0,
+                    data: {},
+                };
+                res.send(resInfo);
+                authMid.handleWorkAuth(tokenRemote, seqObj, req, res);
+            });
 
             // authRouter.post('/signedWork', async function(req, res) {
             //     let resInfo = await authMid.handleSignedWorkAuth(contractRemote, seqObj, req, res);

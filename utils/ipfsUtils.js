@@ -1,4 +1,5 @@
 import http from 'http';
+import fs from 'fs';
 import formData from 'form-data';
 import request from 'request';
 import {ipfsAddUrl, ipfsCatUrl} from './config/ipfs.js';
@@ -56,10 +57,10 @@ export function add(obj) {
  * @param {String}filePath 需要上传的文件路径
  * @returns {String} 上传对象的IPFS哈希标识
  */
- export function addFile(filePath) {
+export function addFile(filePath) {
 
     let form = new formData();
-    form.append('data',fs.readFileSync(filePath));
+    form.append('data', fs.readFileSync(filePath));
 
     let options = {
         host: ipfsAddUrl.hostname,
@@ -148,7 +149,7 @@ export function get(hash) {
  * @param {String}hash 哈希标识
  * @returns {Object} IPFS哈希标识对应的存储内容
  */
- export function getFile(hash, filePath) {
+export function getFile(hash, filePath) {
 
     let options = {
         host: ipfsCatUrl.hostname,
@@ -164,17 +165,14 @@ export function get(hash) {
 
         let req = http.request(options, res => {
 
-            res.setEncoding('utf8');
-            let data = '';
+            let data = Buffer.from("");
     
             res.on('data', chunk => {
-                data += chunk;
+                data = Buffer.concat([data, chunk]);
             });
     
             res.on('end', () => {
-                let writeStream = fs.createWriteStream(filePath);
-                writeStream.write(data);
-                writeStream.end();
+                fs.writeFileSync(filePath, data, () => {});
                 resolve("success");
             });
         
