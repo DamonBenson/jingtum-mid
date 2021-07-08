@@ -521,6 +521,285 @@ function getNeedUpload(checkRes) {
 
     return fileHashArr;
 }
+
+async function genPackage1(workId, address) {
+
+    let name = workId + address;
+
+    let copyrightFilter = {
+        work_id: body.workId,
+        address: body.address,
+    }
+
+    let sql = sqlText.table('work_info').where(copyrightFilter).select();
+    let workInfo = await mysqlUtils.sql(c, sql)[0];
+    let fileInfo = workInfo.file_info_list[0];
+    let workPath = fileInfo.fileHash;
+
+    let localWorkPath = basePath + "/authFiles/work/" + workPath;
+    await ipfsUtils.getFile(workPath, localWorkPath);
+
+    let fd = fs.createReadStream(localWorkPath);
+    let hash = crypto.createHash('sha256');
+    hash.setEncoding('hex');
+
+    fd.on('end', function() {
+
+        hash.end();
+        let workHash = hash.read();
+
+        let package1 = {
+            "cover": cover,
+            "cover_hash": coverHash,
+            "name": name,
+            "subject": [{
+                "A1": {
+                    "id_type": "A2",
+                    "type": "1",
+                    "address": "北京市海淀区京王坟2号楼1⻔1308",
+                    "name": "裘牧非",
+                    "usn": "48d8e39d453f9080ad1add77dd4de852b5e5ad0896606482af96e59f2b28ff33",
+                    "id_number": "110108199808215411",
+                },
+                "A2": {
+                    "files": [
+                        {
+                            "card_type": "1",
+                            "file_path": "/mnt/savepath/userIdentity/1625639256802/1625639256804.png",
+                            "file_type": "1",
+                            "file_hash": "e0ee43735705f926041622740843aa11",
+                            "file_name": "20210707142852.png",
+                            "id_card_no": "110108199808215411",
+                            "credentials_id": "8f81491f-0585-4453-9f3a-59fe7ccd6419"
+                        },
+                        {
+                            "card_type": "1",
+                            "file_path": "/mnt/savepath/userIdentity/1625639256802/1625639256932.png",
+                            "file_type": "2",
+                            "file_hash": "878ebe5347f44ab6629fb5fa73d95cb4",
+                            "file_name": "20210707142856.png",
+                            "id_card_no": "110108199808215411",
+                            "credentials_id": "8f81491f-0585-4453-9f3a-59fe7ccd6419"
+                        }
+                    ],
+                    "id": "8f81491f-0585-4453-9f3a-59fe7ccd6419",
+                    "sex": "男",
+                    "date_end": "2025-07-27",
+                    "address": "北京市海淀区京王坟2号楼1⻔1308",
+                    "name": "裘牧非",
+                    "usn": "48d8e39d453f9080ad1add77dd4de852b5e5ad0896606482af96e59f2b28ff33",
+                    "birthday": "1999-08-21",
+                    "id_number": "110108199808215411",
+                    "nation": "中国",
+                    "date_start": "2015-07-27"
+                },
+                "A3": {
+                    "id": "",
+                    "sex": "",
+                    "date_end": "",
+                    "address": "",
+                    "name": "",
+                    "usn": "",
+                    "birthday": "",
+                    "id_number": "",
+                    "nation": "",
+                    "date_start": ""
+                },
+                "A4": {
+                    "id": "",
+                    "sex": "",
+                    "date_end": "",
+                    "address": "",
+                    "name": "",
+                    "usn": "",
+                    "birthday": "",
+                    "id_number": "",
+                    "nation": "",
+                    "date_start": ""
+                },
+                "A5": {
+                    "id": "",
+                    "sex": "",
+                    "date_end": "",
+                    "address": "",
+                    "name": "",
+                    "usn": "",
+                    "birthday": "",
+                    "id_number": "",
+                    "nation": "",
+                    "date_start": ""
+                }
+            }],
+            "is_complete": "1",
+            "material": [
+                {
+                    "material_type_name": "作品创作说明",
+                    "material_type": "C1",
+                    "material_list": [
+                        {
+                            "material_file_list": [
+                                {
+                                    "file_name": "202107071545280.png",
+                                    "file_path": "tmp/202107071545280.png",
+                                    "file_type": "1",
+                                    "file_hash": "1825a1b7fa0478e27805e9f2d213ea6dca01175f9aeb46a71776602bbaf5aa29"
+                                }
+                            ],
+                            "material_name": "作品创作说明"
+                        }
+                    ],
+                    "material_num": "1"
+                },
+                {
+                    "material_type_name": "作品权利保证书",
+                    "material_type": "C3",
+                    "material_list": [
+                        {
+                            "material_file_list": [
+                                {
+                                    "file_name": "202107071545350.png",
+                                    "file_path": "tmp/202107071545350.png",
+                                    "file_type": "1",
+                                    "file_hash": "92357001589797414e67f6e4ab790f4437615f11f7d8d4a7e6fcd6609f9e14a8"
+                                }
+                            ],
+                            "material_name": "作品权利保证书"
+                        }
+                    ],
+                    "material_num": "1"
+                },
+                {
+                    "material_type_name": "唯⼀著作权注册平台承诺书",
+                    "material_type": "C16",
+                    "material_list": [
+                        {
+                            "material_file_list": [
+                                {
+                                    "file_name": "202107071545410.png",
+                                    "file_path": "tmp/202107071545410.png",
+                                    "file_type": "1",
+                                    "file_hash": "cfe7b0b9612176d699cc8731acc106d2e4f4c98c802914d871b7d2181c45c647"
+                                }
+                            ],
+                            "material_name": "唯⼀著作权注册平台承诺书"
+                        }
+                    ],
+                    "material_num": "1"
+                }
+            ],
+            "params": {
+                "works_count": "2",
+                "det_business_code": "C001_01_03",
+                "step": "3",
+                "package_token": "d8dc75dcb3b979f3c9129e2e6157772d18903a37d80656c50cc015efdaff7d24",
+                "submit_usn": "48d8e39d453f9080ad1add77dd4de852b5e5ad0896606482af96e59f2b28ff33"
+            },
+            "object": [
+                {
+                    "works_type": "10",
+                    "works_path": "/mnt/savepath/trueFile/2021-07-07/330f09b16c8232f3fa304d49333db7809a98982e86694f29545826f302264622/d890ac9ca237977f77c148b02e56e0e96c763802ac5c2ff391825adc3f11c24f.png",
+                    "works_creation_city": "北京",
+                    "works_publish_status": "0",
+                    "works_creation_date": "2021-07-07",
+                    "works_creation_desc": "原创",
+                    "works_creation_country": "中国",
+                    "works_creation": "0",
+                    "works_name": "fengjing2",
+                    "works_hash": "d890ac9ca237977f77c148b02e56e0e96c763802ac5c2ff391825adc3f11c24f",
+                    "authors": [
+                        {
+                            "sign_name": "裘牧非",
+                            "sign_status": "1",
+                            "name": "裘牧非",
+                            "usn": "48d8e39d453f9080ad1add77dd4de852b5e5ad0896606482af96e59f2b28ff33"
+                        }
+                    ]
+                },
+                {
+                    "works_type": "10",
+                    "works_path": "/mnt/savepath/trueFile/2021-07-07/330f09b16c8232f3fa304d49333db7809a98982e86694f29545826f302264622/df44dad5df203abc3c564e3aa3db9a1b3a3309e843f41d6e67a59c425c47b986.png",
+                    "works_creation_city": "北京",
+                    "works_publish_status": "0",
+                    "works_creation_date": "2021-07-07",
+                    "works_creation_desc": "原创",
+                    "works_creation_country": "中国",
+                    "works_creation": "0",
+                    "works_name": "fengjing1",
+                    "works_hash": "df44dad5df203abc3c564e3aa3db9a1b3a3309e843f41d6e67a59c425c47b986",
+                    "authors": [
+                        {
+                            "sign_name": "裘牧非",
+                            "sign_status": "1",
+                            "name": "裘牧非",
+                            "usn": "48d8e39d453f9080ad1add77dd4de852b5e5ad0896606482af96e59f2b28ff33"
+                        }
+                    ]
+                }
+            ],
+            "batch_no": "1412676675753213952"
+        }
+        return package1;
+
+    });
+
+    fd.pipe(hash);
+
+    let workName = workInfo.work_name;
+    let workType = fileInfo.work_type;
+
+    let cover = base + "/resource/test.jpg";
+    let coverHash = "017ec8060ae3cd8d7419b73f4f0bf77a7b963dd41a7af2deda1b4bf556835099";
+    let subjectName = "";
+    let subjectType = "";
+    let subjectUsn = "";
+    let packageToken = sha256(subjectUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+
+}
+
+function genExpress1(package1, package1Hash) {
+
+    let detPackageName = package1.name;
+    let detTime = moment().format('YYYY-MM-DD');
+    let fromSpaceUser = package1.subject[0].usn;
+    let fileHash1 = package1.object[0].workHash;
+    let fileName1 = package1.object[0].workName;
+    let filePath1 = package1.object[0].workPath;
+    let fileSize1 = package1.object[0].workSize;
+    let packageToken = package1.params.package_token;
+
+    let express1 = {
+        "det_business_code": "C001_01_01",
+        "det_package_name": detPackageName,
+        "det_package_num": 1,
+        "det_time": detTime,
+        "from_space_address": "",
+        "from_space_device": "",
+        "from_space_ip": "",
+        "from_space_user": fromSpaceUser,
+        "package_list": [
+            {
+                "file_list": [
+                    {
+                        "file_hash": fileHash1,
+                        "file_name": fileName1,
+                        "file_path": filePath1,
+                        "file_size": fileSize1,
+                        "is_split": 0,
+                        "split_num": ""
+                    }
+                ],
+                "package_hash": package1Hash,
+                "package_name": detPackageName,
+                "package_token": packageToken
+            }
+        ],
+        "to_space_address": "",
+        "to_space_user": ""
+    }
+
+    return express1;
+
+}
 let IntervalId_AuthResult;// 审核的定时器
 export async function handleAuthResult(tokenRemote, seqObj, req) {
     /****           查审核情况           ****/
@@ -537,7 +816,8 @@ async function queryAuthResult(tokenRemote, seqObj, req, workId, address) {
     if (debugMode) {
         console.log('requestInfo:', certificateRes.body);
     }
-    if (certificateRes.body.code === 200) {
+    // TODO verify
+    if (certificateRes.code === 200) {
         let body = req.body;// 确权请求
         // 清除定时器
         clearInterval(IntervalId_AuthResult);
@@ -587,7 +867,7 @@ async function queryAuthResult(tokenRemote, seqObj, req, workId, address) {
                 examineMessage : null,
                 authenticationId : workFileHash,
                 licenseUrl: ipfsUrl,
-                timestamp:timestamp//确权信息填入通证链的链上时间戳
+                timestamp:timestamp//确权信息填入通证链的链上时间戳,暂取首次
             }
 
         }
