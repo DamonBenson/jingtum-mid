@@ -18,6 +18,7 @@ import {debugMode, ipfsConf} from "../../../utils/info.js";
 import ipfsAPI from "ipfs-api";
 import {addFile} from "../../../utils/ipfsUtils.js";
 import {subjectInfo} from '../../../utils/config/auth.js';
+import {downloadToIPFS} from "../../../utils/httpUtils.js";
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -919,13 +920,15 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     }
     // TODO verify
     if (certificateRes.code === 200) {
-        let body = req.body;// 确权请求
+        let body = certificateRes.body;// 确权请求
         // 清除定时器
         clearInterval(IntervalId_AuthResult);
         /****获取证书后****/
         // 证书存入IPFS
-        const workFilePath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
-        let ipfsUrl = await ipfsUtils.addFile(workFilePath);
+        // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
+        const cerPath = body.objectJson[0].cerPath;
+        console.log('证书地址.',cerPath);
+        let ipfsUrl = await downloadToIPFS(cerPath);
 
         // 通证信息上链
         let copyrightFilter = {

@@ -2,7 +2,8 @@ import http from 'http';
 import fs from 'fs';
 import querystring from 'querystring';
 import formData from 'form-data';
-import {ipfsCatUrl} from "./config/ipfs";
+import {ipfsCatUrl} from "./config/ipfs.js";
+import * as ipfsUtils from "./ipfsUtils.js";
 
 export function get(url, data) {
 
@@ -141,20 +142,21 @@ export function postFiles(url, fileInfo) {
     });
 
 }
-downloadFile("http://i1.hexun.com/2019-12-30/199821260.jpg", "\\cer.jpg");
+
+
 /**
  * @description 从url处下载文件
  * @param {string}url 下载路径
  * @param {String}savePath 存储路径
  * @returns {Object} 下载文件
  */
-export function downloadFile(urlString, savePath) {
+export function downloadFile(urlString = "http://i1.hexun.com/2019-12-30/199821260.jpg", savePath = ".\\cer.jpg") {
     let url = new URL(urlString);
 
     let options = {
         host: url.hostname,
         port: url.port,
-        path: url.pathname + '?arg=' + hash,
+        path: url.pathname,
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
@@ -173,7 +175,7 @@ export function downloadFile(urlString, savePath) {
 
             res.on('end', () => {
                 fs.writeFileSync(savePath, data, () => {});
-                resolve("success");
+                resolve(data);
             });
 
         });
@@ -181,10 +183,53 @@ export function downloadFile(urlString, savePath) {
         req.on('error', e => {
             reject(e.message);
         });
-
         req.write('');
         req.end();
 
-    });
+    })
+}
 
+/**
+ * @description 从url处下载文件
+ * @param {string}url 下载路径
+ * @param {String}savePath 存储路径
+ * @returns {Object} IPFSURL
+ */
+export function downloadToIPFS(urlString = "http://i1.hexun.com/2019-12-30/199821260.jpg") {
+    let url = new URL(urlString);
+
+    let options = {
+        host: url.hostname,
+        port: url.port,
+        path: url.pathname,
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        },
+    };
+
+    return new Promise((resolve, reject) => {
+
+        let req = http.request(options, res => {
+
+            let data = Buffer.from("");
+
+            res.on('data', chunk => {
+                data = Buffer.concat([data, chunk]);
+            });
+
+            res.on('end', () => {
+                let ipfsUrl = ipfsUtils.addRaw(data);
+                resolve(ipfsUrl);
+            });
+
+        });
+
+        req.on('error', e => {
+            reject(e.message);
+        });
+        req.write('');
+        req.end();
+
+    })
 }

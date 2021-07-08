@@ -51,6 +51,53 @@ export function add(obj) {
 }
 
 /**
+ * @description 将数据上传到IPFS。比如一个图片。
+ * @param {Objcet}obj 需要上传的对象
+ * @returns {String} 上传对象的IPFS哈希标识
+ */
+export function addRaw(obj) {
+
+    let form = new formData();
+    form.append('data', obj);
+
+    let options = {
+        host: ipfsAddUrl.hostname,
+        port: ipfsAddUrl.port,
+        path: ipfsAddUrl.pathname,
+        method: 'POST',
+        headers: form.getHeaders(),
+    };
+
+    return new Promise((resolve, reject) => {
+
+        let req = http.request(options, res => {
+
+            res.setEncoding('utf8');
+            let data = '';
+
+            res.on('data', chunk => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
+                let cid = JSON.parse(data).cid['/'];
+                resolve(cid);
+            });
+
+        });
+
+        req.on('error', e => {
+            reject(e.message);
+        });
+
+        req.write(form.getBuffer());
+        req.end();
+
+    });
+
+}
+
+/**
  * @description 将文件上传到IPFS。
  * @param {String}filePath 需要上传的文件路径
  * @returns {String} 上传对象的IPFS哈希标识
