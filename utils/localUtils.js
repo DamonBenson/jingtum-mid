@@ -189,7 +189,7 @@ export function memos2obj(arr) {
 
 export function saveJson(json, path) {
 
-    path = new URL(path);
+    json = JSON.stringify(json);
 
     return new Promise((resolve, reject) => {
 

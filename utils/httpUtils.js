@@ -95,7 +95,7 @@ export function postFiles(url, fileInfo) {
     for(let key in fileInfo) {
         if(Array.isArray(fileInfo[key])) {
             for(let i in fileInfo[key]) {
-                form.append(key, fs.createReadStream(fileInfo[key][i]));
+                form.append(key, fs.readFileSync(fileInfo[key][i]));
             }
         }
         else {
@@ -134,7 +134,7 @@ export function postFiles(url, fileInfo) {
             reject(e.message);
         });
 
-        req.write(data);
+        req.write(form.getBuffer());
         req.end();        
 
     });
