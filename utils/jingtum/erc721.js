@@ -218,7 +218,7 @@ export function buildTransferTokenTx(remote, src, secret, seq, dest, id, showRes
  * @param {int}seq 通证修改者的交易序列号
  * @param {String}id 待修改通证的标识
  * @param {Object}tokenInfos 添加的通证信息
- * @param {bool}showRes 是否显示结果
+ * @param {boolean}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
 export function buildTokenInfoChangeTx(remote, src, secret, seq, id, tokenInfos, showRes) {

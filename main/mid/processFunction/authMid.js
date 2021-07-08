@@ -530,31 +530,72 @@ export async function handleAuthResult(tokenRemote, seqObj, req) {
 /**
  * @description 查询审核的轮询函数。
  */
-async function queryAuthResult() {
+async function queryAuthResult(tokenRemote, seqObj, req, workId, address) {
     // 请求接口
     let batchNo = 0;
-    let approveResInfo = await httpUtils.get('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
+    let certificateRes = await httpUtils.post('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
     if (debugMode) {
-        console.log('approvesInfo:', approveResInfo.data.approveInfoList);
+        console.log('requestInfo:', certificateRes.body);
     }
-    let resJson = requestInfo;
-    if (code == 200) {
+    if (certificateRes.body.code === 200) {
+        let body = req.body;// 确权请求
         // 清除定时器
         clearInterval(IntervalId_AuthResult);
-
-        // 获取证书
-        let certificateBytes = resJson;
-
-        // 证书上链
-        // TODO
-        erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false);
-
+        /****获取证书后****/
         // 证书存入IPFS
         const workFilePath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
-        let workFileHash = await ipfsUtils.addFile(workFilePath);
+        let ipfsUrl = await ipfsUtils.addFile(workFilePath);
+
+        // 通证信息上链
+        let copyrightFilter = {
+            work_id: body.workId,
+            address: body.address,
+        }
+        let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
+        let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+        if(copyrightInfoArr.length == 0) {
+            let resInfo = {};
+            resInfo.msg = 'no data',
+                resInfo.code = 6;
+            console.log('/auth/innerWork:', resInfo);
+            console.timeEnd('handleInnerWorkAuth');
+            console.log('--------------------');
+            return resInfo;
+        }
+        let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
+        let authenticationId = 'DCI' + sha256(copyrightIds).toString().substring(0, 8);
+        let authenticationInfo = {
+            authenticationId: authenticationId,
+            licenseUrl: ipfsUrl,
+        };
+
+        let authenticatePromises = copyrightIds.map(copyrightId => {
+            return (erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
+        });
+        let authenticateResArr = await Promise.all(authenticatePromises);
+
+        let txHash = authenticateResArr[0].tx_json.hash;
+        let txInfo = await requestInfo.requestTx(tokenRemote, txHash, true);
+        let timestamp = txInfo.Timestamp + 946684800;
 
         // 异步返回京东
-        // TODO
+        let authResult = {
+            workId : workId,
+            address : address,
+            authenticateInfo:{
+                auditResult : true,
+                examineMessage : null,
+                authenticationId : workFileHash,
+                licenseUrl: ipfsUrl,
+                timestamp:timestamp//确权信息填入通证链的链上时间戳
+            }
+
+        }
+        // TODO 京东接口
+        let Res = await httpUtils.post('', authResult);
+        if (debugMode) {
+            console.log('Res:', Res.data);
+        }
 
     }
 }
