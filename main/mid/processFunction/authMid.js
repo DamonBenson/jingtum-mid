@@ -1231,9 +1231,6 @@ async function uploadFiles(checkRes, detSn, packageHash) {
 }
 
 
-
-
-
 let IntervalId_AuthResult;// 审核的定时器
 /**
  * @description 查审核情况。
@@ -1307,7 +1304,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
 
         console.log('authResult:', authResult);
         // TODO 京东接口
-        let Res = await httpUtils.post('', authResult);
+        let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
         if (debugMode) {
             console.log('Res:', Res.data);
         }
