@@ -469,7 +469,7 @@ async function genPackage1(workId, address, batchName) {
     let localWorkPath = basePath + "/authFiles/work/" + workPath;
     await ipfsUtils.getFile(workPath, localWorkPath);
     let workHash = localUtils.getFileHash(localWorkPath);
-    let workSize = fs.statSync(localWorkPath).size;
+    let workSize = fs.statSync(localWorkPath).size.toString();
     let workName = workInfo.work_name + '.jpg';
     let workType = workInfo.work_type.toString();
 
@@ -560,9 +560,9 @@ function genExpress1(package1, package1Hash, batchName) {
     let coverHash = package1.cover_hash;
     let coverName = "test";
     let coverPath = package1.cover;
-    let coverSize = fs.statSync(coverPath).size;
+    let coverSize = fs.statSync(coverPath).size.toString();
     let cover = {
-        "is_split": 0,
+        "is_split": "0",
         "file_hash": coverHash,
         "file_name": coverName,
         "file_path": coverPath,
@@ -582,7 +582,7 @@ function genExpress1(package1, package1Hash, batchName) {
             "file_hash": fileHash,
             "file_name": fileName,
             "file_path": filePath,
-            "file_size": fileSize.toString(),
+            "file_size": fileSize,
         }
 
         fileList.push(file);
@@ -1139,14 +1139,14 @@ function genExpress3(package3, package3Hash, batchName) {
                 let fileHash = package3.material[i].material_list[j].material_file_list[k].file_hash;
                 let fileName = package3.material[i].material_list[j].material_file_list[k].file_name;
                 let filePath = package3.material[i].material_list[j].material_file_list[k].file_path;
-                let fileSize = fs.statSync(filePath).size;
+                let fileSize = fs.statSync(filePath).size.toString();
 
                 let file = {
                     "is_split": "0",
                     "file_hash": fileHash,
                     "file_name": fileName,
                     "file_path": filePath,
-                    "file_size": fileSize.toString()
+                    "file_size": fileSize
                 }
 
                 fileList.push(file);
