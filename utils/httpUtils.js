@@ -97,7 +97,7 @@ export function postFiles(url, fileInfo) {
     for(let key in fileInfo) {
         if(Array.isArray(fileInfo[key])) {
             for(let i in fileInfo[key]) {
-                form.append(key, fs.readFileSync(fileInfo[key][i]));
+                form.append(key, fs.createReadStream(fileInfo[key][i]));
             }
         }
         else {
@@ -132,17 +132,11 @@ export function postFiles(url, fileInfo) {
         
         });
 
-        req.on('error', e => {
-            reject(e.message);
-        });
-
-        req.write(form.getBuffer());
-        req.end();        
+        form.pipe(req); 
 
     });
 
 }
-
 
 /**
  * @description 从url处下载文件
