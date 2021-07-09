@@ -369,6 +369,9 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     await uploadFiles(check1Res, detSn1, package1Hash);
 
+    // let doubleCheck = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
+    // let workPath = doubleCheck.data.package_list[0].file_list[0].works_path;
+
     // get batchNo
 
     await localUtils.sleep(5000);
@@ -467,7 +470,7 @@ async function genPackage1(workId, address, batchName) {
     await ipfsUtils.getFile(workPath, localWorkPath);
     let workHash = localUtils.getFileHash(localWorkPath);
     let workSize = fs.statSync(localWorkPath).size;
-    let workName = workInfo.work_name;
+    let workName = workInfo.work_name + '.jpg';
     let workType = workInfo.work_type.toString();
 
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
