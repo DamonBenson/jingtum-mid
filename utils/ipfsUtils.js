@@ -105,7 +105,7 @@ export function addRaw(obj) {
 export function addFile(filePath) {
 
     let form = new formData();
-    form.append('data', fs.readFileSync(filePath));
+    form.append('data', fs.createReadStream(filePath));
 
     let options = {
         host: ipfsAddUrl.hostname,
@@ -133,11 +133,7 @@ export function addFile(filePath) {
 
         });
 
-        req.on('error', e => {
-            reject(e.message);
-        });
-        req.write(form.getBuffer());
-        req.end();
+        form.pipe(req);
 
     });
 

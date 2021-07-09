@@ -354,6 +354,8 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let package1Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package1Path, express1Path]});
 
+    // let package1Res = await httpUtils.postFiles("http://39.102.93.47:9003/test", {files: [package1Path, express1Path]});
+
     console.log(package1Res);
 
     let detSn1 = package1Res.data;
@@ -1120,10 +1122,10 @@ function genExpress3(package3, package3Hash, batchName) {
 
             for(let k in package3.material[i].material_list[j].material_file_list) {
 
-                fileHash = package3.material[i].material_list[j].material_file_list[k].file_hash;
-                fileName = package3.material[i].material_list[j].material_file_list[k].file_name;
-                filePath = package3.material[i].material_list[j].material_file_list[k].file_path;
-                fileSize = fs.statSync(filePath).size;
+                let fileHash = package3.material[i].material_list[j].material_file_list[k].file_hash;
+                let fileName = package3.material[i].material_list[j].material_file_list[k].file_name;
+                let filePath = package3.material[i].material_list[j].material_file_list[k].file_path;
+                let fileSize = fs.statSync(filePath).size;
 
                 let file = {
                     "is_split": 0,
