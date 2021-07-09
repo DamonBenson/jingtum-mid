@@ -1187,8 +1187,10 @@ async function uploadFiles(checkRes) {
 
 
 let IntervalId_AuthResult;// 审核的定时器
+/**
+ * @description 查审核情况
+ */
 export async function handleAuthResult(tokenRemote, seqObj, req) {
-    /****           查审核情况           ****/
     // 启动定时器
     IntervalId_AuthResult = setInterval(queryAuthResult, 3000, [tokenRemote, seqObj, workId, address, batchNo]);
 }
@@ -1209,8 +1211,8 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         clearInterval(IntervalId_AuthResult);
         /****获取证书后****/
         // 证书存入IPFS
-        // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
         const cerPath = body.objectJson[0].cerPath;
+        // @硬存的路径 // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
         console.log('证书地址.',cerPath);
         let ipfsUrl = await downloadToIPFS(cerPath);
 
