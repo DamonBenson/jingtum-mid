@@ -427,6 +427,16 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     await uploadFiles(check3Res, detSn3, package3Hash);
 
+    // submit
+
+    let submitInfo = {
+        batchNo: batchNo,
+        usn: subjectInfo.usn,
+    }
+    let submitRes = await httpUtils.postFiles("http://117.107.213.242:8124/examine/result/submit", submitInfo);
+
+    console.log(submitRes);
+
     handleAuthResult(tokenRemote, seqObj, workId, address, batchNo);
 
     console.timeEnd('handleWorkAuth');
@@ -458,7 +468,7 @@ async function genPackage1(workId, address, batchName) {
     let workHash = localUtils.getFileHash(localWorkPath);
     let workSize = fs.statSync(localWorkPath).size;
     let workName = workInfo.work_name;
-    let workType = workInfo.work_type;
+    let workType = workInfo.work_type.toString();
 
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
@@ -466,7 +476,7 @@ async function genPackage1(workId, address, batchName) {
         "cover": cover,
         "cover_hash": coverHash,
         "name": batchName,
-        "copyright_rights_get": 0,
+        "copyright_rights_get": "0",
         "subject": [
             {
                 "name": subjectInfo.name,
@@ -478,7 +488,7 @@ async function genPackage1(workId, address, batchName) {
             {
                 "isSelect": false,
                 "longSelect": false,
-                "is_split": 0,
+                "is_split": "0",
                 "file_type": "",
                 "works_hash": workHash,
                 "works_name": workName,
@@ -491,9 +501,9 @@ async function genPackage1(workId, address, batchName) {
             "batch_name": batchName,
             "det_business_code": "C001_01_01",
             "package_token": packageToken,
-            "step": 1,
+            "step": "1",
             "submit_usn": subjectInfo.usn,
-            "works_count": 1
+            "works_count": "1"
         }
     }
     // 调整顺序未改变内容，其中object应该有两个
@@ -565,11 +575,11 @@ function genExpress1(package1, package1Hash, batchName) {
         let fileSize = package1.object[i].works_size;
 
         let file = {
-            "is_split": 0,
+            "is_split": "0",
             "file_hash": fileHash,
             "file_name": fileName,
             "file_path": filePath,
-            "file_size": fileSize,
+            "file_size": fileSize.toString(),
         }
 
         fileList.push(file);
@@ -579,7 +589,7 @@ function genExpress1(package1, package1Hash, batchName) {
     let express1 = {
         "det_business_code": "C001_01_01",
         "det_package_name": batchName,
-        "det_package_num": 1,
+        "det_package_num": "1",
         "det_time": detTime,
         "from_space_address": "",
         "from_space_device": "",
@@ -635,7 +645,7 @@ async function genPackage2(workId, address, batchNo) {
     let rights = [];
     for(let i in copyrightTypes) {
         rights.push({
-            rights_category: copyrightTypes[i],
+            rights_category: copyrightTypes[i].toString(),
             rights_explain: "",
         });
     }
@@ -643,7 +653,7 @@ async function genPackage2(workId, address, batchNo) {
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package2 = {
-        "copyright_produce_mode": 0,
+        "copyright_produce_mode": "0",
         "batch_no": batchNo,
         "rights_category": [
             {
@@ -657,7 +667,7 @@ async function genPackage2(workId, address, batchNo) {
             "det_business_code": "C001_01_02",
             "submit_usn": subjectInfo.usn,
             "package_token": packageToken,
-            "step": 2
+            "step": "2"
         }
     }
     // 调整顺序未改变内容
@@ -694,7 +704,7 @@ function genExpress2(package2, package2Hash, batchName) {
     let express2 = {
         "det_business_code": "C001_01_02",
         // "det_package_name": batchName,
-        "det_package_num": 1,
+        "det_package_num": "1",
         "det_time": detTime,
         "from_space_address": "",
         "from_space_device": "",
@@ -766,7 +776,7 @@ function genPackage3(package1, batchNo) {
 
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
     let package3 = {
-        "is_complete": 1,
+        "is_complete": "1",
         "batch_no": batchNo,
         "subject": [
             {
@@ -781,18 +791,18 @@ function genPackage3(package1, batchNo) {
                 "A2": {
                     "files": [
                         {
-                            "card_type": 1,
+                            "card_type": "1",
                             "file_path": A2Path1,
-                            "file_type": 1,
+                            "file_type": "1",
                             "file_hash": A2Hash1,
                             "file_name": A2Name1,
                             "id_card_no": subjectInfo.idNum,
                             "credentials_id": subjectInfo.credentialsId
                         },
                         {
-                            "card_type": 1,
+                            "card_type": "1",
                             "file_path": A2Path2,
-                            "file_type": 2,
+                            "file_type": "2",
                             "file_hash": A2Hash2,
                             "file_name": A2Name2,
                             "id_card_no": subjectInfo.idNum,
@@ -850,20 +860,20 @@ function genPackage3(package1, batchNo) {
         ],
         "object": [
             {
-                "works_type": package1.object.works_type,
-                "works_path": package1.object.works_path,
+                "works_type": package1.object[0].works_type,
+                "works_path": package1.object[0].works_path,
                 "works_creation_city": worksCreationCity,
-                "works_publish_status": 0,
+                "works_publish_status": "0",
                 "works_creation_date": worksCreationDate,
                 "works_creation_desc": worksCreationDesc,
                 "works_creation_country": worksCreationCountry,
-                "works_creation": 0,
-                "works_name": package1.object.works_name,
-                "works_hash": package1.object.works_hash,
+                "works_creation": "0",
+                "works_name": package1.object[0].works_name,
+                "works_hash": package1.object[0].works_hash,
                 "authors": [
                     {
                         "sign_name": subjectInfo.name,
-                        "sign_status": 1,
+                        "sign_status": "1",
                         "name": subjectInfo.name,
                         "usn": subjectInfo.usn
                     }
@@ -880,14 +890,14 @@ function genPackage3(package1, batchNo) {
                             {
                                 "file_name": C1Name,
                                 "file_path": C1Path,
-                                "file_type": 1,
+                                "file_type": "1",
                                 "file_hash": C1Hash
                             }
                         ],
                         "material_name": "作品创作说明"
                     }
                 ],
-                "material_num": 1
+                "material_num": "1"
             },
             {
                 "material_type_name": "作品权利保证书",
@@ -898,14 +908,14 @@ function genPackage3(package1, batchNo) {
                             {
                                 "file_name": C3Name,
                                 "file_path": C3Path,
-                                "file_type": 1,
+                                "file_type": "1",
                                 "file_hash": C3Hash
                             }
                         ],
                         "material_name": "作品权利保证书"
                     }
                 ],
-                "material_num": 1
+                "material_num": "1"
             },
             {
                 "material_type_name": "唯⼀著作权注册平台承诺书",
@@ -916,20 +926,20 @@ function genPackage3(package1, batchNo) {
                             {
                                 "file_name": C16Name,
                                 "file_path": C16Path,
-                                "file_type": 1,
+                                "file_type": "1",
                                 "file_hash": C16Hash
                             }
                         ],
                         "material_name": "唯⼀著作权注册平台承诺书"
                     }
                 ],
-                "material_num": 1
+                "material_num": "1"
             }
         ],
         "params": {
-            "works_count": 1,
+            "works_count": "1",
             "det_business_code": "C001_01_03",
-            "step": 3,
+            "step": "3",
             "package_token": packageToken,
             "submit_usn": subjectInfo.usn
         }
@@ -1129,11 +1139,11 @@ function genExpress3(package3, package3Hash, batchName) {
                 let fileSize = fs.statSync(filePath).size;
 
                 let file = {
-                    "is_split": 0,
+                    "is_split": "0",
                     "file_hash": fileHash,
                     "file_name": fileName,
                     "file_path": filePath,
-                    "file_size": fileSize
+                    "file_size": fileSize.toString()
                 }
 
                 fileList.push(file);
@@ -1145,7 +1155,7 @@ function genExpress3(package3, package3Hash, batchName) {
     let express3 = {
         "det_business_code": "C001_01_03",
         "det_package_name": batchName,
-        "det_package_num": 1,
+        "det_package_num": "1",
         "det_time": detTime,
         "from_space_address": "",
         "from_space_device": "",
