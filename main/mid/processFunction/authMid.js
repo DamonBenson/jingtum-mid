@@ -1222,10 +1222,12 @@ async function uploadFiles(checkRes, detSn, packageHash) {
 
 
 let IntervalId_AuthResult;// 审核的定时器
+/**
+ * @description 查审核情况。
+ */
 export async function handleAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
-    /****           查审核情况           ****/
     // 启动定时器
-    IntervalId_AuthResult = setInterval(queryAuthResult, 3000, [tokenRemote, seqObj, workId, address, batchNo]);
+    IntervalId_AuthResult = setInterval(queryAuthResult, 3000, tokenRemote, seqObj, workId, address, batchNo);
 }
 
 /**
@@ -1233,13 +1235,13 @@ export async function handleAuthResult(tokenRemote, seqObj, workId, address, bat
  */
 async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     // 请求接口
-    let certificateRes = await httpUtils.post('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
+    let certificateRes = await httpUtils.postFiles('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
     if (debugMode) {
         console.log('requestInfo:', certificateRes);
     }
     // TODO verify
     if (certificateRes.code === 200) {
-        let body = certificateRes.body;// 确权请求
+        let body = certificateRes;// 确权请求
         // 清除定时器
         clearInterval(IntervalId_AuthResult);
         /****获取证书后****/
