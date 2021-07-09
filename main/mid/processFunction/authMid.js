@@ -346,11 +346,11 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let package1 = await genPackage1(workId, address, batchName);
     let package1Path = basePath + "/authFiles/package/" + package1.params.package_token + ".json";
-    let package1Hash = localUtils.saveJson(package1, package1Path);
+    let package1Hash = await localUtils.saveJson(package1, package1Path);
 
     let express1 = genExpress1(package1, package1Hash, batchName);
     let express1Path = basePath + "/authFiles/express/" + package1.params.package_token + ".json";
-    let express1Hash = localUtils.saveJson(express1, express1Path);
+    let express1Hash = await localUtils.saveJson(express1, express1Path);
 
     let package1Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package1Path, express1Path]});
 
@@ -380,11 +380,11 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let package2 = await genPackage2(workId, address, batchNo);
     let package2Path = basePath + "/authFiles/package/" + package2.params.package_token + ".json";
-    let package2Hash = localUtils.saveJson(package2, package2Path);
+    let package2Hash = await localUtils.saveJson(package2, package2Path);
 
     let express2 = genExpress2(package2, package2Hash, batchName);
     let express2Path = basePath + "/authFiles/express/" + package2.params.package_token + ".json";
-    let express2Hash = localUtils.saveJson(express2, express2Path);
+    let express2Hash = await localUtils.saveJson(express2, express2Path);
 
     let package2Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package2Path, express2Path]});
 
@@ -404,11 +404,11 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let package3 = await genPackage3(batchNo);
     let package3Path = basePath + "/authFiles/package/" + package3.params.package_token + ".json";
-    let package3Hash = localUtils.saveJson(package3, package3Path);
+    let package3Hash = await localUtils.saveJson(package3, package3Path);
 
     let express3 = genExpress3(package3, package3Hash, batchName);
     let express3Path = basePath + "/authFiles/express/" + package3.params.package_token + ".json";
-    let express3Hash = localUtils.saveJson(express3, express3Path);
+    let express3Hash = await localUtils.saveJson(express3, express3Path);
 
     let package3Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package3Path, express3Path]});
 
@@ -541,12 +541,25 @@ function genExpress1(package1, package1Hash, batchName) {
 
     let fileList = [];
 
+    let coverHash = package1.cover_hash;
+    let coverName = "test";
+    let coverPath = package1.cover;
+    let coverSize = fs.statSync(coverPath).size;
+    let cover = {
+        "is_split": 0,
+        "file_hash": coverHash,
+        "file_name": coverName,
+        "file_path": coverPath,
+        "file_size": coverSize,
+    }
+    fileList.push(cover);
+
     for(let i in package1.object) {
 
-        let fileHash = package1.object[i].workHash;
-        let fileName = package1.object[i].workName;
-        let filePath = package1.object[i].workPath;
-        let fileSize = package1.object[i].workSize;
+        let fileHash = package1.object[i].works_hash;
+        let fileName = package1.object[i].works_name;
+        let filePath = package1.object[i].works_path;
+        let fileSize = package1.object[i].works_size;
 
         let file = {
             "is_split": 0,
