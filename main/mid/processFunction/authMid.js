@@ -464,7 +464,7 @@ async function genPackage1(workId, address, batchName) {
     let workType = workInfo.work_type.toString();
 
     // 测试
-    workType = "1";
+    workType = "2";
 
     let workName;
     switch (workType) {
@@ -483,8 +483,8 @@ async function genPackage1(workId, address, batchName) {
     }
 
     // 测试
-    fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
-    // fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+    // fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
+    fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
 
     let workPath;
     switch (workType) {
