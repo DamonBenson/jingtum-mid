@@ -1304,6 +1304,8 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
             }
 
         }
+
+        console.log('authResult:', authResult);
         // TODO 京东接口
         let Res = await httpUtils.post('', authResult);
         if (debugMode) {
