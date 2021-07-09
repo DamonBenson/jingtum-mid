@@ -89,6 +89,41 @@ export function post(url, data) {
 
 }
 
+export function postFormData(url, data) {
+    url = new URL(url);
+
+    let form = new formData();
+    for(let key in data) {
+        form.append(key, data[key]);
+    }
+    let options = {
+        host: url.hostname,
+        port: url.port,
+        path: url.pathname,
+        method: 'POST',
+        headers: form.getHeaders(),
+    };
+    return new Promise((resolve, reject) => {
+        let req = http.request(options, function (res) {
+            let chunks = [];
+
+            res.on("data", function (chunk) {
+                chunks.push(chunk);
+            });
+
+            res.on("end", function (chunk) {
+                let body = Buffer.concat(chunks);
+                resolve(body.toString());
+
+            });
+
+            res.on("error", function (error) {
+                console.error(error);
+            });
+        });
+        form.pipe(req);
+    });
+}
 export function postFiles(url, fileInfo) {
 
     url = new URL(url);

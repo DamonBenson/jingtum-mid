@@ -19,6 +19,7 @@ import ipfsAPI from "ipfs-api";
 import {addFile} from "../../../utils/ipfsUtils.js";
 import {subjectInfo} from '../../../utils/config/auth.js';
 import {downloadToIPFS} from "../../../utils/httpUtils.js";
+import formData from "form-data";
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
