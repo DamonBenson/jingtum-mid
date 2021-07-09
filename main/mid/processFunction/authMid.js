@@ -352,11 +352,16 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express1Hash = localUtils.saveJson(express1, express1Path);
 
     let package1Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package1Path, express1Path]});
+
+    console.log(package1Res);
+
     let detSn1 = package1Res.data;
 
     await localUtils.sleep(5000);
 
     let check1Res = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
+
+    console.log(check1Res);
 
     await uploadFiles(check1Res);
 
@@ -365,7 +370,10 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     await localUtils.sleep(5000);
 
     let batchRes = await httpUtils.get("http://117.107.213.242:8124/cr/reg/query/batch_no", {packageToken: package1.params.package_token});
-    let batchNo = batchRes.dara.batchNo;
+
+    console.log(batchRes);
+
+    let batchNo = batchRes.data.batchNo;
 
     // step2
 
@@ -378,11 +386,16 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express2Hash = localUtils.saveJson(express2, express2Path);
 
     let package2Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package2Path, express2Path]});
+
+    console.log(package2Res);
+
     let detSn2 = package2Res.det_sn;
 
     await localUtils.sleep(5000);
 
     let check2Res = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn2});
+
+    console.log(check2Res);
 
     await uploadFiles(check2Res);
 
@@ -397,11 +410,16 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express3Hash = localUtils.saveJson(express3, express3Path);
 
     let package3Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package3Path, express3Path]});
+
+    console.log(package3Res);
+
     let detSn3 = package3Res.det_sn;
 
     await localUtils.sleep(5000);
 
     let check3Res = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn3});
+
+    console.log(check3Res);
 
     await uploadFiles(check3Res);
 
@@ -902,7 +920,7 @@ async function uploadFiles(checkRes) {
 
 
 let IntervalId_AuthResult;// 审核的定时器
-export async function handleAuthResult(tokenRemote, seqObj, req) {
+export async function handleAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     /****           查审核情况           ****/
     // 启动定时器
     IntervalId_AuthResult = setInterval(queryAuthResult, 3000, [tokenRemote, seqObj, workId, address, batchNo]);
