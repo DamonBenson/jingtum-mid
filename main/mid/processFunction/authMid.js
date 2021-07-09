@@ -362,12 +362,12 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let detSn1 = package1Res.data;
 
     await localUtils.sleep(5000);
-    let check1Res = await httpUtils.postFormData("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
-    // let package1Res = await httpUtils.postFiles("http://39.102.93.47:9003/test", {"det_sn": detSn1});
+
+    let check1Res = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
 
     console.log(check1Res);
 
-    await uploadFiles(check1Res);
+    await uploadFiles(check1Res, detSn1, package1Hash);
 
     // get batchNo
 
@@ -389,23 +389,23 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express2Path = basePath + "/authFiles/express/" + package2.params.package_token + ".json";
     let express2Hash = await localUtils.saveJson(express2, express2Path);
 
-    let package2Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package2Path, express2Path]});
+    let package2Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [express2Path, package2Path]});
 
     console.log(package2Res);
 
-    let detSn2 = package2Res.det_sn;
+    let detSn2 = package2Res.data;
 
     await localUtils.sleep(5000);
 
-    let check2Res = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn2});
+    let check2Res = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn2});
 
     console.log(check2Res);
 
-    await uploadFiles(check2Res);
+    await uploadFiles(check2Res, detSn2, package2Hash);
 
     // step3
 
-    let package3 = await genPackage3(batchNo);
+    let package3 = await genPackage3(package1, batchNo);
     let package3Path = basePath + "/authFiles/package/" + package3.params.package_token + ".json";
     let package3Hash = await localUtils.saveJson(package3, package3Path);
 
@@ -413,19 +413,19 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express3Path = basePath + "/authFiles/express/" + package3.params.package_token + ".json";
     let express3Hash = await localUtils.saveJson(express3, express3Path);
 
-    let package3Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package3Path, express3Path]});
+    let package3Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [express3Path, package3Path]});
 
     console.log(package3Res);
 
-    let detSn3 = package3Res.det_sn;
+    let detSn3 = package3Res.data;
 
     await localUtils.sleep(5000);
 
-    let check3Res = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn3});
+    let check3Res = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn3});
 
     console.log(check3Res);
 
-    await uploadFiles(check3Res);
+    await uploadFiles(check3Res, detSn3, package3Hash);
 
     handleAuthResult(tokenRemote, seqObj, workId, address, batchNo);
 
@@ -482,7 +482,7 @@ async function genPackage1(workId, address, batchName) {
                 "file_type": "",
                 "works_hash": workHash,
                 "works_name": workName,
-                "works_path": workPath,
+                "works_path": basePath + "/authFiles/work/" + workPath,
                 "works_size": workSize,
                 "works_type": workType
             }
@@ -737,7 +737,7 @@ function genExpress2(package2, package2Hash, batchName) {
 
 }
 
-function genPackage3(batchNo) {
+function genPackage3(package1, batchNo) {
 
     let A2Path1 = basePath + "/resource/A21.jpg";
     let A2Name1 = "A21.jpg";
@@ -1189,27 +1189,28 @@ function genExpress3(package3, package3Hash, batchName) {
 }
 
 
-async function uploadFiles(checkRes) {
+async function uploadFiles(checkRes, detSn, packageHash) {
 
     if(checkRes.data == null) {
         return true;
     }
 
-    let fileHashArr = checkRes.data.package_list.file_list.map(fileInfo => {
-        return {
-            fileHash: fileInfo.file_hash,
-            fileStatus: fileInfo.file_status,
-        }
-    }).filter(fileInfo => !fileInfo.fileStatus);
+    let filePathArr = checkRes.data.package_list[0].file_list.filter(fileInfo => {
+        let isNeed = fileInfo.file_status == '0';
+        return isNeed;
+    }).map(fileInfo => {
+        return fileInfo.file_path;
+    });
 
-    for(let i in fileHashArr) {
+    for(let i in filePathArr) {
         let uploadFileInfo = {
-            files: fileHashArr[i],
+            files: [filePathArr[i]],
             det_sn: detSn,
-            packageHash: package1Hash,
+            packageHash: packageHash,
             is_split: 0
         }
-        await httpUtils.post("http://117.107.213.242:8888/spaceUpload/uploadDETFile", uploadFileInfo);
+        let uploadRes = await httpUtils.postFiles("http://117.107.213.242:8888/spaceUpload/uploadDETFile", uploadFileInfo);
+        console.log(uploadRes);
     }
 
     return true;
@@ -1234,7 +1235,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     // 请求接口
     let certificateRes = await httpUtils.post('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
     if (debugMode) {
-        console.log('requestInfo:', certificateRes.body);
+        console.log('requestInfo:', certificateRes);
     }
     // TODO verify
     if (certificateRes.code === 200) {
