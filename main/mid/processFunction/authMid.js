@@ -27,7 +27,7 @@ const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 
 const authenticateAddr = userAccount.authenticateAccount[0].address;
 const authenticateSecr = userAccount.authenticateAccount[0].secret;
-const basePath = "E:/Git/Projects/jingtum-mid-1";
+const basePath = ".";
 
 // /*----------作品确权请求----------*/
 
