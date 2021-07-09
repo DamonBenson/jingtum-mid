@@ -459,19 +459,67 @@ async function genPackage1(workId, address, batchName) {
     let workInfo = await mysqlUtils.sql(c, sql);
     workInfo = workInfo[0];
 
-    let cover = basePath + "/resource/test.jpg";
-    let coverHash = "017ec8060ae3cd8d7419b73f4f0bf77a7b963dd41a7af2deda1b4bf556835099";
-
     let fileInfo = JSON.parse(workInfo.file_info_list)[0];
-    let workPath = fileInfo.fileHash;
+
+    let workType = workInfo.work_type.toString();
+
     // 测试
-    workPath = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF.jpg';
+    workType = "1";
+
+    let workName;
+    switch (workType) {
+        case "1":
+            workName = workInfo.work_name + '.mp3';
+            break;
+        case "2":
+            workName = workInfo.work_name + '.jpg';
+            break;
+        case "3":
+            workName = workInfo.work_name + '.mp4';
+            break;
+        default:
+            workName = workInfo.work_name;
+            break;
+    }
+
+    // 测试
+    fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
+    // fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+
+    let workPath;
+    switch (workType) {
+        case "1":
+            workPath = fileInfo.fileHash + '.mp3';
+            break;
+        case "2":
+            workPath = fileInfo.fileHash + '.jpg';
+            break;
+        case "3":
+            workPath = fileInfo.fileHash + '.mp4';
+            break;
+        default:
+            workPath = fileInfo.fileHash;
+            break;
+    }
+
+    
     let localWorkPath = basePath + "/authFiles/work/" + workPath;
-    await ipfsUtils.getFile(workPath, localWorkPath);
+    await ipfsUtils.getFile(fileInfo.fileHash, localWorkPath);
     let workHash = localUtils.getFileHash(localWorkPath);
     let workSize = fs.statSync(localWorkPath).size.toString();
-    let workName = workInfo.work_name + '.jpg';
-    let workType = workInfo.work_type.toString();
+    
+    let cover;
+    let coverHash;
+    if(workType == "2") {
+        cover = localWorkPath;
+        coverHash = workHash;
+    }
+    else {
+        cover = "";
+        coverHash = "";
+    }
+    
+    workType = convertWorkType(workType);
 
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
@@ -495,7 +543,7 @@ async function genPackage1(workId, address, batchName) {
                 "file_type": "",
                 "works_hash": workHash,
                 "works_name": workName,
-                "works_path": basePath + "/authFiles/work/" + workPath,
+                "works_path": localWorkPath,
                 "works_size": workSize,
                 "works_type": workType
             }
@@ -556,19 +604,6 @@ function genExpress1(package1, package1Hash, batchName) {
     let packageToken = package1.params.package_token;
 
     let fileList = [];
-
-    let coverHash = package1.cover_hash;
-    let coverName = "test";
-    let coverPath = package1.cover;
-    let coverSize = fs.statSync(coverPath).size.toString();
-    let cover = {
-        "is_split": "0",
-        "file_hash": coverHash,
-        "file_name": coverName,
-        "file_path": coverPath,
-        "file_size": coverSize,
-    }
-    fileList.push(cover);
 
     for(let i in package1.object) {
 
@@ -1231,7 +1266,18 @@ async function uploadFiles(checkRes, detSn, packageHash) {
 }
 
 
+function convertWorkType(workType) {
 
+    switch (workType) {
+        case "1":
+            return "3";
+        case "2":
+            return "10";
+        case "3":
+            return "12";
+    }
+
+}
 
 
 let IntervalId_AuthResult;// 审核的定时器
