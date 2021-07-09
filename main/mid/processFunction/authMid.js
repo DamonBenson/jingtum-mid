@@ -19,6 +19,7 @@ import ipfsAPI from "ipfs-api";
 import {addFile} from "../../../utils/ipfsUtils.js";
 import {subjectInfo} from '../../../utils/config/auth.js';
 import {downloadToIPFS} from "../../../utils/httpUtils.js";
+import formData from "form-data";
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -27,7 +28,7 @@ const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 
 const authenticateAddr = userAccount.authenticateAccount[0].address;
 const authenticateSecr = userAccount.authenticateAccount[0].secret;
-const basePath = "E:/Git/Projects/jingtum-mid-1";
+const basePath = ".";
 
 // /*----------作品确权请求----------*/
 
@@ -352,7 +353,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let express1Path = basePath + "/authFiles/express/" + package1.params.package_token + ".json";
     let express1Hash = await localUtils.saveJson(express1, express1Path);
 
-    let package1Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [package1Path, express1Path]});
+    let package1Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [express1Path, package1Path]});
 
     // let package1Res = await httpUtils.postFiles("http://39.102.93.47:9003/test", {files: [package1Path, express1Path]});
 
@@ -361,8 +362,8 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     let detSn1 = package1Res.data;
 
     await localUtils.sleep(5000);
-
-    let check1Res = await httpUtils.post("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
+    let check1Res = await httpUtils.postFormData("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
+    // let package1Res = await httpUtils.postFiles("http://39.102.93.47:9003/test", {"det_sn": detSn1});
 
     console.log(check1Res);
 
