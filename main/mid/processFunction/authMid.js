@@ -366,7 +366,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     await localUtils.sleep(5000);
 
     let batchRes = await httpUtils.get("http://117.107.213.242:8124/cr/reg/query/batch_no", {packageToken: package1.params.package_token});
-    let batchNo = batchRes.dara.batchNo;
+    let batchNo = batchRes.data.batchNo;
 
     // step2
 
@@ -475,7 +475,41 @@ async function genPackage1(workId, address, batchName) {
             "works_count": 1
         }
     }
-
+    // 调整顺序未改变内容，其中object应该有两个
+    let HuangWenwei_package1 = {
+        "cover": cover,
+        "cover_hash": coverHash,
+        "subject": [
+            {
+                "name": subjectInfo.name,
+                "type": subjectInfo.type,
+                "usn": subjectInfo.usn
+            }
+        ],
+        "object": [
+            {
+                "isSelect": false,
+                "longSelect": false,
+                "is_split": 0,
+                "file_type": "",
+                "works_hash": workHash,
+                "works_name": workName,
+                "works_path": workPath,
+                "works_size": workSize,
+                "works_type": workType
+            }
+        ],
+        "copyright_rights_get": 0,
+        "name": batchName,
+        "params": {
+            "batch_name": batchName,
+            "det_business_code": "C001_01_01",
+            "package_token": packageToken,
+            "step": 1,
+            "submit_usn": subjectInfo.usn,
+            "works_count": 1
+        }
+    }
     return package1;
 
 }
@@ -528,7 +562,27 @@ function genExpress1(package1, package1Hash, batchName) {
             }
         ]
     }
-      
+    // 调整顺序未改变内容
+    let HuangWenwei_express1 = {
+        "from_space_user": fromSpaceUser,
+        "from_space_address": "",
+        "det_business_code": "C001_01_01",
+        "to_space_address": "",
+        "from_space_ip": "",
+        "to_space_user": "",
+        "det_package_name": batchName,
+        "package_list": [
+            {
+                "file_list": fileList,
+                "package_name": batchName,
+                "package_hash": package1Hash,
+                "package_token": packageToken,
+            }
+        ],
+        "det_time": detTime,
+        "from_space_device": "",
+        "det_package_num": 1,
+    }
     return express1;
 
 }
@@ -572,6 +626,25 @@ async function genPackage2(workId, address, batchNo) {
             "step": 2
         }
     }
+    // 调整顺序未改变内容
+    let HuangWenwei_package2 = {
+        "params": {
+            "submit_usn": subjectInfo.usn,
+            "det_business_code": "C001_01_02",
+            "package_token": packageToken,
+            "step": 2
+        },
+        "rights_category": [
+            {
+                "rights_owner_name": subjectInfo.name,
+                "rights_owner_type": subjectInfo.type,
+                "rights_owner_usn": subjectInfo.usn,
+                "rights": rights
+            }
+        ],
+        "copyright_produce_mode": 0,
+        "batch_no": batchNo,
+    }
 
     return package2;
 
@@ -603,7 +676,28 @@ function genExpress2(package2, package2Hash, batchName) {
                 "file_list": []
             }
         ]
-    }
+    };
+    // 调整顺序未改变内容
+    let HuangWenwei_express2 = {
+        "from_space_user": fromSpaceUser,
+        "from_space_address": "",
+        "det_business_code": "C001_01_02",
+        "to_space_address": "",
+        "from_space_ip": "",
+        "to_space_user": "",
+        "det_package_name": batchName,
+        "package_list": [
+            {
+                "file_list": [],
+                "package_name": batchName,
+                "package_hash": package2Hash,
+                "package_token": packageToken,
+            }
+        ],
+        "det_time": detTime,
+        "from_space_device": "",
+        "det_package_num": 1,
+    };
       
     return express2;
 
@@ -637,7 +731,6 @@ function genPackage3(batchNo) {
     let C16Hash = localUtils.getFileHash(C16Path);
 
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
-
     let package3 = {
         "is_complete": 1,
         "batch_no": batchNo,
@@ -807,7 +900,177 @@ function genPackage3(batchNo) {
             "submit_usn": subjectInfo.usn
         }
     }
-
+    // 调整顺序未改变内容，其中object应该有两个
+    let HuangWenwei_package3 = {
+        "subject": [
+            {
+                "A1": {
+                    "id_type": "A2",
+                    "type": subjectInfo.type,
+                    "address": subjectInfo.address,
+                    "name": subjectInfo.name,
+                    "usn": subjectInfo.usn,
+                    "id_number": subjectInfo.idNum
+                },
+                "A2": {
+                    "files": [
+                        {
+                            "card_type": 1,
+                            "file_path": A2Path1,
+                            "file_type": 1,
+                            "file_hash": A2Hash1,
+                            "file_name": A2Name1,
+                            "id_card_no": subjectInfo.idNum,
+                            "credentials_id": subjectInfo.credentialsId
+                        },
+                        {
+                            "card_type": 1,
+                            "file_path": A2Path2,
+                            "file_type": 2,
+                            "file_hash": A2Hash2,
+                            "file_name": A2Name2,
+                            "id_card_no": subjectInfo.idNum,
+                            "credentials_id": subjectInfo.credentialsId
+                        }
+                    ],
+                    "id": subjectInfo.credentialsId,
+                    "sex": subjectInfo.sex,
+                    "date_end": subjectInfo.dateEnd,
+                    "address": subjectInfo.address,
+                    "name": subjectInfo.name,
+                    "usn": subjectInfo.usn,
+                    "birthday": subjectInfo.birthday,
+                    "id_number": subjectInfo.idNum,
+                    "nation": subjectInfo.nation,
+                    "date_start": subjectInfo.dateStart
+                },
+                "A3": {
+                    "id": "",
+                    "sex": "",
+                    "date_end": "",
+                    "address": "",
+                    "name": "",
+                    "usn": "",
+                    "birthday": "",
+                    "id_number": "",
+                    "nation": "",
+                    "date_start": ""
+                },
+                "A4": {
+                    "id": "",
+                    "sex": "",
+                    "date_end": "",
+                    "address": "",
+                    "name": "",
+                    "usn": "",
+                    "birthday": "",
+                    "id_number": "",
+                    "nation": "",
+                    "date_start": ""
+                },
+                "A5": {
+                    "id": "",
+                    "sex": "",
+                    "date_end": "",
+                    "address": "",
+                    "name": "",
+                    "usn": "",
+                    "birthday": "",
+                    "id_number": "",
+                    "nation": "",
+                    "date_start": ""
+                }
+            }
+        ],
+        "is_complete": 1,
+        "material": [
+            {
+                "material_type_name": "作品创作说明",
+                "material_type": "C1",
+                "material_list": [
+                    {
+                        "material_file_list": [
+                            {
+                                "file_name": C1Name,
+                                "file_path": C1Path,
+                                "file_type": 1,
+                                "file_hash": C1Hash
+                            }
+                        ],
+                        "material_name": "作品创作说明"
+                    }
+                ],
+                "material_num": 1
+            },
+            {
+                "material_type_name": "作品权利保证书",
+                "material_type": "C3",
+                "material_list": [
+                    {
+                        "material_file_list": [
+                            {
+                                "file_name": C3Name,
+                                "file_path": C3Path,
+                                "file_type": 1,
+                                "file_hash": C3Hash
+                            }
+                        ],
+                        "material_name": "作品权利保证书"
+                    }
+                ],
+                "material_num": 1
+            },
+            {
+                "material_type_name": "唯⼀著作权注册平台承诺书",
+                "material_type": "C16",
+                "material_list": [
+                    {
+                        "material_file_list": [
+                            {
+                                "file_name": C16Name,
+                                "file_path": C16Path,
+                                "file_type": 1,
+                                "file_hash": C16Hash
+                            }
+                        ],
+                        "material_name": "唯⼀著作权注册平台承诺书"
+                    }
+                ],
+                "material_num": 1
+            }
+        ],
+        "params": {
+            "works_count": 1,
+            "det_business_code": "C001_01_03",
+            "step": 3,
+            "package_token": packageToken,
+            "submit_usn": subjectInfo.usn
+        },
+        // TODO object应该有两个
+        "object": [
+            {
+                "works_type": package1.object.works_type,
+                "works_path": package1.object.works_path,
+                "works_creation_city": worksCreationCity,
+                "works_publish_status": 0,
+                "works_creation_date": worksCreationDate,
+                "works_creation_desc": worksCreationDesc,
+                "works_creation_country": worksCreationCountry,
+                "works_creation": 0,
+                "works_name": package1.object.works_name,
+                "works_hash": package1.object.works_hash,
+                "authors": [
+                    {
+                        "sign_name": subjectInfo.name,
+                        "sign_status": 1,
+                        "name": subjectInfo.name,
+                        "usn": subjectInfo.usn
+                    }
+                ]
+            }
+        ],
+        "batch_no": batchNo,
+    }
     return package3;
 
 }
@@ -865,7 +1128,28 @@ function genExpress3(package3, package3Hash, batchName) {
             }
         ]
     }
-    
+    // 调整顺序未改变内容
+    let HuangWenwei_express3 = {
+        "from_space_usr":fromSpaceUser,
+        "from_space_address": "",
+        "det_business_code": "C001_01_03",
+        "to_space_address": "",
+        "from_space_ip": "",
+        "to_space_user": "",
+        "det_package_name": batchName,
+        "package_list": [
+            {
+                "file_list": fileList,
+                "package_name": batchName,
+                "package_hash": package3Hash,
+                "package_token": packageToken,
+            }
+        ],
+        "det_time": detTime,
+        "from_space_device": "",
+        "det_package_num": 1,
+
+    }
     return express3;
 
 }
