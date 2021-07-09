@@ -462,7 +462,7 @@ async function genPackage1(workId, address, batchName) {
     let fileInfo = JSON.parse(workInfo.file_info_list)[0];
     let workPath = fileInfo.fileHash;
     // 测试
-    workPath = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+    workPath = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF.jpg';
     let localWorkPath = basePath + "/authFiles/work/" + workPath;
     await ipfsUtils.getFile(workPath, localWorkPath);
     let workHash = localUtils.getFileHash(localWorkPath);
