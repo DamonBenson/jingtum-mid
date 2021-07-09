@@ -194,6 +194,7 @@ export function get(hash) {
  * @param {String}hash 哈希标识
  * @returns {Object} IPFS哈希标识对应的存储内容
  */
+// TODO field question verify
 export function getFile(hash, filePath) {
 
     let options = {
