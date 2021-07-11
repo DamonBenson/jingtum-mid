@@ -7,6 +7,7 @@ import * as erc721 from '../../../utils/jingtum/erc721.js';
 import * as contract from '../../../utils/jingtum/contract.js';
 import * as ipfsUtils from '../../../utils/ipfsUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
+import * as localUtils from '../../../utils/localUtils.js';
 import * as transactionValidate from '../../../utils/validateUtils/transaction.js';
 
 import {userAccount, chains, tokenName} from '../../../utils/config/jingtum.js';
@@ -843,7 +844,7 @@ export async function handleApproveConfirm(tokenRemote, seqObj, req) {
         let copyrightIds = await getTokenIds(workId, approveScene);
         let singlePubApproveTokenPromises = copyrightIds.map(copyrightId => {
 
-            let approveId = sha256(copyrightId + JSON.stringify(buyOrderInfo)).toString();
+            let approveId = sha256(copyrightId + JSON.stringify(buyOrderInfo) + localUtils.randomNumber(0,9999)).toString();
 
             approveResult.approveIds.push(approveId);
 
