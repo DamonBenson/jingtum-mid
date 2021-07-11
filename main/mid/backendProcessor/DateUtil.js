@@ -215,10 +215,12 @@ export function getSeasonTimeStampArray(MonthsAmong = 12,MonthOrWeek = true){
     let nowYear = now.getFullYear(); //当前年
     MonthArray.push(transSeasonName(now));
     TimeStampArray.push(Date.parse(now)/1000);
-    for (let index = 0; index < MonthsAmong; index++) {
+    let NowSeason = transSeasonName(now);
+    for (let index = 0; index <= MonthsAmong; index++) {
         let time = new Date(nowYear, nowMonth - index);
         let timeStart = Date.parse(time)/1000;//s
-        if(false == MonthArray.includes(transSeasonName(time))){
+        if(NowSeason != (transSeasonName(time))){
+            NowSeason = transSeasonName(time);
             MonthArray.push(transSeasonName(time));
             TimeStampArray.push(timeStart);
         }

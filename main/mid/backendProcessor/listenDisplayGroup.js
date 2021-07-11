@@ -15,8 +15,13 @@ import util from 'util';
 
 import mysql from 'mysql';
 import {c} from "../MidBackend.js";
-import {debugMode, WORKTYPE, CREATIONTYPE, TORTSITE} from '../../../utils/info.js';
-
+import {debugMode, CREATIONTYPE, TORTSITE} from '../../../utils/info.js';
+// OVERIDE the Info
+const WORKTYPE = {
+    1:"音乐",2:"摄影",3:"短视频",4:"戏剧",5:"曲艺",
+    6:"舞蹈",7:"杂技艺术",8:"美术",9:"建筑",10:"文字",
+    11:"电影",12:"图形",13:"模型",14:"其他"
+};
 const CONNECT = true;// When false, Send Random Response
 // export{
 //     handleTortCount,// 发现的侵权总数量
@@ -201,42 +206,22 @@ async function getTortCountGroupByWorkType() {
     }
     console.log(TortCountGroupByWorkType);
     return TortCountGroupByWorkType;
-}
-function PROTOTECT_getTortCountGroupByWorkType(TortCountGroupByWorkType) {
-    console.log("PROTOTECT_getTortCountGroupByWorkType");
-
-    let WorkTypeInfo = {};
-    WorkTypeInfo = {
-        "workType":WORKTYPE["1"],
-        "TortCount":0
-    };
-    TortCountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":WORKTYPE["2"],
-        "TortCount":0
-    };
-    TortCountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":WORKTYPE["3"],
-        "TortCount":0
-    };
-    TortCountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":WORKTYPE["4"],
-        "TortCount":0
-    };
-    TortCountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":WORKTYPE["5"],
-        "TortCount":0
-    };
-    TortCountGroupByWorkType.push(WorkTypeInfo);
-    WorkTypeInfo = {
-        "workType":WORKTYPE["6"],
-        "TortCount":0
-    };
-    TortCountGroupByWorkType.push(WorkTypeInfo);
-    return TortCountGroupByWorkType;
+    function PROTOTECT_getTortCountGroupByWorkType(TortCountGroupByWorkType){
+        let selections = Object.values(WORKTYPE);
+        TortCountGroupByWorkType.forEach(function (element) {
+            deleteArraryElement(element.workType.toString(), selections)
+        });
+        let needNum = (6 - TortCountGroupByWorkType.length);
+        for(let i = 1;i <= needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            deleteArraryElement(elementPick, selections);
+            WorkTypeInfo = {
+                "workType":elementPick,
+                "TortCount":0
+            };
+            TortCountGroupByWorkType.push(WorkTypeInfo);
+        }
+    }
 }
 /*
  * @param req: 请求
@@ -282,7 +267,7 @@ async function getTortCountGroupByCreationType() {
         let sqlRes = await mysqlUtils.sql(c, sqlRight);
         sqlRes.forEach(function(item){
             let CreationTypeInfo = {
-                "creationType":WORKTYPE[item['creation_type']],
+                "creationType":CREATIONTYPE[item['creation_type']],
                 "TortCount":item['num'],
             };
             TortCountGroupByCreationType.push(CreationTypeInfo);
@@ -290,36 +275,33 @@ async function getTortCountGroupByCreationType() {
 
         // 空数据库保护
         if(TortCountGroupByCreationType.length < 3){
-            PROTECT_getTortCountGroupByCreationType(TortCountGroupByCreationType);
+            _PROTECT_(TortCountGroupByCreationType);
         }
 
 
     }
     else{
-        PROTECT_getTortCountGroupByCreationType(TortCountGroupByCreationType);
+        _PROTECT_(TortCountGroupByCreationType);
     }
     console.log(TortCountGroupByCreationType);
     return TortCountGroupByCreationType;
-}
-function  PROTECT_getTortCountGroupByCreationType(TortCountGroupByCreationType){
-    console.log("PROTECT_getTortCountGroupByCreationType");
-
-    let CreationTypeInfo={};
-    CreationTypeInfo = {
-        "creationType":CREATIONTYPE["3"],
-        "TortCount":0
-    };
-    TortCountGroupByCreationType.push(CreationTypeInfo);
-    CreationTypeInfo = {
-        "creationType":CREATIONTYPE["2"],
-        "TortCount":0
-    };
-    TortCountGroupByCreationType.push(CreationTypeInfo);
-    CreationTypeInfo = {
-        "creationType":CREATIONTYPE["1"],
-        "TortCount":0
-    };
-    TortCountGroupByCreationType.push(CreationTypeInfo);
+    function _PROTECT_(TortCountGroupByCreationType){
+        console.log("_PROTECT_");
+        let selections = Object.values(CREATIONTYPE);
+        TortCountGroupByCreationType.forEach(function (element) {
+            deleteArraryElement(element.creationType.toString(), selections)
+        });
+        let needNum = (3 - TortCountGroupByCreationType.length);
+        for(let i = 1;i <= needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            deleteArraryElement(elementPick, selections);
+            let CreationTypeInfo = {
+                "creationType":elementPick,
+                "TortCount":0,
+            };
+            TortCountGroupByCreationType.push(CreationTypeInfo);
+        }
+    }
 }
 /*
  * @param req: 请求
@@ -337,7 +319,7 @@ export async function handleTortCountGroupByWorkTypeEXchange(req, res) {
     console.log('--------------------');
     return sqlRes;
 }
-async function getTortCountGroupByWorkTypeEXchange() {
+async function getTortCountGroupByWorkTypeEXchange(NUM_LIMIT = 3) {
     let TortCountGroupByWorkTypeEXchange = [];
     let [TimeStampArray,MonthArray] = DateUtil.getMonthTimeStampArray();
     let MonthGap = 1;
@@ -345,81 +327,38 @@ async function getTortCountGroupByWorkTypeEXchange() {
     let TortCountGroupByWorkType = [];
     let endTimeStamp = TimeStampArray[0];
     let startTimeStamp = TimeStampArray[1];
+    let keysSet = new Set();
+    let sqlRight = "";
     if(CONNECT == true){
         // TODO 确定选中的类型
-        let keys = [];
         let index = 0;
-        while(keys.length < 3 && index < 12){
-            keys=[]
+        console.log("size:",keysSet.size);
+        while(keysSet.size < 3 && index < 12){
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
-            let sqlRight = util.format("SELECT\n" +
-                "\tType.work_type, \n" +
-                "\tCOUNT(Type.work_id) AS num\n" +
-                "FROM\n" +
-                "\t(\n" +
-                "\t\tSELECT DISTINCT\n" +
-                "\t\t\ttort_info.work_id, \n" +
-                "\t\t\twork_info.work_type\n" +
-                "\t\tFROM\n" +
-                "\t\t\ttort_info\n" +
-                "\t\t\tINNER JOIN\n" +
-                "\t\t\twork_info\n" +
-                "\t\t\tON \n" +
-                "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
-                "\t\tWHERE\n" +
-                "\t\t\ttort_info.monitor_time <= %s AND\n" +
-                "\t\t\ttort_info.monitor_time > %s\n" +
-                "\t) AS Type\n" +
-                "GROUP BY\n" +
-                "\tType.work_type\n" +
-                "ORDER BY\n" +
-                "\tnum DESC\n" +
-                "LIMIT 3",endTimeStamp,startTimeStamp);
+            sqlRight = gen_sqlRight(endTimeStamp, startTimeStamp, NUM_LIMIT);
             let sqlRes = await mysqlUtils.sql(c, sqlRight);
             sqlRes.forEach(function(item){
-                keys.push(item['work_type']);
+                keysSet.add(item['work_type']);
             });
             index = index + MonthGap
         }
-        if(keys.length < 3){
-            _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray);
-            TortCountGroupByWorkTypeEXchange.reverse();
-            return TortCountGroupByWorkTypeEXchange;
-        }
+        console.log("keysSet:",keysSet);
+        let keys = Array.from(keysSet);
+        console.log("keys:",keys);
+
         for (let index = 0; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
             let TortCountGroupByWorkType = [];
-            let sqlRight = util.format("SELECT\n" +
-                "\tType.work_type, \n" +
-                "\tCOUNT(Type.work_id) AS num\n" +
-                "FROM\n" +
-                "\t(\n" +
-                "\t\tSELECT DISTINCT\n" +
-                "\t\t\ttort_info.work_id, \n" +
-                "\t\t\twork_info.work_type\n" +
-                "\t\tFROM\n" +
-                "\t\t\ttort_info\n" +
-                "\t\t\tINNER JOIN\n" +
-                "\t\t\twork_info\n" +
-                "\t\t\tON \n" +
-                "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
-                "\t\tWHERE\n" +
-                "\t\t\ttort_info.monitor_time <= %s AND\n" +
-                "\t\t\ttort_info.monitor_time > %s\n" +
-                "\t) AS Type\n" +
-                "GROUP BY\n" +
-                "\tType.work_type\n" +
-                "ORDER BY\n" +
-                "\tnum DESC\n" +
-                "LIMIT 3",endTimeStamp,startTimeStamp);
+            sqlRight = gen_sqlRight(endTimeStamp, startTimeStamp, NUM_LIMIT);
             let sqlRes = await mysqlUtils.sql(c, sqlRight);
+            console.log("调试sqlRes",sqlRes);
             let Res = {};
             sqlRes.forEach(function(item){
                 Res[item['work_type']]=item['num']
             });
-            for (let i = 0, n = keys.length, key; i < n; ++i) {
+            for (let i = 0, n = 3, key; i < n; ++i) {
                 key = keys[i];
                 if(Res[key]==null)Res[key]=0;
                 let MonthInfo = {
@@ -431,6 +370,10 @@ async function getTortCountGroupByWorkTypeEXchange() {
             };
             TortCountGroupByWorkTypeEXchange.push(TortCountGroupByWorkType);
         }
+        if(keys.length < 3){
+            _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray);
+        }
+        console.log("TortCountGroupByWorkTypeEXchange:",TortCountGroupByWorkTypeEXchange);
     }
     else{
         _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray);
@@ -438,32 +381,60 @@ async function getTortCountGroupByWorkTypeEXchange() {
     TortCountGroupByWorkTypeEXchange.reverse();
     console.log(TortCountGroupByWorkTypeEXchange);
     return TortCountGroupByWorkTypeEXchange;
-}
-function _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray) {
-    console.log("_PROTECT_getTortCountGroupByWorkTypeEXchange");
+    // TODO
+    function _PROTECT_getTortCountGroupByWorkTypeEXchange(TortCountGroupByWorkTypeEXchange,MonthGap,MonthArray){
+        console.log("_PROTECT_getTortCountGroupByWorkTypeEXchange");
+        let selections = Object.values(WORKTYPE);
+        let selectionWorkType = []
+        let keyLenth = 0;
+        console.log("TortCountGroupByWorkTypeEXchange",TortCountGroupByWorkTypeEXchange[0]);
 
-    for (let index = 0; index < 12; index = index + MonthGap) {
-        let TortCountGroupByWorkType = [];
-        let WorkTypeInfo = {};
-        WorkTypeInfo = {
-            "workType":WORKTYPE["1"],
-            "TortCount":0,
-            "Month" : MonthArray[index + MonthGap],
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["2"],
-            "TortCount":0,
-            "Month" : MonthArray[index + MonthGap],
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        WorkTypeInfo = {
-            "workType":WORKTYPE["3"],
-            "TortCount":0,
-            "Month" : MonthArray[index + MonthGap],
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
-        TortCountGroupByWorkTypeEXchange.push(TortCountGroupByWorkType);
+        TortCountGroupByWorkTypeEXchange[0].forEach(function (element) {
+            if (element.workType!=null){
+                deleteArraryElement(element.workType.toString(), selections);
+                selectionWorkType.push(element.workType.toString());
+                keyLenth++;
+            }
+        });
+        let needNum = 3 - keyLenth;
+        console.log(needNum);
+        for(let i = 0;i < needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            selectionWorkType.push(elementPick);
+            deleteArraryElement(elementPick, selections);
+        }
+        console.log("selectionWorkType",selectionWorkType);
+        for (let index = 0; index < 12; index = index + MonthGap) {
+            for(let i = keyLenth;i < needNum + keyLenth;i++){
+                console.log("needNum",i);
+                TortCountGroupByWorkTypeEXchange[index][i].workType = selectionWorkType[i];
+            }
+        }
+    }
+    function gen_sqlRight(endTimeStamp,startTimeStamp, NUM_LIMIT) {
+        return  util.format("SELECT\n" +
+            "\tType.work_type, \n" +
+            "\tCOUNT(Type.work_id) AS num\n" +
+            "FROM\n" +
+            "\t(\n" +
+            "\t\tSELECT DISTINCT\n" +
+            "\t\t\ttort_info.work_id, \n" +
+            "\t\t\twork_info.work_type\n" +
+            "\t\tFROM\n" +
+            "\t\t\ttort_info\n" +
+            "\t\t\tINNER JOIN\n" +
+            "\t\t\twork_info\n" +
+            "\t\t\tON \n" +
+            "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
+            "\t\tWHERE\n" +
+            "\t\t\ttort_info.upload_time <= %s AND\n" +
+            "\t\t\ttort_info.upload_time > %s\n" +
+            "\t) AS Type\n" +
+            "GROUP BY\n" +
+            "\tType.work_type\n" +
+            "ORDER BY\n" +
+            "\tnum DESC\n" +
+            "LIMIT %s",endTimeStamp,startTimeStamp,NUM_LIMIT);
     }
 }
 /*
@@ -491,75 +462,23 @@ async function getTortCountGroupByCreationTypeEXchange() {
     let startTimeStamp = TimeStampArray[(index + 1)];
     if(CONNECT == true){
         // TODO 确定选中的类型
-        let keys = [];
-        while(keys.length<3 && index<12){
-            keys = [];
+        let keySet = new Set();
+        while(keySet.size<3 && index<12){
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
-            let sqlRight = util.format("SELECT\n" +
-                "\tType.creation_type, \n" +
-                "\tCOUNT(Type.work_id) AS num\n" +
-                "FROM\n" +
-                "\t(\n" +
-                "\t\tSELECT DISTINCT\n" +
-                "\t\t\ttort_info.work_id, \n" +
-                "\t\t\twork_info.creation_type\n" +
-                "\t\tFROM\n" +
-                "\t\t\ttort_info\n" +
-                "\t\t\tINNER JOIN\n" +
-                "\t\t\twork_info\n" +
-                "\t\t\tON \n" +
-                "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
-                "\t\tWHERE\n" +
-                "\t\t\ttort_info.monitor_time <= %s AND\n" +
-                "\t\t\ttort_info.monitor_time > %s\n" +
-                "\t) AS Type\n" +
-                "GROUP BY\n" +
-                "\tType.creation_type\n" +
-                "ORDER BY\n" +
-                "\tnum DESC\n" +
-                "LIMIT 3",endTimeStamp,startTimeStamp);
+            let sqlRight = gen_SqlRight(endTimeStamp,startTimeStamp);
             let sqlRes = await mysqlUtils.sql(c, sqlRight);
             sqlRes.forEach(function(item){
-                keys.push(item['creation_type']);
+                keySet.add(item['creation_type']);
             });
             index = index + MonthGap;
         }
-        if(keys.length < 3){
-            _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange, MonthGap, MonthArray)
-            TortCountGroupByCreationTypeEXchange.reverse();
-            return TortCountGroupByCreationTypeEXchange;
-        }
-
-
-
+        let keys = Array.from(keySet);
         for (let index = 0; index < 12; index = index + MonthGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
             let TortCountGroupByCreationType = [];
-            let sqlRight = util.format("SELECT\n" +
-                "\tType.creation_type, \n" +
-                "\tCOUNT(Type.work_id) AS num\n" +
-                "FROM\n" +
-                "\t(\n" +
-                "\t\tSELECT DISTINCT\n" +
-                "\t\t\ttort_info.work_id, \n" +
-                "\t\t\twork_info.creation_type\n" +
-                "\t\tFROM\n" +
-                "\t\t\ttort_info\n" +
-                "\t\t\tINNER JOIN\n" +
-                "\t\t\twork_info\n" +
-                "\t\t\tON \n" +
-                "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
-                "\t\tWHERE\n" +
-                "\t\t\ttort_info.monitor_time <= %s AND\n" +
-                "\t\t\ttort_info.monitor_time > %s\n" +
-                "\t) AS Type\n" +
-                "GROUP BY\n" +
-                "\tType.creation_type\n" +
-                "ORDER BY\n" +
-                "\tnum DESC\n" +
-                "LIMIT 3",endTimeStamp,startTimeStamp);
+            let sqlRight = gen_SqlRight(endTimeStamp,startTimeStamp);
             let sqlRes = await mysqlUtils.sql(c, sqlRight);
             let Res = {};
             sqlRes.forEach(function(item){
@@ -569,13 +488,16 @@ async function getTortCountGroupByCreationTypeEXchange() {
                 key = keys[i];
                 if(Res[key]==null)Res[key]=0;
                 let MonthInfo = {
-                    "creationType":WORKTYPE[key],
+                    "creationType":CREATIONTYPE[key],
                     "TortCount":Res[key],
                     "Month" : MonthArray[index + MonthGap],
                 };
                 TortCountGroupByCreationType.push(MonthInfo);
             };
             TortCountGroupByCreationTypeEXchange.push(TortCountGroupByCreationType);
+        }
+        if(keys.length < 3){
+            _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange, MonthGap, MonthArray)
         }
     }
     else{
@@ -584,34 +506,70 @@ async function getTortCountGroupByCreationTypeEXchange() {
     TortCountGroupByCreationTypeEXchange.reverse();
     console.log(TortCountGroupByCreationTypeEXchange);
     return TortCountGroupByCreationTypeEXchange;
-}
-function _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange, MonthGap, MonthArray) {
-    console.log("_PROTECT_getTortCountGroupByCreationTypeEXchange");
+    // TODO
+    function _PROTECT_getTortCountGroupByCreationTypeEXchange(TortCountGroupByCreationTypeEXchange,MonthGap,MonthArray){
+        console.log("_PROTECT_getTortCountGroupByCreationTypeEXchange");
+        let selections = Object.values(CREATIONTYPE);
+        let selectionCreationType = []
+        let keyLenth = 0;
+        console.log("TortCountGroupByCREATIONTYPEEXchange",TortCountGroupByCreationTypeEXchange[0]);
+        console.log("TortCountGroupByCREATIONTYPEEXchange",TortCountGroupByCreationTypeEXchange);
 
-    for (let index = 0; index < 12; index = index + MonthGap) {
-        let TortCountGroupByWorkType = [];
-        let MonthInfo = {};
-        MonthInfo = {
-            "creationType":CREATIONTYPE["1"],
-            "TortCount":0,
-            "Month" : MonthArray[index + MonthGap],
-        };
-        TortCountGroupByWorkType.push(MonthInfo);
-        MonthInfo = {
-            "creationType":CREATIONTYPE["2"],
-            "TortCount":0,
-            "Month" : MonthArray[index + MonthGap],
-        };
-        TortCountGroupByWorkType.push(MonthInfo);
-        MonthInfo = {
-            "creationType":CREATIONTYPE["3"],
-            "TortCount":0,
-            "Month" : MonthArray[index + MonthGap],
-        };
-        TortCountGroupByWorkType.push(MonthInfo);
-        TortCountGroupByCreationTypeEXchange.push(TortCountGroupByWorkType);
+        TortCountGroupByCreationTypeEXchange[0].forEach(function (element) {
+            if (element.creationType!=null){
+                deleteArraryElement(element.creationType.toString(), selections);
+                selectionCreationType.push(element.creationType.toString());
+                keyLenth++;
+            }
+        });
+        let needNum = 3 - keyLenth;
+        console.log(needNum);
+        for(let i = 0;i < needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            selectionCreationType.push(elementPick);
+            deleteArraryElement(elementPick, selections);
+        }
+        console.log("selectionCreationType",selectionCreationType);
+        for (let index = 0; index < 12; index = index + MonthGap) {
+            for(let i = keyLenth;i < needNum + keyLenth;i++){
+                let MonthInfo = {
+                    "creationType":selectionCreationType[i],
+                    "TortCount":0,
+                    "Month" : MonthArray[index + MonthGap],
+                };
+                TortCountGroupByCreationTypeEXchange[index].push(MonthInfo);
+            }
+        }
+    }
+    function gen_SqlRight(endTimeStamp,startTimeStamp){
+        return  util.format("SELECT\n" +
+            "\tType.creation_type, \n" +
+            "\tCOUNT(Type.work_id) AS num\n" +
+            "FROM\n" +
+            "\t(\n" +
+            "\t\tSELECT DISTINCT\n" +
+            "\t\t\ttort_info.work_id, \n" +
+            "\t\t\twork_info.creation_type\n" +
+            "\t\tFROM\n" +
+            "\t\t\ttort_info\n" +
+            "\t\t\tINNER JOIN\n" +
+            "\t\t\twork_info\n" +
+            "\t\t\tON \n" +
+            "\t\t\t\ttort_info.work_id = work_info.work_id\n" +
+            "\t\tWHERE\n" +
+            "\t\t\ttort_info.upload_time <= %s AND\n" +
+            "\t\t\ttort_info.upload_time > %s\n" +
+            "\t) AS Type\n" +
+            "GROUP BY\n" +
+            "\tType.creation_type\n" +
+            "ORDER BY\n" +
+            "\tnum DESC\n" +
+            "LIMIT 3",endTimeStamp,startTimeStamp);
     }
 }
+
+
+
 /*
  * @param req: 请求d
  * @param res: 返回
@@ -634,6 +592,22 @@ async function getTortCountGroupByTortSite() {
     if(CONNECT == true){
         let Res = await countGroupBy("tort_info","site_name");
         let keys = Object.keys(Res);
+        if(keys[0]==""){
+            keys = [];
+        }
+
+        await Batch(TortCountGroupByTortSite);
+        async function Batch(TortCountGroupByTortSite){
+            let Res = await  countNum("tort_info","sample_id");
+            let tortCount = Res['num'];
+            TortSiteInfo = {
+                "TortSite":TORTSITE[6],
+                "TortCount":tortCount
+            };
+            TortCountGroupByTortSite.push(TortSiteInfo);
+        }
+
+
         for (let i = 0, n = keys.length, key; i < n; ++i) {
             key = keys[i];
             TortSiteInfo = {
@@ -643,33 +617,31 @@ async function getTortCountGroupByTortSite() {
             TortCountGroupByTortSite.push(TortSiteInfo);
         }
         if(keys.length<3){
-            _PROTECT_getTortCountGroupByTortSite(TortCountGroupByTortSite);
+            _PROTECT_(TortCountGroupByTortSite);
         }
     }
     else{
-        _PROTECT_getTortCountGroupByTortSite(TortCountGroupByTortSite);
+        _PROTECT_(TortCountGroupByTortSite);
     }
     console.log(TortCountGroupByTortSite);
     return TortCountGroupByTortSite;
-}
-function _PROTECT_getTortCountGroupByTortSite(TortCountGroupByTortSite) {
-    console.log("_PROTECT_getTortCountGroupByTortSite");
-    let TortSiteInfo = {};
-    TortSiteInfo = {
-        "TortSite":TORTSITE["3"],
-        "TortCount":0
-    };
-    TortCountGroupByTortSite.push(TortSiteInfo);
-    TortSiteInfo = {
-        "TortSite":TORTSITE["2"],
-        "TortCount":0
-    };
-    TortCountGroupByTortSite.push(TortSiteInfo);
-    TortSiteInfo = {
-        "TortSite":TORTSITE["1"],
-        "TortCount":0
-    };
-    TortCountGroupByTortSite.push(TortSiteInfo);
+    function _PROTECT_(TortCountGroupByTortSite){
+        console.log("_PROTECT_");
+        let selections = Object.values(TORTSITE);
+        TortCountGroupByTortSite.forEach(function (element) {
+            deleteArraryElement(element.TortSite.toString(), selections)
+        });
+        let needNum = (3 - TortCountGroupByTortSite.length);
+        for(let i = 1;i <= needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            deleteArraryElement(elementPick, selections);
+            TortSiteInfo = {
+                "TortSite":elementPick,
+                "TortCount":0
+            };
+            TortCountGroupByTortSite.push(TortSiteInfo);
+        }
+    }
 }
 
 /*
@@ -812,27 +784,48 @@ async function getTortGroupByTortSiteGroupByWorkType() {
             };
             TortCountGroupByWorkType.push(WorkTypeInfo);
         });
-        if (TortCountGroupByWorkType.length < 6) {
-            _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType);
-        }
+
+        return getTortCountGroupByWorkType();
+        // if (TortCountGroupByWorkType.length < 6) {
+        //     _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType);
+        // }
+
     }
     else{
         _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType);
     }
     console.log(TortCountGroupByWorkType);
     return TortCountGroupByWorkType;
-}
-function _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType) {
-    console.log("_PROTECT_getTortGroupByTortSiteGroupByWorkType");
+    function _PROTECT_getTortGroupByTortSiteGroupByWorkType(TortCountGroupByWorkType) {
+        console.log("_PROTECT_getTortGroupByTortSiteGroupByWorkType");
 
-    for(let i = 1;i <= 6;i++){
-        let WorkTypeInfo = {
-            "workType":WORKTYPE[i],
-            "TortCount":0,
-        };
-        TortCountGroupByWorkType.push(WorkTypeInfo);
+        let selections = Object.values(WORKTYPE);
+        TortCountGroupByWorkType.forEach(function (element) {
+            deleteArraryElement(element.workType.toString(), selections);
+        });
+        let needNum = (6-TortCountGroupByWorkType.length);
+        for(let i = 1;i <= needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            deleteArraryElement(elementPick, selections);
+            let WorkTypeInfo = {
+                "workType":elementPick,
+                "TortCount":0,
+                "TotalTortCount":0,
+                "ClaimCount":0
+            };
+            TortCountGroupByWorkType.push(WorkTypeInfo);
+        }
+
+        for(let i = 1;i <= 6;i++){
+            let WorkTypeInfo = {
+                "workType":WORKTYPE[i],
+                "TortCount":0,
+            };
+            TortCountGroupByWorkType.push(WorkTypeInfo);
+        }
     }
 }
+
 /*
  * @param req: 请求
  * @param res: 返回
@@ -896,9 +889,16 @@ async function getTortTort_AND_ClaimCountGroupByWorkType() {
     console.log(TortCountGroupByWorkType);
     return TortCountGroupByWorkType;
     function _PROTECT_(TortCountGroupByWorkType){
-        for(let i = 1;i <= 6;i++){
+        let selections = Object.values(WORKTYPE);
+        TortCountGroupByWorkType.forEach(function (element) {
+            deleteArraryElement(element.workType.toString(), selections)
+        });
+        let needNum = (6 - TortCountGroupByWorkType.length);
+        for(let i = 1;i <= needNum;i++){
+            let elementPick = selections.splice(0,1)[0];
+            deleteArraryElement(elementPick, selections);
             let WorkTypeInfo = {
-                "workType":WORKTYPE[i],
+                "workType":elementPick,
                 "TortCount":0,
                 "TotalTortCount":0,
                 "ClaimCount":0
@@ -907,4 +907,8 @@ async function getTortTort_AND_ClaimCountGroupByWorkType() {
         }
     }
 }
-
+// 删除指定ArraryElement
+function deleteArraryElement(element, Arrary){
+    let deleteIndex = Arrary.indexOf(element);
+    Arrary.splice(deleteIndex,1);
+}

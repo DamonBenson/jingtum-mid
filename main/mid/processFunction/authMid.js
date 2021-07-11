@@ -340,6 +340,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let workId = body.workId;
     let address = body.address;
+    // TODO Test
 
     let batchName = sha256(workId + address).toString();
 
@@ -440,6 +441,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     console.log(submitRes);
 
+    // let batchNo = "1413441800852471808";
     handleAuthResult(tokenRemote, seqObj, workId, address, batchNo);
 
     console.timeEnd('handleWorkAuth');
@@ -1306,9 +1308,10 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         /****获取证书后****/
         // 证书存入IPFS
         // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
-        const cerPath = body.objectJson[0].cerPath;
-        console.log('证书地址.',cerPath);
-        let ipfsUrl = await downloadToIPFS(cerPath);
+        const cerPath = body.data.objectJson[0].cerPath;
+        console.log('证书地址：',cerPath);
+        // TODO fake IPFS_URL
+        let ipfsUrl = "http://118.190.39.87:5001/api/v0/cat?arg=" + "QmeSZyn1XGYgYyczhoKofwzxZBktUAhWtDzs88C21KDNzF";//await downloadToIPFS(cerPath);
 
         // 通证信息上链
         let copyrightFilter = {
@@ -1337,11 +1340,26 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         let txInfo = await requestInfo.requestTx(tokenRemote, txHash, true);
         let timestamp = txInfo.Timestamp + 946684800;
 
+
+
         // 异步返回京东
+        let workFileHash;
+        let auditResult;
+        let examineMessage;
+        try{
+            workFileHash = body.data.objectIdentityJson[0].works_hash;
+            auditResult = body.data.objectIdentityJson[0].examine_status==1?true:false;
+            examineMessage = body.data.objectIdentityJson[0].examine_message;
+        }
+        catch (e) {
+            console.log('e:', e);
+            console.log('body.data:', body.data);
+
+        }
         let authResult = {
             workId : workId,
             address : address,
-            authenticateInfo:{
+            authenticationInfo:{
                 auditResult : true,
                 examineMessage : null,
                 authenticationId : workFileHash,
@@ -1350,12 +1368,11 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
             }
 
         }
-
         console.log('authResult:', authResult);
         // TODO 京东接口
         let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
         if (debugMode) {
-            console.log('Res:', Res.data);
+            console.log('Res:', Res);
         }
 
     }

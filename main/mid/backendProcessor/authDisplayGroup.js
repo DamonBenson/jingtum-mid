@@ -14,8 +14,13 @@ import util from 'util';
 
 import mysql from 'mysql';
 import {c} from "../MidBackend.js";
-import {debugMode, WORKTYPE, CREATIONTYPE} from '../../../utils/info.js';
+import {debugMode, CREATIONTYPE} from '../../../utils/info.js';
 import {countGroupBy, countNumJoinRight, countNumJoinRightAll} from "./SelectUtil.js";
+const WORKTYPE = {
+    1:"音乐",2:"摄影",3:"短视频",4:"戏剧",5:"曲艺",
+    6:"舞蹈",7:"杂技艺术",8:"美术",9:"建筑",10:"文字",
+    11:"电影",12:"图形",13:"模型",14:"其他"
+};
 const CONNECT = true;// When false, Send Random Response
 // export{
 //     handleCertificateAmountEXchange,// 1）	存证总数量随时间的变化。
@@ -134,6 +139,7 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
         let index = 0;
         let endTimeStamp = TimeStampArray[index];
         let startTimeStamp = TimeStampArray[(index + 1)];
+        console.log(TimeStampArray);
         let keys = [];
         while(keys.length<3 && index<3){
             endTimeStamp = TimeStampArray[index];
@@ -142,11 +148,17 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
             keys = Object.keys(Res);
             index = index + SeasonGap;
         }
-
+        console.log(keys);
         for (let index = 0; index < 4; index = index + SeasonGap) {
             endTimeStamp = TimeStampArray[index];
             startTimeStamp = TimeStampArray[(index + 1)];
-            let Res = await countGroupBy("work_info", "work_type",endTimeStamp ,startTimeStamp);
+            // let Res = await countGroupBy("work_info", "work_type",endTimeStamp ,startTimeStamp);
+            let sqlRight = gen_SqlRight(endTimeStamp , startTimeStamp, keys);
+            let sqlRes = await mysqlUtils.sql(c, sqlRight);
+            let Res = {};
+            sqlRes.forEach(value =>
+                Res[[value["work_type"]]] = value['num']
+            );
             CertificateAmountGroupByWorkType =[];
             for (let i = 0, n = keys.length, key; i < n; ++i) {
                 key = keys[i];
@@ -161,6 +173,7 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
             CertificateAmountGroupByWorkTypeEXchange.push(CertificateAmountGroupByWorkType);
 
         }
+        console.log(CertificateAmountGroupByWorkTypeEXchange);
     }
     else{
         for (let index = 0; index < 3; index = index + SeasonGap) {
@@ -191,6 +204,31 @@ async function getCertificateAmountGroupByWorkTypeEXchange() {
 
     CertificateAmountGroupByWorkTypeEXchange.reverse();
     return CertificateAmountGroupByWorkTypeEXchange;
+    function gen_SqlRight(endTimeStamp , startTimeStamp,workTypes) {
+        console.log(workTypes)
+        return util.format("SELECT\n" +
+            "\t*\n" +
+            "FROM\n" +
+            "\t(\n" +
+            "\t\tSELECT\n" +
+            "\t\t\twork_info.work_type, \n" +
+            "\t\t\tCOUNT(work_info.work_id) AS num\n" +
+            "\t\tFROM\n" +
+            "\t\t\twork_info\n" +
+            "\t\tWHERE\n" +
+            "\t\t\twork_info.completion_time <= %s AND\n" +
+            "\t\t\twork_info.completion_time > %s AND\n" +
+            "\t\t\t(\n" +
+            "\t\t\t  work_info.work_type = %s OR\n" +
+            "\t\t\t  work_info.work_type = %s OR\n" +
+            "\t\t\t  work_info.work_type = %s\n" +
+            "\t\t\t)\n" +
+            "\t\tGROUP BY\n" +
+            "\t\t\twork_info.work_type\n" +
+            "\t) AS Type\n"
+            ,endTimeStamp , startTimeStamp, workTypes[0], workTypes[1], workTypes[2])
+
+    }
 }
 
 // 1）	版权通证总数量随时间的变化。 Amount

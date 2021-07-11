@@ -175,9 +175,9 @@ export function postFiles(url, fileInfo) {
 
 /**
  * @description 从url处下载文件
- * @param {string}url 下载路径
+ * @param {string}urlString 下载路径
  * @param {String}savePath 存储路径
- * @returns {Object} 下载文件
+ * @returns {Object} 下载文件数据
  */
 export function downloadFile(urlString = "http://i1.hexun.com/2019-12-30/199821260.jpg", savePath = ".\\cer.jpg") {
     let url = new URL(urlString);
@@ -186,7 +186,7 @@ export function downloadFile(urlString = "http://i1.hexun.com/2019-12-30/1998212
         host: url.hostname,
         port: url.port,
         path: url.pathname,
-        method: 'POST',
+        method: 'GET',
         headers: {
             "Content-Type": "application/json",
         },
@@ -231,7 +231,7 @@ export function downloadToIPFS(urlString = "http://i1.hexun.com/2019-12-30/19982
         host: url.hostname,
         port: url.port,
         path: url.pathname,
-        method: 'POST',
+        method: 'GET',
         headers: {
             "Content-Type": "application/json",
         },

@@ -278,10 +278,10 @@ export const CREATIONTYPE = {
  * @date 2021/5/24
  */
 export const TORTSITE = {
-    1:"乐视",2:"新浪",3:"酷狗",4:"网易",5:"腾讯",
+    1:"乐视",2:"新浪",3:"酷狗",4:"网易",5:"腾讯",6:"网易云音乐"
 };
 export const TORTURL = {
-    1:"https://www.letv.com/",2:"https://www.sina.com.cn/",3:"https://www.kugou.com/",4:"https://www.163.com/",5:"https://www.tencent.com/zh-cn",
+    1:"https://www.letv.com/",2:"https://www.sina.com.cn/",3:"https://www.kugou.com/",4:"https://www.163.com/",5:"https://www.tencent.com/zh-cn",6:"https://music.163.com/song"
 };
 
 
