@@ -1310,7 +1310,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
         const cerPath = body.data.objectJson[0].cerPath;
         console.log('证书地址：',cerPath);
-        // TODO fake IPFS_URL
+
         let ipfsUrl = await downloadToIPFS(cerPath);//"http://118.190.39.87:5001/api/v0/cat?arg=" + "QmeSZyn1XGYgYyczhoKofwzxZBktUAhWtDzs88C21KDNzF";
 
         // 通证信息上链
@@ -1352,7 +1352,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
             examineMessage = body.data.objectIdentityJson[0].examine_message;
         }
         catch (e) {
-            console.log('e:', e);
+            console.log('证书下载错误（已存IPFS、上链）:', e);
             console.log('body.data:', body.data);
 
         }
@@ -1369,10 +1369,9 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
 
         }
         console.log('authResult:', authResult);
-        // TODO 京东接口
         let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
         if (debugMode) {
-            console.log('Res:', Res);
+            console.log('京东Res:', Res);
         }
 
     }
