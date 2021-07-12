@@ -1311,7 +1311,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         const cerPath = body.data.objectJson[0].cerPath;
         console.log('证书地址：',cerPath);
         // TODO fake IPFS_URL
-        let ipfsUrl = "http://118.190.39.87:5001/api/v0/cat?arg=" + "QmeSZyn1XGYgYyczhoKofwzxZBktUAhWtDzs88C21KDNzF";//await downloadToIPFS(cerPath);
+        let ipfsUrl = await downloadToIPFS(cerPath);//"http://118.190.39.87:5001/api/v0/cat?arg=" + "QmeSZyn1XGYgYyczhoKofwzxZBktUAhWtDzs88C21KDNzF";
 
         // 通证信息上链
         let copyrightFilter = {
