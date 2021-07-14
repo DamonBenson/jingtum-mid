@@ -364,9 +364,9 @@ export const approveConfirmReqSchema = Joi.object().keys({
             authorizationScene:
                 Joi.number().integer().min(0).max(9).required(),
             authorizationChannel:
-                Joi.number().integer().min(0).max(3).required(),
+                Joi.number().integer().min(0).max(4).required(),
             authorizationArea:
-                Joi.number().integer().min(0).max(3).required(),
+                Joi.number().integer().min(0).max(2).required(),
             authorizationTime:
                 Joi.number().integer().min(0).max(3).required(),
         }).required(),
