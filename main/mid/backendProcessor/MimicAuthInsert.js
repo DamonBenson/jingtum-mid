@@ -59,22 +59,20 @@ function MimicAuthInsert(){
 export function generateworkAuth(){
     let fileNum = localUtils.randomSelect([1,2,3,4],[0.7,0.2,0.07,0.003]);
     let upload_fileInfoList = []
+    let workType = localUtils.randomSelect([1, 2, 3],[0.36,0.61,0.03]);
     while(fileNum >0 ){
         fileNum --;
         upload_fileInfoList.push({
             fileHash:sha256(localUtils.randomNumber(100, 2000000000).toString()).toString(),
-            fileType:localUtils.randomNumber(1,5),// 文本(1)、图片(2)、音频(3)、视频(4)
+            fileType:localUtils.randomNumber(2,4),// 文本(1)、图片(2)、音频(3)、视频(4)
             fileAddress:'http://yjxt.bupt.edu.cn/Gstudent/Default.aspx'//文件下载地址
-           });
+       });
     }
-    let publishStatus = localUtils.randomSelect(["Unpublished","Published"])
+    let publishStatus = "Unpublished";//localUtils.randomSelect(["Unpublished","Published"])
     let workAuth = {};
     let createdDay = DateUtil.getPastDay();
     let publishedDay = DateUtil.getBetweenDay(createdDay);
-    let workType = localUtils.randomNumber(1,15);
-    if(localUtils.randomSelect([1,2])!=1){//文字、音乐、美术、图形比较多
-        workType = localUtils.randomSelect([1, 3, 8, 12]);
-    }
+
     if(publishStatus == "Published"){
         workAuth = {
             workName: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString().substring(0,8),

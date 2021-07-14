@@ -1,9 +1,10 @@
 import Joi from 'joi';
+import {authCustom, jingtumCustom} from "./base";
 
 /*----------数据验证格式定义----------*/
 
 // 作品确权
-export const workAuthReqSchema = Joi.any();
+export const workAuthReqSchema_Any = Joi.any();
 
 /**
  * @description 版权确权。
@@ -25,10 +26,31 @@ export const authStateReqSchema = Joi.any();
  * @param {int}workId 作品标识
  * @param {String}address 确权用户地址
  */
- export const innerWorkAuthReqSchema = Joi.any();
+export const innerWorkAuthReqSchema = Joi.any();
 
 /**
  * @description 不通过合约完成同步版权确权。
  * @param {int[]}copyrightIds 版权权利通证标识列表
  */
- export const innerCopyrightAuthReqSchema = Joi.any();
+export const innerCopyrightAuthReqSchema = Joi.any();
+
+/**
+ * @description 北京版权局确权。
+ * @param {int[]}copyrightIds 版权权利通证标识列表
+ */
+export const workAuthReqSchema = Joi.object().keys({
+    workId:
+        Joi.string().required(),
+    address:
+        jingtumCustom.jingtum().address().required()
+}).id('workAuthReqSchema');
+// /**
+//  * @description 北京版权局确权。
+//  * @param {int[]}copyrightIds 版权权利通证标识列表
+//  */
+// export const package1Schema = Joi.object().keys({
+//     workId:
+//         Joi.string().required(),
+//     address:
+//         jingtumCustom.jingtum().address().required()
+// }).id('workAuthReqSchema');

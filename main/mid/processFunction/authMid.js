@@ -23,7 +23,7 @@ import formData from "form-data";
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 600000);
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 
 const authenticateAddr = userAccount.authenticateAccount[0].address;
@@ -62,11 +62,11 @@ const basePath = ".";
 // }
 
 /**
- * @description 版权确权，平台签名。
+ * @description 版权确权，平台签名
  * @param {int[]}copyrightIds 版权权利通证标识列表
  * @param {String}platformAddr 平台地址
  * @param {String}contractAddr 确权合约地址
- * @returns 无
+ * @returns 
  */
 // export async function handleCopyrightAuth(contractRemote, seqObj, req) {
 
@@ -103,7 +103,7 @@ const basePath = ".";
 // }
 
 /**
- * @description 查询审核情况，中间层签名。
+ * @description 查询审核情况，中间层签名
  * @param {int[]}copyrightIds 版权权利通证标识列表
  * @param {String}contractAddr 确权合约地址
  * @returns {Object[]} 审核情况列表，包括：审核状态auditStatus、审核结果copyrightStatus、确权标识authenticationId、确权证书索引licenseUrl
@@ -133,7 +133,7 @@ const basePath = ".";
 //         return resInfo;
 //     }
 
-//     // 方法体    
+//     // 方法体  
 
 //     console.timeEnd('handleAuthState');
 //     console.log('--------------------');
@@ -145,7 +145,7 @@ const basePath = ".";
 // }
 
 /**
- * @description 不通过合约完成同步作品确权。
+ * @description 不通过合约完成同步作品确权
  * @param {int}workId 作品标识
  * @param {String}address 确权用户地址
  * @returns {Object} 确权信息，包括：审核结果auditResult、确权标识authenticationId、登记确权证书索引licenseUrl、确权时间戳timestamp
@@ -236,7 +236,7 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
 }
 
 /**
- * @description 不通过合约完成同步版权确权。
+ * @description 不通过合约完成同步版权确权
  * @param {int[]}copyrightIds 版权权利通证标识列表
  * @returns {Object[]} 确权信息列表，包括：版权权利通证标识copyrightId、审核结果auditResult、确权标识authenticationId、登记确权证书索引licenseUrl、确权时间戳timestamp
  */
@@ -316,20 +316,17 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
 // }
 
 /**
- * @description 不通过合约完成同步作品确权。
+ * @description 不通过合约完成同步作品确权
  * @param {int}workId 作品标识
  * @param {String}address 确权用户地址
  */
-let IntervalId_1;// 第一步业务
-let IntervalId_2;// 第二步业务
-let IntervalId_3;// 第三步业务
 export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     console.time('handleWorkAuth');
 
     let body = req.body;
     try {
-        await authValidate.innerWorkAuthReqSchema.validateAsync(body);
+        await authValidate.workAuthReqSchema.validateAsync(body);
     } catch(e) {
         e.details.map((detail, index) => {
             console.log('error message ' + index + ':', detail.message);
@@ -340,7 +337,8 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let workId = body.workId;
     let address = body.address;
-    // TODO Test
+
+    console.log('body:', body);
 
     let batchName = sha256(workId + address).toString();
 
@@ -466,7 +464,7 @@ async function genPackage1(workId, address, batchName) {
     let workType = workInfo.work_type.toString();
 
     // 测试
-    workType = "2";
+    // workType = "1";
 
     let workName;
     switch (workType) {
@@ -486,7 +484,7 @@ async function genPackage1(workId, address, batchName) {
 
     // 测试
     // fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
-    fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+    // fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
 
     let workPath;
     switch (workType) {
@@ -559,41 +557,7 @@ async function genPackage1(workId, address, batchName) {
             "works_count": "1"
         }
     }
-    // 调整顺序未改变内容，其中object应该有两个
-    let HuangWenwei_package1 = {
-        "cover": cover,
-        "cover_hash": coverHash,
-        "subject": [
-            {
-                "name": subjectInfo.name,
-                "type": subjectInfo.type,
-                "usn": subjectInfo.usn
-            }
-        ],
-        "object": [
-            {
-                "isSelect": false,
-                "longSelect": false,
-                "is_split": 0,
-                "file_type": "",
-                "works_hash": workHash,
-                "works_name": workName,
-                "works_path": workPath,
-                "works_size": workSize,
-                "works_type": workType
-            }
-        ],
-        "copyright_rights_get": 0,
-        "name": batchName,
-        "params": {
-            "batch_name": batchName,
-            "det_business_code": "C001_01_01",
-            "package_token": packageToken,
-            "step": 1,
-            "submit_usn": subjectInfo.usn,
-            "works_count": 1
-        }
-    }
+    
     return package1;
 
 }
@@ -646,27 +610,7 @@ function genExpress1(package1, package1Hash, batchName) {
             }
         ]
     }
-    // 调整顺序未改变内容
-    let HuangWenwei_express1 = {
-        "from_space_user": fromSpaceUser,
-        "from_space_address": "",
-        "det_business_code": "C001_01_01",
-        "to_space_address": "",
-        "from_space_ip": "",
-        "to_space_user": "",
-        "det_package_name": batchName,
-        "package_list": [
-            {
-                "file_list": fileList,
-                "package_name": batchName,
-                "package_hash": package1Hash,
-                "package_token": packageToken,
-            }
-        ],
-        "det_time": detTime,
-        "from_space_device": "",
-        "det_package_num": 1,
-    }
+
     return express1;
 
 }
@@ -677,10 +621,13 @@ async function genPackage2(workId, address, batchNo) {
         work_id: workId,
         address: address,
     };
-    let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
+    let sql = sqlText.table('right_token_info').where(copyrightFilter).select();
     let copyrightInfoArr = await mysqlUtils.sql(c, sql);
     let copyrightTypes = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_type + 4);
+
     copyrightTypes = [0, 1, 2, 3].concat(copyrightTypes);
+
+    copyrightTypes.sort((a, b) => a - b);
 
     let rights = [];
     for(let i in copyrightTypes) {
@@ -689,7 +636,7 @@ async function genPackage2(workId, address, batchNo) {
             rights_explain: "",
         });
     }
-
+    
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package2 = {
@@ -709,25 +656,6 @@ async function genPackage2(workId, address, batchNo) {
             "package_token": packageToken,
             "step": "2"
         }
-    }
-    // 调整顺序未改变内容
-    let HuangWenwei_package2 = {
-        "params": {
-            "submit_usn": subjectInfo.usn,
-            "det_business_code": "C001_01_02",
-            "package_token": packageToken,
-            "step": 2
-        },
-        "rights_category": [
-            {
-                "rights_owner_name": subjectInfo.name,
-                "rights_owner_type": subjectInfo.type,
-                "rights_owner_usn": subjectInfo.usn,
-                "rights": rights
-            }
-        ],
-        "copyright_produce_mode": 0,
-        "batch_no": batchNo,
     }
 
     return package2;
@@ -760,27 +688,6 @@ function genExpress2(package2, package2Hash, batchName) {
                 "file_list": []
             }
         ]
-    };
-    // 调整顺序未改变内容
-    let HuangWenwei_express2 = {
-        "from_space_user": fromSpaceUser,
-        "from_space_address": "",
-        "det_business_code": "C001_01_02",
-        "to_space_address": "",
-        "from_space_ip": "",
-        "to_space_user": "",
-        "det_package_name": batchName,
-        "package_list": [
-            {
-                "file_list": [],
-                "package_name": batchName,
-                "package_hash": package2Hash,
-                "package_token": packageToken,
-            }
-        ],
-        "det_time": detTime,
-        "from_space_device": "",
-        "det_package_num": 1,
     };
       
     return express2;
@@ -984,177 +891,7 @@ function genPackage3(package1, batchNo) {
             "submit_usn": subjectInfo.usn
         }
     }
-    // 调整顺序未改变内容，其中object应该有两个
-    let HuangWenwei_package3 = {
-        "subject": [
-            {
-                "A1": {
-                    "id_type": "A2",
-                    "type": subjectInfo.type,
-                    "address": subjectInfo.address,
-                    "name": subjectInfo.name,
-                    "usn": subjectInfo.usn,
-                    "id_number": subjectInfo.idNum
-                },
-                "A2": {
-                    "files": [
-                        {
-                            "card_type": 1,
-                            "file_path": A2Path1,
-                            "file_type": 1,
-                            "file_hash": A2Hash1,
-                            "file_name": A2Name1,
-                            "id_card_no": subjectInfo.idNum,
-                            "credentials_id": subjectInfo.credentialsId
-                        },
-                        {
-                            "card_type": 1,
-                            "file_path": A2Path2,
-                            "file_type": 2,
-                            "file_hash": A2Hash2,
-                            "file_name": A2Name2,
-                            "id_card_no": subjectInfo.idNum,
-                            "credentials_id": subjectInfo.credentialsId
-                        }
-                    ],
-                    "id": subjectInfo.credentialsId,
-                    "sex": subjectInfo.sex,
-                    "date_end": subjectInfo.dateEnd,
-                    "address": subjectInfo.address,
-                    "name": subjectInfo.name,
-                    "usn": subjectInfo.usn,
-                    "birthday": subjectInfo.birthday,
-                    "id_number": subjectInfo.idNum,
-                    "nation": subjectInfo.nation,
-                    "date_start": subjectInfo.dateStart
-                },
-                "A3": {
-                    "id": "",
-                    "sex": "",
-                    "date_end": "",
-                    "address": "",
-                    "name": "",
-                    "usn": "",
-                    "birthday": "",
-                    "id_number": "",
-                    "nation": "",
-                    "date_start": ""
-                },
-                "A4": {
-                    "id": "",
-                    "sex": "",
-                    "date_end": "",
-                    "address": "",
-                    "name": "",
-                    "usn": "",
-                    "birthday": "",
-                    "id_number": "",
-                    "nation": "",
-                    "date_start": ""
-                },
-                "A5": {
-                    "id": "",
-                    "sex": "",
-                    "date_end": "",
-                    "address": "",
-                    "name": "",
-                    "usn": "",
-                    "birthday": "",
-                    "id_number": "",
-                    "nation": "",
-                    "date_start": ""
-                }
-            }
-        ],
-        "is_complete": 1,
-        "material": [
-            {
-                "material_type_name": "作品创作说明",
-                "material_type": "C1",
-                "material_list": [
-                    {
-                        "material_file_list": [
-                            {
-                                "file_name": C1Name,
-                                "file_path": C1Path,
-                                "file_type": 1,
-                                "file_hash": C1Hash
-                            }
-                        ],
-                        "material_name": "作品创作说明"
-                    }
-                ],
-                "material_num": 1
-            },
-            {
-                "material_type_name": "作品权利保证书",
-                "material_type": "C3",
-                "material_list": [
-                    {
-                        "material_file_list": [
-                            {
-                                "file_name": C3Name,
-                                "file_path": C3Path,
-                                "file_type": 1,
-                                "file_hash": C3Hash
-                            }
-                        ],
-                        "material_name": "作品权利保证书"
-                    }
-                ],
-                "material_num": 1
-            },
-            {
-                "material_type_name": "唯⼀著作权注册平台承诺书",
-                "material_type": "C16",
-                "material_list": [
-                    {
-                        "material_file_list": [
-                            {
-                                "file_name": C16Name,
-                                "file_path": C16Path,
-                                "file_type": 1,
-                                "file_hash": C16Hash
-                            }
-                        ],
-                        "material_name": "唯⼀著作权注册平台承诺书"
-                    }
-                ],
-                "material_num": 1
-            }
-        ],
-        "params": {
-            "works_count": 1,
-            "det_business_code": "C001_01_03",
-            "step": 3,
-            "package_token": packageToken,
-            "submit_usn": subjectInfo.usn
-        },
-        // TODO object应该有两个
-        "object": [
-            {
-                "works_type": package1.object.works_type,
-                "works_path": package1.object.works_path,
-                "works_creation_city": worksCreationCity,
-                "works_publish_status": 0,
-                "works_creation_date": worksCreationDate,
-                "works_creation_desc": worksCreationDesc,
-                "works_creation_country": worksCreationCountry,
-                "works_creation": 0,
-                "works_name": package1.object.works_name,
-                "works_hash": package1.object.works_hash,
-                "authors": [
-                    {
-                        "sign_name": subjectInfo.name,
-                        "sign_status": 1,
-                        "name": subjectInfo.name,
-                        "usn": subjectInfo.usn
-                    }
-                ]
-            }
-        ],
-        "batch_no": batchNo,
-    }
+    
     return package3;
 
 }
@@ -1212,32 +949,10 @@ function genExpress3(package3, package3Hash, batchName) {
             }
         ]
     }
-    // 调整顺序未改变内容
-    let HuangWenwei_express3 = {
-        "from_space_usr":fromSpaceUser,
-        "from_space_address": "",
-        "det_business_code": "C001_01_03",
-        "to_space_address": "",
-        "from_space_ip": "",
-        "to_space_user": "",
-        "det_package_name": batchName,
-        "package_list": [
-            {
-                "file_list": fileList,
-                "package_name": batchName,
-                "package_hash": package3Hash,
-                "package_token": packageToken,
-            }
-        ],
-        "det_time": detTime,
-        "from_space_device": "",
-        "det_package_num": 1,
 
-    }
     return express3;
 
 }
-
 
 async function uploadFiles(checkRes, detSn, packageHash) {
 
@@ -1267,7 +982,6 @@ async function uploadFiles(checkRes, detSn, packageHash) {
 
 }
 
-
 function convertWorkType(workType) {
 
     switch (workType) {
@@ -1281,20 +995,23 @@ function convertWorkType(workType) {
 
 }
 
-
-let IntervalId_AuthResult;// 审核的定时器
+let IntervalId_AuthResult = {};// 审核的定时器
 /**
  * @description 查审核情况。
  */
 export async function handleAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     // 启动定时器
-    IntervalId_AuthResult = setInterval(queryAuthResult, 3000, tokenRemote, seqObj, workId, address, batchNo);
+    let randomNum = localUtils.randomNumber(1,999999);
+    let Interval_ID = setInterval(queryAuthResult, 20000, tokenRemote, seqObj, workId, address, batchNo,randomNum);
+    IntervalId_AuthResult[randomNum] = Interval_ID;
 }
 
 /**
  * @description 查询审核的轮询函数。
  */
-async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
+async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,randomNum) {
+    console.log('workId:', workId);
+    console.log('batchNo:', batchNo);
     // 请求接口
     let certificateRes = await httpUtils.postFiles('http://117.107.213.242:8124/examine/result/details', {"batchNo": batchNo});
     if (debugMode) {
@@ -1303,16 +1020,29 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
     // TODO verify
     if (certificateRes.code === 200) {
         let body = certificateRes;// 确权请求
-        // 清除定时器
-        clearInterval(IntervalId_AuthResult);
+
+        console.log("body:", body.data);
+        console.log("body-object:", body.data.objectJson[0]);
+
         /****获取证书后****/
         // 证书存入IPFS
         // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
         const cerPath = body.data.objectJson[0].cerPath;
+        if(cerPath == "http://document.wespace.cnnull"){
+            console.log('证书为空：',cerPath);
+            return false;
+        }
         console.log('证书地址：',cerPath);
-
-        let ipfsUrl = await downloadToIPFS(cerPath);//"http://118.190.39.87:5001/api/v0/cat?arg=" + "QmeSZyn1XGYgYyczhoKofwzxZBktUAhWtDzs88C21KDNzF";
-
+        let ipfsHash;
+        try{
+            ipfsHash = await downloadToIPFS(cerPath);//
+        }
+        catch (e) {
+            console.log('IPFS错误:', e);
+            console.log('body.data:', body.data);
+            return false;
+        }
+        let ipfsUrl = "http://118.190.39.87:5001/api/v0/cat?arg=" + ipfsHash;
         // 通证信息上链
         let copyrightFilter = {
             work_id: workId,
@@ -1354,14 +1084,15 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         catch (e) {
             console.log('证书下载错误（已存IPFS、上链）:', e);
             console.log('body.data:', body.data);
-
+            return false;
         }
+
         let authResult = {
             workId : workId,
             address : address,
             authenticationInfo:{
-                auditResult : true,
-                examineMessage : null,
+                auditResult : auditResult,
+                examineMessage : examineMessage,
                 authenticationId : workFileHash,
                 licenseUrl: ipfsUrl,
                 timestamp:timestamp//确权信息填入通证链的链上时间戳,暂取首次
@@ -1373,8 +1104,10 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo) {
         if (debugMode) {
             console.log('京东Res:', Res);
         }
+                
+        // 清除定时器
+        console.log('Interval Clear:', IntervalId_AuthResult[randomNum]);
+        clearInterval(IntervalId_AuthResult[randomNum]);
 
     }
-    
-
 }
