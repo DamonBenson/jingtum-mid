@@ -1,5 +1,6 @@
 import Joi from 'joi';
-import {authCustom, jingtumCustom} from "./base";
+import {authCustom, jingtumCustom} from "./base.js";
+import {minTs, maxTs} from '../config/profile.js';
 
 /*----------数据验证格式定义----------*/
 
@@ -35,8 +36,7 @@ export const innerWorkAuthReqSchema = Joi.any();
 export const innerCopyrightAuthReqSchema = Joi.any();
 
 /**
- * @description 北京版权局确权。
- * @param {int[]}copyrightIds 版权权利通证标识列表
+ * @description 北京版权局确权请求报文。
  */
 export const workAuthReqSchema = Joi.object().keys({
     workId:
@@ -44,6 +44,33 @@ export const workAuthReqSchema = Joi.object().keys({
     address:
         jingtumCustom.jingtum().address().required()
 }).id('workAuthReqSchema');
+
+/**
+ * @description 北京版权局确权返回报文。
+ */
+export const workAuthResSchema = Joi.object().keys({
+    workId:
+        Joi.string().required(),
+    address:
+        jingtumCustom.jingtum().address().required()
+    authenticationInfo:
+        Joi.object().keys({
+            auditResult :
+                Joi.boolean().required(),
+            examineMessage :
+                Joi.string(),
+            authenticationId :
+                Joi.string(),
+            licenseUrl:
+                Joi.string(),
+            timestamp :
+                Joi.number().integer().min(minTs).max(maxTs),
+        }).required(),
+
+
+    }
+}).id('workAuthResSchema');
+
 // /**
 //  * @description 北京版权局确权。
 //  * @param {int[]}copyrightIds 版权权利通证标识列表

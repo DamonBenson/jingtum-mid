@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 import {authCustom, jingtumCustom, delJoiKeys} from './base.js';
+import {minTs, maxTs} from '../config/profile.js';
 
 /*----------数据常量----------*/
 
@@ -18,8 +19,6 @@ const maxAssetAmout = 100;
 const minExpireTime = 3600;
 const maxExpireTime = 2592000;
 const assetTypeAmount = 3;
-const minTs = 1609430400;
-const maxTs = 1924963200;
 
 const sideConst = 0;
 // const contact = ''; // 如何验证？

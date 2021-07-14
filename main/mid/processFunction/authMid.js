@@ -331,7 +331,13 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
         e.details.map((detail, index) => {
             console.log('error message ' + index + ':', detail.message);
         });
-        return false;
+        resInfo.msg = 'invalid parameters',
+            resInfo.code = 1;
+        resInfo.data.validateInfo = e;
+        console.log('/auth/work:', resInfo.data);
+        console.timeEnd('handleWorkAuth');
+        console.log('--------------------');
+        return resInfo;
     }
 
 
@@ -1095,12 +1101,22 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
                 examineMessage : examineMessage,
                 authenticationId : workFileHash,
                 licenseUrl: ipfsUrl,
-                timestamp:timestamp//确权信息填入通证链的链上时间戳,暂取首次
+                timestamp : timestamp//确权信息填入通证链的链上时间戳,暂取首次
             }
 
         }
         console.log('authResult:', authResult);
-        let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
+
+        let body = authResult;
+        try {
+            await authValidate.workAuthResSchema.validateAsync(body);
+        } catch(e) {
+            e.details.map((detail, index) => {
+                console.log('error message ' + index + ':', detail.message);
+            });
+            return false;
+        }
+        let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", body);
         if (debugMode) {
             console.log('京东Res:', Res);
         }
