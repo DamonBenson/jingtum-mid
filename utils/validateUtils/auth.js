@@ -52,7 +52,7 @@ export const workAuthResSchema = Joi.object().keys({
     workId:
         Joi.string().required(),
     address:
-        jingtumCustom.jingtum().address().required()
+        jingtumCustom.jingtum().address().required(),
     authenticationInfo:
         Joi.object().keys({
             auditResult :
@@ -65,10 +65,7 @@ export const workAuthResSchema = Joi.object().keys({
                 Joi.string(),
             timestamp :
                 Joi.number().integer().min(minTs).max(maxTs),
-        }).required(),
-
-
-    }
+    }).required(),
 }).id('workAuthResSchema');
 
 // /**
