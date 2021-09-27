@@ -141,7 +141,7 @@ r.connect(async function(err, result) {
 
 async function processUpload(uploadTxs, loopConter) {
 
-    if(debugMode == true) {
+    if(debugMode == true && loopConter != 0) {
         console.log('uploadTxs:', uploadTxs);
     }
 
@@ -185,7 +185,7 @@ async function processUpload(uploadTxs, loopConter) {
 
 async function processPicMonitor(picMonitorTxs, loopConter) {
 
-    if(debugMode == true) {
+    if(debugMode == true && loopConter != 0) {
         console.log('picMonitorTxs:', picMonitorTxs);
     }
 
@@ -217,7 +217,7 @@ async function processPicMonitor(picMonitorTxs, loopConter) {
 
 async function processMusicMonitor(musicMonitorTxs, loopConter) {
 
-    if(debugMode == true) {
+    if(debugMode == true && loopConter != 0) {
         console.log('musicMonitorTxs:', musicMonitorTxs);
     }
 
@@ -229,10 +229,6 @@ async function processMusicMonitor(musicMonitorTxs, loopConter) {
 
         monitorInfo.uploadTime = musicMonitorTx.date;
         monitorInfo.hash = musicMonitorTx.hash;
-
-        // 统一字段名
-        monitorInfo.tortNum = monitorInfo.evidenceNo;
-        delete monitorInfo.evidenceNo;
 
         console.log("monitorInfo:", monitorInfo);
         localUtils.toMysqlObj(monitorInfo);

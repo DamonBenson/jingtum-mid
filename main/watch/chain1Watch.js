@@ -168,7 +168,7 @@ r.connect(async function(err, result) {
 
 async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     
-    if(debugMode == true) {
+    if(debugMode == true && loopConter != 0) {
         console.log('issueRightTokenTxs:', issueRightTokenTxs);
     }
 
@@ -202,7 +202,7 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
 
 async function processIssueApproveToken(tokenRemote, issueApproveTokenTxs, loopConter) {
     
-    if(debugMode == true) {
+    if(debugMode == true && loopConter != 0) {
         console.log('issueApproveTokenTxs:', issueApproveTokenTxs);
     }
 
@@ -280,7 +280,7 @@ async function processIssueApproveToken(tokenRemote, issueApproveTokenTxs, loopC
 
 async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
 
-    if(debugMode == true) {
+    if(debugMode == true && loopConter != 0) {
         console.log('tokenInfoChangeTxs:', tokenInfoChangeTxs);
     }
 

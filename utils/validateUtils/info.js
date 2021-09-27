@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { jingtumCustom } from './base';
 
 /*----------数据常量----------*/
 
@@ -53,18 +54,31 @@ export const approveQueryReqSchema = Joi.object().keys({
  * @description 查询用户的所有作品信息。
  * @param {String}address 用户地址
  */
-export const workOfUserQueryReqSchema = Joi.any();
+export const workOfUserQueryReqSchema = Joi.object().keys({
+    address:
+        jingtumCustom.jingtum().address().required(),
+});
 
 /**
  * @description 查询用户作品的许可发放信息。
  * @param {String}address 用户地址
  * @param {int}workId 作品标识
  */
-export const issueApproveOfWorkQueryReqSchema = Joi.any();
+export const issueApproveOfWorkQueryReqSchema = Joi.object().keys({
+    address:
+        jingtumCustom.jingtum().address().required(),
+    workId:
+        Joi.string().hex().length(64),
+});
 
 /**
  * @description 查询用户作品的许可获得信息。
  * @param {String}address 用户地址
  * @param {int}workId 作品标识
  */
-export const ownApproveOfWorkQueryReqSchema = Joi.any();
+export const ownApproveOfWorkQueryReqSchema = Joi.object().keys({
+    address:
+        jingtumCustom.jingtum().address().required(),
+    workId:
+        Joi.string().hex().length(64),
+});

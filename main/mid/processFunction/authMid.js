@@ -463,24 +463,12 @@ async function genPackage1(workId, address, batchName) {
 
     let workType = workInfo.work_type.toString();
 
+    let suffix = '.' + fileInfo.fileAddress.split('.').pop();
+
     // 测试
     // workType = "1";
-
-    let workName;
-    switch (workType) {
-        case "1":
-            workName = workInfo.work_name + '.mp3';
-            break;
-        case "2":
-            workName = workInfo.work_name + '.jpg';
-            break;
-        case "3":
-            workName = workInfo.work_name + '.mp4';
-            break;
-        default:
-            workName = workInfo.work_name;
-            break;
-    }
+    
+    workName = workInfo.work_name + suffix;
 
     // 测试
     // fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
@@ -524,10 +512,10 @@ async function genPackage1(workId, address, batchName) {
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package1 = {
-        "cover": cover,
-        "cover_hash": coverHash,
         "name": batchName,
         "copyright_rights_get": "0",
+        "cover": cover,
+        "cover_hash": coverHash,
         "subject": [
             {
                 "name": subjectInfo.name,
@@ -537,15 +525,15 @@ async function genPackage1(workId, address, batchName) {
         ],
         "object": [
             {
-                "isSelect": false,
-                "longSelect": false,
-                "is_split": "0",
-                "file_type": "",
                 "works_hash": workHash,
                 "works_name": workName,
                 "works_path": localWorkPath,
                 "works_size": workSize,
-                "works_type": workType
+                "works_type": workType,
+                "file_type": "",
+                "is_split": "0",
+                "isSelect": false,
+                "longSelect": false
             }
         ],
         "params": {
@@ -579,11 +567,11 @@ function genExpress1(package1, package1Hash, batchName) {
         let fileSize = package1.object[i].works_size;
 
         let file = {
-            "is_split": "0",
             "file_hash": fileHash,
             "file_name": fileName,
             "file_path": filePath,
             "file_size": fileSize,
+            "is_split": "0",
         }
 
         fileList.push(file);
@@ -1021,9 +1009,6 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
     if (certificateRes.code === 200) {
         let body = certificateRes;// 确权请求
 
-        console.log("body:", body.data);
-        console.log("body-object:", body.data.objectJson[0]);
-
         /****获取证书后****/
         // 证书存入IPFS
         // const cerPath = "E:\\InputFile\\GitBase\\Mid\\main\\mid\\processFunction\\express_file.json";
@@ -1067,7 +1052,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
         let authenticateResArr = await Promise.all(authenticatePromises);
 
         let txHash = authenticateResArr[0].tx_json.hash;
-        let txInfo = await requestInfo.requestTx(tokenRemote, txHash, true);
+        let txInfo = await requestInfo.requestTx(tokenRemote, txHash, false);
         let timestamp = txInfo.Timestamp + 946684800;
 
 
@@ -1106,7 +1091,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
         }
                 
         // 清除定时器
-        console.log('Interval Clear:', IntervalId_AuthResult[randomNum]);
+        console.log('Interval Clear');
         clearInterval(IntervalId_AuthResult[randomNum]);
 
     }

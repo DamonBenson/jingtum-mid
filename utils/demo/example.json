@@ -1,0 +1,208 @@
+{
+    "TokenInfo": {
+        "Flags": 0,
+        "FundCode": "copyrightToken",
+        "Issuer": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF",
+        "LedgerEntryType": "ERCToken",
+        "LowNode": "0000000000000269",
+        "PreviousTxnID": "4FA751D356BAB7D3C5560D02FC94ECA577B676DA1F29E99BD181948E458167F6",
+        "PreviousTxnLgrSeq": 152046,
+        "TokenID": "000151817102F8E8A609E69A6BED545EBEC2EB44ED5C8E85514055497C2B0C7F",
+        "TokenInfos": [
+            {
+                "TokenInfo": {
+                    "type": "authenticationInfo",
+                    "data": [],
+                    "account": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "copyrightUnit",
+                    "data": [
+                        {
+                            "address": "jnuf1Hrd5cMZaxDHBPYPzmLvgt4svvSpjG",
+                            "proportion": "40",
+                            "copyrightExplain": ""
+                        },
+                        {
+                            "address": "jML2zGdi1udiNojfdq7pYA9P78MUzFA3fS",
+                            "proportion": "60",
+                            "copyrightExplain": ""
+                        }
+                    ],
+                    "account": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "workId",
+                    "data": "A76B2AF54FE131E4A32CA225946F38F110D205E712AE071B49ABED2855003CE4",
+                    "account": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "copyrightType",
+                    "data": "4",
+                    "account": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "copyrightStatus",
+                    "data": "1",
+                    "account": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "copyrightGetType",
+                    "data": "0",
+                    "account": "jGt4jgACfyFaW7AkPb48PRsD64491M85GF"
+                }
+            }
+        ],
+        "TokenOwner": "jnuf1Hrd5cMZaxDHBPYPzmLvgt4svvSpjG",
+        "index": "DBD19F1ABA6F2DC763AD953DE33A6FD9F0B3E010B8FC4DEF7537C8D5AA10300B"
+    },
+    "index": "DBD19F1ABA6F2DC763AD953DE33A6FD9F0B3E010B8FC4DEF7537C8D5AA10300B",
+    "ledger_hash": "EFD55CC624F0CDFEC8BA993424541D019DC4D1074B8B829ED5FBC8CFD60766DA",
+    "ledger_index": 822532,
+    "validated": true
+}
+
+
+{
+    "TokenInfo": {
+        "Flags": 0,
+        "FundCode": "approveToken",
+        "Issuer": "jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6",
+        "LedgerEntryType": "ERCToken",
+        "LowNode": "0000000000000000",
+        "PreviousTxnID": "E33B003B58D3543542C6E5242EBF4B224928D0E4218EB4D5C7B58F239A9F47A9",
+        "PreviousTxnLgrSeq": 50858,
+        "ReferenceID": "9BA218C98660BD3219DFDEACA8269F7748A33C09011AB70A5B31BCBF42CFF9B1",
+        "TokenID": "010C55E226F9FBED6BF509B4135BC5FCD4FAB940C3FFDB5FD15BE5CD7F0B3A8A",
+        "TokenInfos": [
+            {
+                "TokenInfo": {
+                    "type": "approveType",
+                    "data": "0",
+                    "account": "jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "constraint",
+                    "data": {
+                        "approveStatus": "0",
+                        "approveChannel": "0",
+                        "approveArea": "2",
+                        "approveTime": "1",
+                    },
+                    "account": "jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6"
+                }
+            },
+            {
+                "TokenInfo": {
+                    "type": "duty",
+                    "data": {
+                        "stockInfo": [
+                            {
+                                "address": "jML2zGdi1udiNojfdq7pYA9P78MUzFA3fS",
+                                "proportion": "60",
+                            },
+                            {
+                                "address": "jnuf1Hrd5cMZaxDHBPYPzmLvgt4svvSpjG",
+                                "proportion": "40",
+                            }
+                        ],
+                        "incomeDistribution": {
+                            "distributionMethod": "0",
+                            "distributionDesc": "",
+                            "receivablePayment": "1000",
+                            "receivedPayment": "1000",
+                            "toReceivePayment": "0",
+                            "balanceDate": "2021-08-30"
+                        }
+                    },
+                    "account": "jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6"
+                }
+            }
+        ],
+        "TokenOwner": "j4M6Hb65iKUVyzRNVYCCvqnpB6q4j7TT9Q",
+        "index": "76EE00A098E0AAE5DF42926633A6B2DDFACF64686ED7B25D30B59894FB99BA3C"
+    },
+    "index": "76EE00A098E0AAE5DF42926633A6B2DDFACF64686ED7B25D30B59894FB99BA3C",
+    "ledger_hash": "61F3D694EA9606DBE9CB6C987EF2C518EB01BBD508B0D7EFB49E6DA081A321CA",
+    "ledger_index": 822591,
+    "validated": true
+}
+
+
+{
+    "TokenInfo": {
+        "Flags": 0,
+        "FundCode": "approveToken",
+        "Issuer": "jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6",
+        "LedgerEntryType": "ERCToken",
+        "LowNode": "0000000000000000",
+        "PreviousTxnID": "E33B003B58D3543542C6E5242EBF4B224928D0E4218EB4D5C7B58F239A9F47A9",
+        "PreviousTxnLgrSeq": 50858,
+        "ReferenceID": "9BA218C98660BD3219DFDEACA8269F7748A33C09011AB70A5B31BCBF42CFF9B1",
+        "TokenID": "010C55E226F9FBED6BF509B4135BC5FCD4FAB940C3FFDB5FD15BE5CD7F0B3A8A",
+        "TokenInfos": [
+            {
+                "TokenInfo": {
+                    "type": "licenseUnit",
+                    "data": [
+                        {
+                            "right": ["0", "1", "2"],
+                            "constraint": {
+                                "spatial": "囯内",
+                                "bounds": {
+                                    "count": "1000",
+                                    "range": {
+                                        "min": "0",
+                                        "max": "10"
+                                    }
+                                },
+                                "temporal": {
+                                    "dateTime": {
+                                        "start": "2021-08-30 24:00:00",
+                                        "end": "2022-08-30 24:00:00"
+                                    }
+                                },
+                                "system": {
+                                    "cpu": ["Intel"],
+                                    "screen": ["AOC"]
+                                }
+                            },
+                            "duty": {
+                                "paymentMethod": {
+                                    "paymentMethodType": "0",
+                                    "fee": {
+                                        "amount": "1000",
+                                        "currency": "CNY",
+                                        "taxPercent": "10",
+                                        "code": "CNY"
+                                    },
+                                    "accept": "接受版权声明",
+                                    "tracked": "可追踪"
+                                }
+                            }
+                        }
+                    ],
+                    "account": "jJB4YxZz3haRJ7Njh86SHtGd7nk7xtyPR6"
+                }
+            }
+        ],
+        "TokenOwner": "j4M6Hb65iKUVyzRNVYCCvqnpB6q4j7TT9Q",
+        "index": "76EE00A098E0AAE5DF42926633A6B2DDFACF64686ED7B25D30B59894FB99BA3C"
+    },
+    "index": "76EE00A098E0AAE5DF42926633A6B2DDFACF64686ED7B25D30B59894FB99BA3C",
+    "ledger_hash": "61F3D694EA9606DBE9CB6C987EF2C518EB01BBD508B0D7EFB49E6DA081A321CA",
+    "ledger_index": 822591,
+    "validated": true
+}
