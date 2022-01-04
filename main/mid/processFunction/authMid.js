@@ -340,17 +340,17 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
         return resInfo;
     }
 
-
+    // 解析报文
+    console.log('body:', body);
     let workId = body.workId;
     let address = body.address;
 
-    console.log('body:', body);
 
     let batchName = sha256(workId + address).toString();
 
     // step1
 
-    let package1 = await genPackage1(workId, address, batchName);
+    let package1 = await genPackage1(workId, address, batchName, arg1);
     let package1Path = basePath + "/authFiles/package/" + package1.params.package_token + ".json";
     let package1Hash = await localUtils.saveJson(package1, package1Path);
 
@@ -382,7 +382,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     await localUtils.sleep(5000);
 
     let batchRes = await httpUtils.get("http://117.107.213.242:8124/cr/reg/query/batch_no", {packageToken: package1.params.package_token});
-
+-
     console.log(batchRes);
 
     let batchNo = batchRes.data.batchNo;
@@ -454,9 +454,118 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
     return true;
 
 }
+/*
+ * @param null:
+ * @return: arg1
+ * @author: Bernard
+ * @date: 2021/7/27 15:36
+ * @description: 返回包裹单1需要的参数
+ * @example:.
+ *
+ */
+async function genPackage1arg(workId, address, batchName){
+    let arg1 = {
+        work_id : workId,
+        address : address,
+    }
 
-async function genPackage1(workId, address, batchName) {
 
+    let copyrightFilter = {
+        work_id: workId,
+        address: address,
+    }
+    let sql = sqlText.table('work_info').where(copyrightFilter).select();
+    let workInfo = await mysqlUtils.sql(c, sql);
+    workInfo = workInfo[0];
+    arg1.workInfo = workInfo[0];
+
+    let fileInfo = JSON.parse(workInfo.file_info_list)[0];
+    arg1.fileInfo = fileInfo;
+
+
+    let workType = workInfo.work_type.toString();
+    arg1.workType = workType;
+
+
+    // 测试
+    // workType = "1";
+
+    let workName;
+    switch (workType) {
+        case "1":
+            workName = workInfo.work_name + '.mp3';
+            break;
+        case "2":
+            workName = workInfo.work_name + '.jpg';
+            break;
+        case "3":
+            workName = workInfo.work_name + '.mp4';
+            break;
+        default:
+            workName = workInfo.work_name;
+            break;
+    }
+    arg1.workName = workName;
+
+
+    // 测试
+    // fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
+    // fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+
+    let workPath;
+    switch (workType) {
+        case "1":
+            workPath = fileInfo.fileHash + '.mp3';
+            break;
+        case "2":
+            workPath = fileInfo.fileHash + '.jpg';
+            break;
+        case "3":
+            workPath = fileInfo.fileHash + '.mp4';
+            break;
+        default:
+            workPath = fileInfo.fileHash;
+            break;
+    }
+    arg1.workPath = workPath;
+
+
+    let localWorkPath = basePath + "/authFiles/work/" + workPath;
+    await ipfsUtils.getFile(fileInfo.fileHash, localWorkPath);
+    let workHash = localUtils.getFileHash(localWorkPath);
+    let workSize = fs.statSync(localWorkPath).size.toString();
+    arg1.workHash = workHash;
+    arg1.workSize = workSize;
+
+
+    let cover;
+    let coverHash;
+    if(workType == "2") {
+        cover = localWorkPath;
+        coverHash = workHash;
+    }
+    else {
+        cover = "";
+        coverHash = "";
+    }
+    arg1.cover = cover;
+    arg1.coverHash = coverHash;
+
+    workType = convertWorkType(workType);
+    arg1.workType = workType;
+
+    let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    arg.packageToken = packageToken;
+
+    return arg;
+}
+/*
+ * @param arg : 包裹单需要的参数
+ * @return: package1任务名称、权利取得⽅式、著作权⼈、作品⽂件
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
+async function genPackage1(workId, address, batchName, arg) {
     let copyrightFilter = {
         work_id: workId,
         address: address,
@@ -488,6 +597,7 @@ async function genPackage1(workId, address, batchName) {
             break;
     }
 
+
     // 测试
     // fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
     // fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
@@ -508,12 +618,13 @@ async function genPackage1(workId, address, batchName) {
             break;
     }
 
-    
+
     let localWorkPath = basePath + "/authFiles/work/" + workPath;
     await ipfsUtils.getFile(fileInfo.fileHash, localWorkPath);
     let workHash = localUtils.getFileHash(localWorkPath);
     let workSize = fs.statSync(localWorkPath).size.toString();
-    
+
+
     let cover;
     let coverHash;
     if(workType == "2") {
@@ -524,7 +635,7 @@ async function genPackage1(workId, address, batchName) {
         cover = "";
         coverHash = "";
     }
-    
+
     workType = convertWorkType(workType);
 
     let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
@@ -568,6 +679,13 @@ async function genPackage1(workId, address, batchName) {
 
 }
 
+/*
+ * @param package1 : 包裹单
+ * @param arg : 快递单需要的参数
+ * @return: express1任务名称、权利取得⽅式、著作权⼈、作品⽂件
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
 function genExpress1(package1, package1Hash, batchName) {
 
     let detTime = moment().format('YYYY-MM-DD');
@@ -621,6 +739,12 @@ function genExpress1(package1, package1Hash, batchName) {
 
 }
 
+/*
+ * @param arg : 包裹单需要的参数
+ * @return: package2选择著作权产⽣⽅式、著作权⼈对应权利种类
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
 async function genPackage2(workId, address, batchNo) {
 
     let copyrightFilter = {
@@ -668,6 +792,13 @@ async function genPackage2(workId, address, batchNo) {
 
 }
 
+/*
+ * @param package2 : 包裹单
+ * @param arg : 快递单需要的参数
+ * @return: express2选择著作权产⽣⽅式、著作权⼈对应权利种类
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
 function genExpress2(package2, package2Hash, batchName) {
 
     let detTime = moment().format('YYYY-MM-DD');
@@ -700,6 +831,12 @@ function genExpress2(package2, package2Hash, batchName) {
 
 }
 
+/*
+ * @param arg : 包裹单需要的参数
+ * @return: package3著作权主体身份信息、著作权客体信息、权利证明⽂件
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
 function genPackage3(package1, batchNo) {
 
     let A2Path1 = basePath + "/resource/A21.jpg";
@@ -902,6 +1039,13 @@ function genPackage3(package1, batchNo) {
 
 }
 
+/*
+ * @param package3 : 包裹单
+ * @param arg : 快递单需要的参数
+ * @return: express3著作权主体身份信息、著作权客体信息、权利证明⽂件
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
 function genExpress3(package3, package3Hash, batchName) {
 
     let detTime = moment().format('YYYY-MM-DD');
@@ -960,6 +1104,14 @@ function genExpress3(package3, package3Hash, batchName) {
 
 }
 
+/*
+ * @param checkRes:
+ * @param detSn:
+ * @param packageHash: 包裹单哈希
+ * @return: true 意味着正常
+ * @author: Qiumufei
+ * @date: 2021/7/7
+ */
 async function uploadFiles(checkRes, detSn, packageHash) {
 
     if(checkRes.data == null) {
