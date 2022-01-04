@@ -9,13 +9,20 @@ const midAddr = userAccount.midAccount.address; // 中间层
 
 /**
  * @description 证据上链，中间层签名。
+ * @param {Datetime}monitorTime 监测时间
+ * @param {String}tortUrl 侵权链接
+ * @param {String}tortTitle 侵权标题
+ * @param {String}siteName 侵权站点名称
+ * @param {String}sampleId 监测作品唯一值
+ * @param {String}tortNum 侵权编号
+ * @param {String}author 侵权链接发布者
+ * @param {int}commentCount 评论数
+ * @param {int}duration 侵权音乐作品的时长 单位秒
  * @param {int}workId 作品标识
- * @param {String}sampleId 监测文件标识
- * @param {String}evidenceNo 侵权证据标识
- * @param {String}url 侵权网页地址
  * @param {String}ipfsAddress 侵权证据文件IPFS地址
  * @returns {Object[]} 证据上链结果，包括：交易哈希hash
  */
+
 export async function handleEvidence(uploadRemote, seqObj, req) {
 
     console.time('handleEvidence');
