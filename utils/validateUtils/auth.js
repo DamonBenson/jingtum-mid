@@ -38,12 +38,13 @@ export const innerCopyrightAuthReqSchema = Joi.any();
 /**
  * @description 北京版权局确权请求报文。
  */
-export const workAuthReqSchema = Joi.object().keys({
-    workId:
-        Joi.string().required(),
-    address:
-        jingtumCustom.jingtum().address().required()
-}).id('workAuthReqSchema');
+// export const workAuthReqSchema = Joi.object().keys({
+//     workId:
+//         Joi.string().required(),
+//     address:
+//         jingtumCustom.jingtum().address().required()
+// }).id('workAuthReqSchema');
+export const workAuthReqSchema = Joi.any().id('workAuthReqSchema');
 
 /**
  * @description 北京版权局确权返回报文。
@@ -51,8 +52,6 @@ export const workAuthReqSchema = Joi.object().keys({
 export const workAuthResSchema = Joi.object().keys({
     workId:
         Joi.string().required(),
-    address:
-        jingtumCustom.jingtum().address().required(),
     authenticationInfo:
         Joi.object().keys({
             auditResult :

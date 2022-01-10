@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { jingtumCustom } from './base';
+import { jingtumCustom } from './base.js';
 
 /*----------数据常量----------*/
 

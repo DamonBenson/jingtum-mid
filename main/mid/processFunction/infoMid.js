@@ -291,29 +291,39 @@ export async function handleWorkInfoOfUser(req) {
 
     let copyrightWorkSql = "\
         SELECT\
-            temp.work_id,\
-            work_name,\
-            work_type,\
+            temp.workId,\
+            baseInfo_workName,\
+            baseInfo_workType,\
             authentication_status,\
-            file_info_list\
+            fileInfo_fileHash\
         FROM\
             (\
                 SELECT DISTINCT\
-                    work_id,\
-                IF (\
-                    authentication_id IS NULL,\
-                    0,\
-                    1\
-                ) AS authentication_status\
+                    workId,\
+                    IF(\
+                        authenticationInfo IS NULL,\
+                        0,\
+                        1\
+                    ) AS authentication_status\
                 FROM\
-                    right_token_info\
-                LEFT JOIN auth_info ON right_token_info.copyright_id = auth_info.copyright_id\
+                    CopyrightToken\
                 WHERE\
-                    address = '" + address + "'\
-            ) AS temp\
-        INNER JOIN work_info ON temp.work_id = work_info.work_id\
-        ORDER BY completion_time DESC\
+                    TokenId IN\
+                        (\
+                            SELECT DISTINCT\
+                                TokenId\
+                            FROM\
+                                UserCopyright\
+                            WHERE\
+                                address = '" + address + "'\
+                        )\
+            ) as temp\
+        INNER JOIN Token ON\
+            temp.workId = Token.baseInfo_workId\
+        ORDER BY\
+            baseInfo_timestamp DESC\
     ";
+
     let copyrightWorkInfoArr =  await mysqlUtils.sql(c, copyrightWorkSql);
     copyrightWorkInfoArr.forEach(copyrightWorkInfo => {
         localUtils.fromMysqlObj(copyrightWorkInfo);
@@ -322,42 +332,42 @@ export async function handleWorkInfoOfUser(req) {
         copyrightWorkInfo.ownershipType = 0;
     });
 
-    let approveWorkSql = "\
-        SELECT\
-            temp2.work_id,\
-            work_name,\
-            work_type,\
-            file_info_list\
-        FROM\
-            (\
-                SELECT DISTINCT\
-                    work_id\
-                FROM\
-                    (\
-                        SELECT DISTINCT\
-                            copyright_id\
-                        FROM\
-                            appr_token_info\
-                        WHERE\
-                            address = '" + address + "'\
-                    ) AS temp1\
-                INNER JOIN right_token_info ON right_token_info.copyright_id = temp1.copyright_id\
-            ) AS temp2\
-        INNER JOIN work_info ON work_info.work_id = temp2.work_id\
-        ORDER BY completion_time DESC\
-    ";
-    let approveWorkInfoArr =  await mysqlUtils.sql(c, approveWorkSql);
-    approveWorkInfoArr.forEach(approveWorkInfo => {
-        localUtils.fromMysqlObj(approveWorkInfo);
-        approveWorkInfo.fileHashList = JSON.parse(approveWorkInfo.fileInfoList).map(fileInfo => fileInfo.fileHash);
-        delete approveWorkInfo.fileInfoList;
-        approveWorkInfo.authenticationStatus = 0;
-        approveWorkInfo.ownershipType = 1;
-    });
+    // let approveWorkSql = "\
+    //     SELECT\
+    //         temp2.work_id,\
+    //         work_name,\
+    //         work_type,\
+    //         file_info_list\
+    //     FROM\
+    //         (\
+    //             SELECT DISTINCT\
+    //                 work_id\
+    //             FROM\
+    //                 (\
+    //                     SELECT DISTINCT\
+    //                         copyright_id\
+    //                     FROM\
+    //                         appr_token_info\
+    //                     WHERE\
+    //                         address = '" + address + "'\
+    //                 ) AS temp1\
+    //             INNER JOIN right_token_info ON right_token_info.copyright_id = temp1.copyright_id\
+    //         ) AS temp2\
+    //     INNER JOIN work_info ON work_info.work_id = temp2.work_id\
+    //     ORDER BY completion_time DESC\
+    // ";
+    // let approveWorkInfoArr =  await mysqlUtils.sql(c, approveWorkSql);
+    // approveWorkInfoArr.forEach(approveWorkInfo => {
+    //     localUtils.fromMysqlObj(approveWorkInfo);
+    //     approveWorkInfo.fileHashList = JSON.parse(approveWorkInfo.fileInfoList).map(fileInfo => fileInfo.fileHash);
+    //     delete approveWorkInfo.fileInfoList;
+    //     approveWorkInfo.authenticationStatus = 0;
+    //     approveWorkInfo.ownershipType = 1;
+    // });
 
-    let userWorkInfoList = copyrightWorkInfoArr.concat(approveWorkInfoArr);
+    // let userWorkInfoList = copyrightWorkInfoArr.concat(approveWorkInfoArr);
 
-    resInfo.data.userWorkInfoList = userWorkInfoList;
+    resInfo.data.userWorkInfoList = copyrightWorkInfoArr;
     console.log('/info/user/work:', resInfo.data);
 
     console.timeEnd('handleWorkInfoOfUser');
@@ -400,39 +410,40 @@ export async function handleIssueApproveInfoOfWork(req) {
         return resInfo;
     }
 
-    let workId = body.workId;
-    let address = body.address;
+    // let workId = body.workId;
+    // let address = body.address;
 
-    let issueApproveSql = "\
-        SELECT\
-            approve_id,\
-            address,\
-            start_time,\
-            copyright_type,\
-            approve_channel,\
-            approve_area,\
-            approve_time\
-        FROM\
-            (\
-                SELECT\
-                    copyright_id\
-                FROM\
-                    right_token_info\
-                WHERE\
-                    work_id = '" + workId + "'\
-                AND address = '" + address + "'\
-            ) AS temp\
-        INNER JOIN appr_token_info ON temp.copyright_id = appr_token_info.copyright_id\
-        ORDER BY start_time DESC\
-    ";
-    let userApproveInfoList =  await mysqlUtils.sql(c, issueApproveSql);
-    userApproveInfoList.forEach(issueApproveInfo => {
-        localUtils.fromMysqlObj(issueApproveInfo);
-        issueApproveInfo.approveTime = getEndTimeStr(issueApproveInfo.startTime, issueApproveInfo.approveTime);
-        delete issueApproveInfo.startTime;
-    });
+    // let issueApproveSql = "\
+    //     SELECT\
+    //         approve_id,\
+    //         address,\
+    //         start_time,\
+    //         copyright_type,\
+    //         approve_channel,\
+    //         approve_area,\
+    //         approve_time\
+    //     FROM\
+    //         (\
+    //             SELECT\
+    //                 copyright_id\
+    //             FROM\
+    //                 right_token_info\
+    //             WHERE\
+    //                 work_id = '" + workId + "'\
+    //             AND address = '" + address + "'\
+    //         ) AS temp\
+    //     INNER JOIN appr_token_info ON temp.copyright_id = appr_token_info.copyright_id\
+    //     ORDER BY start_time DESC\
+    // ";
+    // let userApproveInfoList =  await mysqlUtils.sql(c, issueApproveSql);
+    // userApproveInfoList.forEach(issueApproveInfo => {
+    //     localUtils.fromMysqlObj(issueApproveInfo);
+    //     issueApproveInfo.approveTime = getEndTimeStr(issueApproveInfo.startTime, issueApproveInfo.approveTime);
+    //     delete issueApproveInfo.startTime;
+    // });
 
-    resInfo.data.userApproveInfoList = userApproveInfoList;
+    // resInfo.data.userApproveInfoList = userApproveInfoList;
+    resInfo.data.userApproveInfoList = [];
     console.log('/info/user/work/issueApprove:', resInfo.data);
 
     console.timeEnd('handleIssueApproveInfoOfWork');
@@ -475,41 +486,42 @@ export async function handleOwnApproveInfoOfWork(req) {
         return resInfo;
     }
 
-    let workId = body.workId;
-    let address = body.address;
+    // let workId = body.workId;
+    // let address = body.address;
 
-    let ownApproveSql = "\
-        SELECT\
-            approve_id,\
-            temp.address,\
-            start_time,\
-            copyright_type,\
-            approve_channel,\
-            approve_area,\
-            approve_time\
-        FROM\
-            (\
-                SELECT\
-                    copyright_id,\
-                    address\
-                FROM\
-                    right_token_info\
-                WHERE\
-                    work_id = '" + workId + "'\
-            ) AS temp\
-        INNER JOIN appr_token_info ON temp.copyright_id = appr_token_info.copyright_id\
-        WHERE\
-            appr_token_info.address = '" + address + "'\
-        ORDER BY start_time DESC\
-    ";
-    let userApproveInfoList =  await mysqlUtils.sql(c, ownApproveSql);
-    userApproveInfoList.forEach(ownApproveInfo => {
-        localUtils.fromMysqlObj(ownApproveInfo);
-        ownApproveInfo.approveTime = getEndTimeStr(ownApproveInfo.startTime, ownApproveInfo.approveTime);
-        delete ownApproveInfo.startTime;
-    });
+    // let ownApproveSql = "\
+    //     SELECT\
+    //         approve_id,\
+    //         temp.address,\
+    //         start_time,\
+    //         copyright_type,\
+    //         approve_channel,\
+    //         approve_area,\
+    //         approve_time\
+    //     FROM\
+    //         (\
+    //             SELECT\
+    //                 copyright_id,\
+    //                 address\
+    //             FROM\
+    //                 right_token_info\
+    //             WHERE\
+    //                 work_id = '" + workId + "'\
+    //         ) AS temp\
+    //     INNER JOIN appr_token_info ON temp.copyright_id = appr_token_info.copyright_id\
+    //     WHERE\
+    //         appr_token_info.address = '" + address + "'\
+    //     ORDER BY start_time DESC\
+    // ";
+    // let userApproveInfoList =  await mysqlUtils.sql(c, ownApproveSql);
+    // userApproveInfoList.forEach(ownApproveInfo => {
+    //     localUtils.fromMysqlObj(ownApproveInfo);
+    //     ownApproveInfo.approveTime = getEndTimeStr(ownApproveInfo.startTime, ownApproveInfo.approveTime);
+    //     delete ownApproveInfo.startTime;
+    // });
 
-    resInfo.data.userApproveInfoList = userApproveInfoList;
+    // resInfo.data.userApproveInfoList = userApproveInfoList;
+    resInfo.data.userApproveInfoList = [];
     console.log('/info/user/work/ownApprove:', resInfo.data);
 
     console.timeEnd('handleOwnApproveInfoOfWork');

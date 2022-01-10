@@ -6,7 +6,7 @@ import sqlText from 'node-transform-mysql';
 import moment from 'moment';
 
 import * as requestInfo from '../../../utils/jingtum/requestInfo.js';
-import * as erc721 from '../../../utils/jingtum/erc721.js';
+import * as tokenLayer from '../../../utils/jingtum/tokenLayer.js';
 import * as localUtils from '../../../utils/localUtils.js';
 import * as mysqlUtils from '../../../utils/mysqlUtils.js';
 import * as authValidate from '../../../utils/validateUtils/auth.js';
@@ -17,7 +17,6 @@ import {mysqlConf} from '../../../utils/config/mysql.js';
 import {debugMode, ipfsConf} from "../../../utils/info.js";
 import ipfsAPI from "ipfs-api";
 import {addFile} from "../../../utils/ipfsUtils.js";
-import {subjectInfo} from '../../../utils/config/auth.js';
 import {downloadToIPFS} from "../../../utils/httpUtils.js";
 import formData from "form-data";
 
@@ -108,51 +107,9 @@ const basePath = ".";
  * @param {String}contractAddr 确权合约地址
  * @returns {Object[]} 审核情况列表，包括：审核状态auditStatus、审核结果copyrightStatus、确权标识authenticationId、确权证书索引licenseUrl
  */
-// export async function handleAuthState(contractRemote, seqObj, req) {
+export async function handleAuthState(contractRemote, seqObj, req) {
 
-//     console.time('handleAuthState');
-
-//     let resInfo = {
-//         msg: 'success',
-//         code: 0,
-//         data: {},
-//     }
-
-//     let body = req.query;
-//     try {
-//         await authValidate.authStateReqSchema.validateAsync(body);
-//     } catch(e) {
-//         e.details.map((detail, index) => {
-//             console.log('error message ' + index + ':', detail.message);
-//         });
-//         resInfo.msg = 'invalid parameters',
-//         resInfo.code = 1;
-//         resInfo.data.validateInfo = e;
-//         console.timeEnd('handleAuthState');
-//         console.log('--------------------');
-//         return resInfo;
-//     }
-
-//     // 方法体  
-
-//     console.timeEnd('handleAuthState');
-//     console.log('--------------------');
-
-//     resInfo.data.auditInfoList = auditInfoList;
-
-//     return resInfo;
-
-// }
-
-/**
- * @description 不通过合约完成同步作品确权
- * @param {int}workId 作品标识
- * @param {String}address 确权用户地址
- * @returns {Object} 确权信息，包括：审核结果auditResult、确权标识authenticationId、登记确权证书索引licenseUrl、确权时间戳timestamp
- */
-export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
-
-    console.time('handleInnerWorkAuth');
+    console.time('handleAuthState');
 
     let resInfo = {
         msg: 'success',
@@ -160,10 +117,9 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
         data: {},
     }
 
-    let body = req.body;
-    console.log(body);
+    let body = req.query;
     try {
-        await authValidate.innerWorkAuthReqSchema.validateAsync(body);
+        await authValidate.authStateReqSchema.validateAsync(body);
     } catch(e) {
         e.details.map((detail, index) => {
             console.log('error message ' + index + ':', detail.message);
@@ -171,69 +127,115 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
         resInfo.msg = 'invalid parameters',
         resInfo.code = 1;
         resInfo.data.validateInfo = e;
-        console.log('/auth/innerWork:', resInfo.data);
-        console.timeEnd('handleInnerWorkAuth');
+        console.timeEnd('handleAuthState');
         console.log('--------------------');
         return resInfo;
     }
 
-    // 方法体
-    let copyrightFilter = {
-        work_id: body.workId,
-        address: body.address,
-    }
-    let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
-    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
-    if(copyrightInfoArr.length == 0) {
-        resInfo.msg = 'no data',
-        resInfo.code = 6;
-        console.log('/auth/innerWork:', resInfo);
-        console.timeEnd('handleInnerWorkAuth');
-        console.log('--------------------');
-        return resInfo;
-    }
-    let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
+    // 方法体  
+    let sql = sqlText.table('AuthenticationInfo').where({workId: body.workId}).select();
+    let authInfo = await mysqlUtils.sql(c, sql);
+    authInfo = authInfo[0];
 
-    // let auditResult = localUtils.randomSelect([true, false], [0.8, 0.2]);
-    let auditResult = true;
-    if(auditResult == false) {
-        resInfo.data.authenticationInfo = {
-            auditResult: false,
-        };
-        console.log('/auth/innerWork:', resInfo.data);
-        console.timeEnd('handleInnerWorkAuth');
-        console.log('--------------------');
-        return resInfo;
-    }
-
-    let authenticationId = 'DCI' + sha256(copyrightIds).toString().substring(0, 8);
-    let licenseUrl = 'http://118.190.39.87:5001/api/v0/cat?arg=QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
-    let authenticationInfo = {
-        authenticationId: authenticationId,
-        licenseUrl: licenseUrl,
-    };
-
-    let authenticatePromises = copyrightIds.map(copyrightId => {
-        return (erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
-    });
-
-    let authenticateResArr = await Promise.all(authenticatePromises);
-
-    let txHash = authenticateResArr[0].tx_json.hash;
-    let txInfo = await requestInfo.requestTx(tokenRemote, txHash, true);
-    let timestamp = txInfo.Timestamp + 946684800;
-    authenticationInfo.auditResult = true;
-    authenticationInfo.timestamp = timestamp;
-
-    resInfo.data.authenticationInfo = authenticationInfo;
-    console.log('/auth/innerWork:', resInfo.data);
-
-    console.timeEnd('handleInnerWorkAuth');
+    console.timeEnd('handleAuthState');
     console.log('--------------------');
+
+    resInfo.data = authInfo;
 
     return resInfo;
 
 }
+
+/**
+ * @description 不通过合约完成同步作品确权
+ * @param {int}workId 作品标识
+ * @param {String}address 确权用户地址
+ * @returns {Object} 确权信息，包括：审核结果auditResult、确权标识authenticationId、登记确权证书索引licenseUrl、确权时间戳timestamp
+ */
+// export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
+
+//     console.time('handleInnerWorkAuth');
+
+//     let resInfo = {
+//         msg: 'success',
+//         code: 0,
+//         data: {},
+//     }
+
+//     let body = req.body;
+//     console.log(body);
+//     try {
+//         await authValidate.innerWorkAuthReqSchema.validateAsync(body);
+//     } catch(e) {
+//         e.details.map((detail, index) => {
+//             console.log('error message ' + index + ':', detail.message);
+//         });
+//         resInfo.msg = 'invalid parameters',
+//         resInfo.code = 1;
+//         resInfo.data.validateInfo = e;
+//         console.log('/auth/innerWork:', resInfo.data);
+//         console.timeEnd('handleInnerWorkAuth');
+//         console.log('--------------------');
+//         return resInfo;
+//     }
+
+//     // 方法体
+//     let copyrightFilter = {
+//         work_id: body.workId,
+//         address: body.address,
+//     }
+//     let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
+//     let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+//     if(copyrightInfoArr.length == 0) {
+//         resInfo.msg = 'no data',
+//         resInfo.code = 6;
+//         console.log('/auth/innerWork:', resInfo);
+//         console.timeEnd('handleInnerWorkAuth');
+//         console.log('--------------------');
+//         return resInfo;
+//     }
+//     let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
+
+//     // let auditResult = localUtils.randomSelect([true, false], [0.8, 0.2]);
+//     let auditResult = true;
+//     if(auditResult == false) {
+//         resInfo.data.authenticationInfo = {
+//             auditResult: false,
+//         };
+//         console.log('/auth/innerWork:', resInfo.data);
+//         console.timeEnd('handleInnerWorkAuth');
+//         console.log('--------------------');
+//         return resInfo;
+//     }
+
+//     let authenticationId = 'DCI' + sha256(copyrightIds).toString().substring(0, 8);
+//     let licenseUrl = 'http://118.190.39.87:5001/api/v0/cat?arg=QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
+//     let authenticationInfo = {
+//         authenticationId: authenticationId,
+//         licenseUrl: licenseUrl,
+//     };
+
+//     let authenticatePromises = copyrightIds.map(copyrightId => {
+//         return (erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
+//     });
+
+//     let authenticateResArr = await Promise.all(authenticatePromises);
+
+//     let txHash = authenticateResArr[0].tx_json.hash;
+//     let txInfo = await requestInfo.requestTx(tokenRemote, txHash, true);
+//     let timestamp = txInfo.Timestamp + 946684800;
+//     authenticationInfo.auditResult = true;
+//     authenticationInfo.timestamp = timestamp;
+
+//     resInfo.data.authenticationInfo = authenticationInfo;
+//     console.log('/auth/innerWork:', resInfo.data);
+
+//     console.timeEnd('handleInnerWorkAuth');
+//     console.log('--------------------');
+
+//     return resInfo;
+
+// }
 
 /**
  * @description 不通过合约完成同步版权确权
@@ -316,9 +318,8 @@ export async function handleInnerWorkAuth(tokenRemote, seqObj, req) {
 // }
 
 /**
- * @description 不通过合约完成同步作品确权
- * @param {int}workId 作品标识
- * @param {String}address 确权用户地址
+ * @description 请求提交到版权局，完成异步确权
+ * @param {Object}body 详见文档
  */
 export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
@@ -340,17 +341,15 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
         return resInfo;
     }
 
-
-    let workId = body.workId;
-    let address = body.address;
-
     console.log('body:', body);
 
-    let batchName = sha256(workId + address).toString();
+
+
+    let batchName = sha256(JSON.stringify(body)).toString();
 
     // step1
 
-    let package1 = await genPackage1(workId, address, batchName);
+    let package1 = await genPackage1(body, batchName);
     let package1Path = basePath + "/authFiles/package/" + package1.params.package_token + ".json";
     let package1Hash = await localUtils.saveJson(package1, package1Path);
 
@@ -389,7 +388,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     // step2
 
-    let package2 = await genPackage2(workId, address, batchNo);
+    let package2 = await genPackage2(body, batchNo);
     let package2Path = basePath + "/authFiles/package/" + package2.params.package_token + ".json";
     let package2Hash = await localUtils.saveJson(package2, package2Path);
 
@@ -413,7 +412,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     // step3
 
-    let package3 = await genPackage3(package1, batchNo);
+    let package3 = await genPackage3(body, package1, batchNo);
     let package3Path = basePath + "/authFiles/package/" + package3.params.package_token + ".json";
     let package3Hash = await localUtils.saveJson(package3, package3Path);
 
@@ -439,14 +438,20 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let submitInfo = {
         batchNo: batchNo,
-        usn: subjectInfo.usn,
+        usn: body.submitUsn,
     }
     let submitRes = await httpUtils.postFiles("http://117.107.213.242:8124/examine/result/submit", submitInfo);
 
     console.log(submitRes);
 
-    // let batchNo = "1413441800852471808";
-    handleAuthResult(tokenRemote, seqObj, workId, address, batchNo);
+    let authInfo = {
+        workId: body.object.workId,
+        authStatus: false
+    }
+    let sql = sqlText.table('AuthenticationInfo').data(authInfo).insert();
+    await mysqlUtils.sql(c, sql);
+
+    handleAuthResult(tokenRemote, seqObj, body.object.workId, batchNo);
 
     console.timeEnd('handleWorkAuth');
     console.log('--------------------');
@@ -455,53 +460,36 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
 }
 
-async function genPackage1(workId, address, batchName) {
+async function genPackage1(body, batchName) {
 
-    let copyrightFilter = {
-        work_id: workId,
-        address: address,
-    }
-    let sql = sqlText.table('work_info').where(copyrightFilter).select();
+    let sql = sqlText.table('Token').where({baseInfo_workId: body.object.workId}).select();
     let workInfo = await mysqlUtils.sql(c, sql);
     workInfo = workInfo[0];
 
-    let fileInfo = JSON.parse(workInfo.file_info_list)[0];
-
-    let workType = workInfo.work_type.toString();
-
-    let suffix = '.' + fileInfo.fileAddress.split('.').pop();
-
-    // 测试
-    // workType = "1";
-    
-    workName = workInfo.work_name + suffix;
-
-    // 测试
-    // fileInfo.fileHash = 'QmUaP774nVud8HWZnhm4XARJrnswY35bMaKwCzMZLVMWhh';
-    // fileInfo.fileHash = 'QmW7AqqmFkzEmebuCe9MUvUpXMA4fYZgMvicvufi1NdBEF';
-
-    let workPath;
+    // 作品类型相关信息
+    let workType = workInfo.fileInfo_fileType.toString(); //注意上链的对应关系是不是正确
+    let suffix = "";
     switch (workType) {
         case "1":
-            workPath = fileInfo.fileHash + '.mp3';
+            suffix = ".mp3";
             break;
         case "2":
-            workPath = fileInfo.fileHash + '.jpg';
+            suffix = ".jpg";
             break;
         case "3":
-            workPath = fileInfo.fileHash + '.mp4';
+            suffix = ".mp4";
             break;
         default:
-            workPath = fileInfo.fileHash;
             break;
     }
-
+    let workName = workInfo.baseInfo_workName + suffix;
+    let workPath = workInfo.fileInfo_fileHash + suffix;
     
+    // 文件相关信息
     let localWorkPath = basePath + "/authFiles/work/" + workPath;
-    await ipfsUtils.getFile(fileInfo.fileHash, localWorkPath);
+    await ipfsUtils.getFile(workInfo.fileInfo_fileHash, localWorkPath);
     let workHash = localUtils.getFileHash(localWorkPath);
     let workSize = fs.statSync(localWorkPath).size.toString();
-    
     let cover;
     let coverHash;
     if(workType == "2") {
@@ -515,20 +503,23 @@ async function genPackage1(workId, address, batchName) {
     
     workType = convertWorkType(workType);
 
-    let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    // 主体信息
+    let subjectInfo = body.subject.map((element) => {
+        return {
+            name: element.A1.name,
+            type: element.A1.type,
+            usn: element.A1.usn
+        };
+    });
+
+    let packageToken = sha256(body.submitUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package1 = {
         "name": batchName,
         "copyright_rights_get": "0",
         "cover": cover,
         "cover_hash": coverHash,
-        "subject": [
-            {
-                "name": subjectInfo.name,
-                "type": subjectInfo.type,
-                "usn": subjectInfo.usn
-            }
-        ],
+        "subject": subjectInfo,
         "object": [
             {
                 "works_hash": workHash,
@@ -547,7 +538,7 @@ async function genPackage1(workId, address, batchName) {
             "det_business_code": "C001_01_01",
             "package_token": packageToken,
             "step": "1",
-            "submit_usn": subjectInfo.usn,
+            "submit_usn": body.submitUsn,
             "works_count": "1"
         }
     }
@@ -609,44 +600,41 @@ function genExpress1(package1, package1Hash, batchName) {
 
 }
 
-async function genPackage2(workId, address, batchNo) {
+async function genPackage2(body, batchNo) {
 
-    let copyrightFilter = {
-        work_id: workId,
-        address: address,
-    };
-    let sql = sqlText.table('right_token_info').where(copyrightFilter).select();
-    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
-    let copyrightTypes = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_type + 4);
-
-    copyrightTypes = [0, 1, 2, 3].concat(copyrightTypes);
-
-    copyrightTypes.sort((a, b) => a - b);
-
-    let rights = [];
-    for(let i in copyrightTypes) {
-        rights.push({
-            rights_category: copyrightTypes[i].toString(),
-            rights_explain: "",
-        });
+    let addrRights = await localUtils.getAddressRights(body.object.workId);
+    body.subject.filter((element) => {
+        return element.hasOwnProperty("rights");
+    }).forEach((element) => {
+        if(!addrRights.hasOwnProperty(element.A1.userAddress)) {
+            addrRights[element.A1.userAddress] = element.rights;
+        } else {
+            addrRights[element.A1.userAddress].concat(element.rights);
+        }
+    });
+    let rightsCategory = [];
+    for(let addr in addrRights) {
+        for(let i in body.subject) {
+            if(body.subject[i].A1.userAddress == addr) {
+                rightsCategory.push({
+                    "rights_owner_name": body.subject[i].A1.name,
+                    "rights_owner_type": body.subject[i].A1.type,
+                    "rights_owner_usn": body.subject[i].A1.usn,
+                    "rights": addrRights[addr],
+                })
+            }
+        }
     }
     
-    let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    let packageToken = sha256(body.submitUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package2 = {
         "copyright_produce_mode": "0",
         "batch_no": batchNo,
-        "rights_category": [
-            {
-                "rights_owner_name": subjectInfo.name,
-                "rights_owner_type": subjectInfo.type,
-                "rights_owner_usn": subjectInfo.usn,
-                "rights": rights
-            }
-        ],
+        "rights_category": rightsCategory,
         "params": {
             "det_business_code": "C001_01_02",
-            "submit_usn": subjectInfo.usn,
+            "submit_usn": body.submitUsn,
             "package_token": packageToken,
             "step": "2"
         }
@@ -688,201 +676,139 @@ function genExpress2(package2, package2Hash, batchName) {
 
 }
 
-function genPackage3(package1, batchNo) {
+async function genPackage3(body, package1, batchNo) {
 
-    let A2Path1 = basePath + "/resource/A21.jpg";
-    let A2Name1 = "A21.jpg";
-    let A2Hash1 = localUtils.getFileHash(A2Path1);
+    let packageToken = sha256(body.submitUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    
+    let subject = body.subject.map((element) => {
 
-    let A2Path2 = basePath + "/resource/A22.jpg";
-    let A2Name2 = "A22.jpg";
-    let A2Hash2 = localUtils.getFileHash(A2Path2);
+        delete element.A1.userAddress;
+        localUtils.toMysqlObj(element.A1);
+        element.address = element.residence;
+        delete element.A1.residence;
 
-    let worksCreationCity = "北京";
-    let worksCreationDate = "2021-07-07";
-    let worksCreationDesc = "原创";
-    let worksCreationCountry = "中国";
+        let idType = element.A1.id_type;
+        let nullSubjectInfo = {
+            "id": "",
+            "sex": "",
+            "date_end": "",
+            "address": "",
+            "name": "",
+            "usn": "",
+            "birthday": "",
+            "id_number": "",
+            "nation": "",
+            "date_start": ""
+        };
+        let subjectCertificateType = ["A2", "A3", "A4", "A5", "A6"];
+        for(let i in subjectCertificateType) {
+            if(subjectCertificateType[i] != idType) {
+                element[subjectCertificateType[i]] = nullSubjectInfo;
+            }
+        }
 
-    let C1Path = basePath + "/resource/C1.jpg";
-    let C1Name = "C1.jpg"
-    let C1Hash = localUtils.getFileHash(C1Path);
+        element[idType].address = element.A1.address;
+        element[idType].idNumber = element.A1.id_number;
+        element[idType].usn = element.A1.usn;
+        element[idType].name = element.A1.name;
+        localUtils.toMysqlObj(element[idType]);
 
-    let C3Path = basePath + "/resource/C3.jpg";
-    let C3Name = "C3.jpg"
-    let C3Hash = localUtils.getFileHash(C3Path);
+        let files = element[idType].files.map(async(fileInfo) => {
+            let suffix = '.' + fileInfo.filePath.split('.').pop();
+            let localFilePath = basePath + "/authFiles/subjectMaterials/" + packageToken + "/" + idType + fileInfo.fileType + suffix;
+            await httpUtils.downloadFile(fileInfo.filePath, localFilePath);
+            fileInfo.filePath = localFilePath;
+            fileInfo.cardType = "1";
+            fileInfo.fileHash = localUtils.getFileHash(localFilePath);
+            fileInfo.fileName = idType + fileInfo.fileType + suffix;
+            fileInfo.idCardNo = element.A1.id_number;
+            fileInfo.credentialsId = "";
+            return fileInfo;
+        });
 
-    let C16Path = basePath + "/resource/C16.jpg";
-    let C16Name = "C16.jpg"
-    let C16Hash = localUtils.getFileHash(C16Path);
+        element[idType].files = files;
 
-    let packageToken = sha256(subjectInfo.usn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    });
+
+    let materialInfo = [];
+    for(let type in material) {
+        let num = material[type].length;
+        let typeInfo = [];
+        for(let i in material[type]) {
+            let filePath = material[type][i];
+            let suffix = '.' + filePath.split('.').pop();
+            let localFilePath = basePath + "/authFiles/certificateMaterials/" + packageToken + "/" + type + suffix;
+            await httpUtils.downloadFile(filePath, localFilePath);
+            let materialName = "";
+            switch(type) {
+                case "C1":
+                    materialName = "作品创作说明";
+                    break;
+                case "C3":
+                    materialName = "作品权利保证书";
+                    break;
+                case "C16":
+                    materialName = "唯⼀著作权注册平台承诺书";
+                    break;
+                default:
+                    break;
+
+            }
+            let temp = {
+                "material_type_name": materialName,
+                "material_type": type,
+                "material_list": [
+                    {
+                        "material_file_list": [
+                            {
+                                "file_name": type + suffix,
+                                "file_path": localFilePath,
+                                "file_type": "1",
+                                "file_hash": localUtils.getFileHash(localFilePath),
+                            }
+                        ],
+                        "material_name": materialName,
+                    }
+                ],
+                "material_num": num,
+            };
+            typeInfo.add(temp);
+        }
+        materialInfo.concat(typeInfo);
+    }
+
+    let sql = sqlText.table('Token').where({baseInfo_workId: body.object.workId}).select();
+    let workInfo = await mysqlUtils.sql(c, sql);
+    workInfo = workInfo[0];
+
     let package3 = {
         "is_complete": "1",
         "batch_no": batchNo,
-        "subject": [
-            {
-                "A1": {
-                    "id_type": "A2",
-                    "type": subjectInfo.type,
-                    "address": subjectInfo.address,
-                    "name": subjectInfo.name,
-                    "usn": subjectInfo.usn,
-                    "id_number": subjectInfo.idNum
-                },
-                "A2": {
-                    "files": [
-                        {
-                            "card_type": "1",
-                            "file_path": A2Path1,
-                            "file_type": "1",
-                            "file_hash": A2Hash1,
-                            "file_name": A2Name1,
-                            "id_card_no": subjectInfo.idNum,
-                            "credentials_id": subjectInfo.credentialsId
-                        },
-                        {
-                            "card_type": "1",
-                            "file_path": A2Path2,
-                            "file_type": "2",
-                            "file_hash": A2Hash2,
-                            "file_name": A2Name2,
-                            "id_card_no": subjectInfo.idNum,
-                            "credentials_id": subjectInfo.credentialsId
-                        }
-                    ],
-                    "id": subjectInfo.credentialsId,
-                    "sex": subjectInfo.sex,
-                    "date_end": subjectInfo.dateEnd,
-                    "address": subjectInfo.address,
-                    "name": subjectInfo.name,
-                    "usn": subjectInfo.usn,
-                    "birthday": subjectInfo.birthday,
-                    "id_number": subjectInfo.idNum,
-                    "nation": subjectInfo.nation,
-                    "date_start": subjectInfo.dateStart
-                },
-                "A3": {
-                    "id": "",
-                    "sex": "",
-                    "date_end": "",
-                    "address": "",
-                    "name": "",
-                    "usn": "",
-                    "birthday": "",
-                    "id_number": "",
-                    "nation": "",
-                    "date_start": ""
-                },
-                "A4": {
-                    "id": "",
-                    "sex": "",
-                    "date_end": "",
-                    "address": "",
-                    "name": "",
-                    "usn": "",
-                    "birthday": "",
-                    "id_number": "",
-                    "nation": "",
-                    "date_start": ""
-                },
-                "A5": {
-                    "id": "",
-                    "sex": "",
-                    "date_end": "",
-                    "address": "",
-                    "name": "",
-                    "usn": "",
-                    "birthday": "",
-                    "id_number": "",
-                    "nation": "",
-                    "date_start": ""
-                }
-            }
-        ],
+        "subject": subject,
         "object": [
             {
                 "works_type": package1.object[0].works_type,
                 "works_path": package1.object[0].works_path,
-                "works_creation_city": worksCreationCity,
+                "works_creation_city": workInfo.extraInfo_createCity,
                 "works_publish_status": "0",
-                "works_creation_date": worksCreationDate,
-                "works_creation_desc": worksCreationDesc,
-                "works_creation_country": worksCreationCountry,
+                "works_creation_date": workInfo.extraInfo_createCity,
+                "works_creation_desc": workInfo.extraInfo_createDate,
+                "works_creation_country": workInfo.extraInfo_createCountry,
                 "works_creation": "0",
                 "works_name": package1.object[0].works_name,
                 "works_hash": package1.object[0].works_hash,
-                "authors": [
-                    {
-                        "sign_name": subjectInfo.name,
-                        "sign_status": "1",
-                        "name": subjectInfo.name,
-                        "usn": subjectInfo.usn
-                    }
-                ]
+                "authors": body.object.authors.map((author) => {
+                    return localUtils.toMysqlObj(author);
+                }),
             }
         ],
-        "material": [
-            {
-                "material_type_name": "作品创作说明",
-                "material_type": "C1",
-                "material_list": [
-                    {
-                        "material_file_list": [
-                            {
-                                "file_name": C1Name,
-                                "file_path": C1Path,
-                                "file_type": "1",
-                                "file_hash": C1Hash
-                            }
-                        ],
-                        "material_name": "作品创作说明"
-                    }
-                ],
-                "material_num": "1"
-            },
-            {
-                "material_type_name": "作品权利保证书",
-                "material_type": "C3",
-                "material_list": [
-                    {
-                        "material_file_list": [
-                            {
-                                "file_name": C3Name,
-                                "file_path": C3Path,
-                                "file_type": "1",
-                                "file_hash": C3Hash
-                            }
-                        ],
-                        "material_name": "作品权利保证书"
-                    }
-                ],
-                "material_num": "1"
-            },
-            {
-                "material_type_name": "唯⼀著作权注册平台承诺书",
-                "material_type": "C16",
-                "material_list": [
-                    {
-                        "material_file_list": [
-                            {
-                                "file_name": C16Name,
-                                "file_path": C16Path,
-                                "file_type": "1",
-                                "file_hash": C16Hash
-                            }
-                        ],
-                        "material_name": "唯⼀著作权注册平台承诺书"
-                    }
-                ],
-                "material_num": "1"
-            }
-        ],
+        "material": materialInfo,
         "params": {
             "works_count": "1",
             "det_business_code": "C001_01_03",
             "step": "3",
             "package_token": packageToken,
-            "submit_usn": subjectInfo.usn
+            "submit_usn": body.submitUsn
         }
     }
     
@@ -1003,7 +929,7 @@ export async function handleAuthResult(tokenRemote, seqObj, workId, address, bat
 /**
  * @description 查询审核的轮询函数。
  */
-async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,randomNum) {
+async function queryAuthResult(tokenRemote, seqObj, workId, batchNo,randomNum) {
     console.log('workId:', workId);
     console.log('batchNo:', batchNo);
     // 请求接口
@@ -1035,25 +961,21 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
         }
         let ipfsUrl = "http://118.190.39.87:5001/api/v0/cat?arg=" + ipfsHash;
         // 通证信息上链
-        let copyrightFilter = {
-            work_id: workId,
-            address: address,
-        }
-        let sql = sqlText.table('right_token_info').field('copyright_id').where(copyrightFilter).select();
+        let sql = sqlText.table('CopyrightToken').field('TokenId').where({workId: body.object.workId}).select();
         let copyrightInfoArr = await mysqlUtils.sql(c, sql);
         if(copyrightInfoArr.length == 0) {
             console.log('no data.');
             return false;
         }
         let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
-        let authenticationId = 'DCI' + sha256(copyrightIds).toString().substring(0, 8);
+        let authenticationId = body.data.objectIdentityJson[0].works_hash;
         let authenticationInfo = {
+            authenticationInstitudeName: "北京版权保护中心",
             authenticationId: authenticationId,
-            licenseUrl: ipfsUrl,
         };
 
         let authenticatePromises = copyrightIds.map(copyrightId => {
-            return (erc721.buildTokenInfoChangeTx(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
+            return (tokenLayer.buildModifyAuthenticationInfoTxLayer(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
         });
         let authenticateResArr = await Promise.all(authenticatePromises);
 
@@ -1064,11 +986,9 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
 
 
         // 异步返回京东
-        let workFileHash;
         let auditResult;
         let examineMessage;
         try{
-            workFileHash = body.data.objectIdentityJson[0].works_hash;
             auditResult = body.data.objectIdentityJson[0].examine_status==1?true:false;
             examineMessage = body.data.objectIdentityJson[0].examine_message;
         }
@@ -1080,28 +1000,37 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
 
         let authResult = {
             workId : workId,
-            address : address,
             authenticationInfo:{
                 auditResult : auditResult,
                 examineMessage : examineMessage,
-                authenticationId : workFileHash,
+                authenticationId : authenticationId,
                 licenseUrl: ipfsUrl,
-                timestamp : timestamp//确权信息填入通证链的链上时间戳,暂取首次
+                timestamp: timestamp//确权信息填入通证链的链上时间戳,暂取首次
             }
 
         }
         console.log('authResult:', authResult);
 
-        let body = authResult;
+        let authInfo = {
+            auditStatus: true,
+            auditResult: auditResult,
+            examineMessage: examineMessage,
+            authenticationId: authenticationId,
+            licenseUrl: ipfsUrl,
+            timestamp: timestamp,
+        }
+        sql = sqlText.table('AuthenticationInfo').data(authInfo).where({workId : workId}).update();
+        await mysqlUtils.sql(c, sql);
+
         try {
-            await authValidate.workAuthResSchema.validateAsync(body);
+            await authValidate.workAuthResSchema.validateAsync(authResult);
         } catch(e) {
             e.details.map((detail, index) => {
                 console.log('error message ' + index + ':', detail.message);
             });
             return false;
         }
-        let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", body);
+        let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
         if (debugMode) {
             console.log('京东Res:', Res);
         }

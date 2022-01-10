@@ -185,16 +185,16 @@ uploadRemote.connect(async function(err, res) {
             // });
 
             // 确权状态查询
-            // authRouter.get('/state', async function(req, res) {
-            //     let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req);
-            //     res.send(resInfo);
-            // });
-
-            // 内部版权确权请求
-            authRouter.post('/innerWork', async function(req, res) {
-                let resInfo = await authMid.handleInnerWorkAuth(tokenRemote, seqObj, req);
+            authRouter.get('/state', async function(req, res) {
+                let resInfo = await authMid.handleAuthState(contractRemote, seqObj, req);
                 res.send(resInfo);
             });
+
+            // 内部版权确权请求
+            // authRouter.post('/innerWork', async function(req, res) {
+            //     let resInfo = await authMid.handleInnerWorkAuth(tokenRemote, seqObj, req);
+            //     res.send(resInfo);
+            // });
 
             // // 内部版权确权请求
             // authRouter.post('/innerCopyright', async function(req, res) {
