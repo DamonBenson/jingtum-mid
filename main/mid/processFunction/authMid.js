@@ -472,13 +472,13 @@ async function genPackage1(body, batchName) {
     let suffix = "";
     switch (workType) {
         case "1":
-            suffix = ".mp3";
-            break;
-        case "2":
             suffix = ".jpg";
             break;
-        case "3":
+        case "2":
             suffix = ".mp4";
+            break;
+        case "3":
+            suffix = ".mp3";
             break;
         default:
             break;
