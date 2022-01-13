@@ -292,10 +292,10 @@ export async function handleWorkInfoOfUser(req) {
     let copyrightWorkSql = "\
         SELECT\
             temp.workId,\
-            baseInfo_workName,\
-            baseInfo_workType,\
+            baseInfo_workName AS workName,\
+            baseInfo_workType AS workType,\
             authentication_status,\
-            fileInfo_fileHash\
+            fileInfo_fileHash AS fileHash\
         FROM\
             (\
                 SELECT DISTINCT\
@@ -327,8 +327,6 @@ export async function handleWorkInfoOfUser(req) {
     let copyrightWorkInfoArr =  await mysqlUtils.sql(c, copyrightWorkSql);
     copyrightWorkInfoArr.forEach(copyrightWorkInfo => {
         localUtils.fromMysqlObj(copyrightWorkInfo);
-        copyrightWorkInfo.fileHashList = JSON.parse(copyrightWorkInfo.fileInfoList).map(fileInfo => fileInfo.fileHash);
-        delete copyrightWorkInfo.fileInfoList;
         copyrightWorkInfo.ownershipType = 0;
     });
 

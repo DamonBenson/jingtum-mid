@@ -19,6 +19,7 @@ import ipfsAPI from "ipfs-api";
 import {addFile} from "../../../utils/ipfsUtils.js";
 import {downloadToIPFS} from "../../../utils/httpUtils.js";
 import formData from "form-data";
+import { materialType2materialName, workType2Suffix } from '../../../utils/config/auth.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
@@ -469,20 +470,7 @@ async function genPackage1(body, batchName) {
 
     // 作品类型相关信息
     let workType = workInfo.fileInfo_fileType.toString(); //注意上链的对应关系是不是正确
-    let suffix = "";
-    switch (workType) {
-        case "1":
-            suffix = ".jpg";
-            break;
-        case "2":
-            suffix = ".mp4";
-            break;
-        case "3":
-            suffix = ".mp3";
-            break;
-        default:
-            break;
-    }
+    let suffix = workType2Suffix[workType];
     let workName = workInfo.baseInfo_workName + suffix;
     let workPath = workInfo.fileInfo_fileHash + suffix;
     
@@ -493,7 +481,7 @@ async function genPackage1(body, batchName) {
     let workSize = fs.statSync(localWorkPath).size.toString();
     let cover;
     let coverHash;
-    if(workType == "2") {
+    if(workType == "10") {
         cover = localWorkPath;
         coverHash = workHash;
     }
@@ -501,8 +489,6 @@ async function genPackage1(body, batchName) {
         cover = "";
         coverHash = "";
     }
-
-    workType = convertWorkType(workType);
 
     // 主体信息
     let subjectInfo = body.subject.map((element) => {
@@ -754,21 +740,7 @@ async function genPackage3(body, package1, batchNo) {
             let suffix = '.' + filePath.split('.').pop();
             let localFilePath = basePath + "/authFiles/certificateMaterials/" + packageToken + "/" + type + suffix;
             await httpUtils.downloadFile(filePath, localFilePath);
-            let materialName = "";
-            switch(type) {
-                case "C1":
-                    materialName = "作品创作说明";
-                    break;
-                case "C3":
-                    materialName = "作品权利保证书";
-                    break;
-                case "C16":
-                    materialName = "唯⼀著作权注册平台承诺书";
-                    break;
-                default:
-                    break;
-
-            }
+            let materialName = materialType2materialName[type];
             let temp = {
                 "material_type_name": materialName,
                 "material_type": type,
@@ -929,19 +901,6 @@ async function uploadFiles(checkRes, detSn, packageHash) {
     }
 
     return true;
-
-}
-
-function convertWorkType(workType) {
-
-    switch (workType) {
-        case "1":
-            return "3";
-        case "2":
-            return "10";
-        case "3":
-            return "12";
-    }
 
 }
 
