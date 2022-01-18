@@ -5,7 +5,7 @@ import * as tx from '../utils/jingtum/tx.js';
 
 import {chains} from '../utils/config/jingtum.js';
 
-const addAmount = 1;
+const addAmount = 10;
 const addLoopCounter = addAmount - 1;
 
 const Remote = jlib.Remote;
@@ -36,7 +36,7 @@ for(let i = chains.length - 1; i >= 0; i--) {
     let rootAddr = chain.account.root.address;
     let rootSecr = chain.account.root.secret;
 
-    let r = new Remote({server: chain.server[0], local_sign: true});
+    let r = new Remote({server: chain.server[2], local_sign: true});
     r.connect(async function(err, result) {
 
         /*---------链接状态----------*/
