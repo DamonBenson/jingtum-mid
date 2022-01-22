@@ -15,12 +15,16 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {Object}tokenObject 是否显示结果
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
- export function buildPublishTokenTxLayer(remote, id, showRes = true) {
-
-    let tx = remote.requestTokenInfo({
-        tokenId: id,
+export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = true) {
+    let tx = remote.buildPublishTokenTxLayer({
+        publisher: publisher,
+        receiver: receiver,
+        token: token,
+        referenceFlag: referenceFlag, 
+        tokenObject: tokenObject,
     });
-
+    tx.setSecret(secret);
+   
     return _returnPromise(tx,'requestTokenInfo:', showRes);
 
 }
@@ -30,26 +34,26 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {Object}remote 底层链连接对象
  * @param {String}src 通证修改者的地址
  * @param {String}secret 通证修改者的私钥
- * @param {int}seq 通证修改者的交易序列号
  * @param {String}id 待修改通证的标识
  * @param {Object}tokenInfos 添加的通证信息
  * @param {boolean}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
-export function buildModifyAuthenticationInfoTxLayer(remote, src, secret, seq, id, tokenInfos, showRes = true) {
+export function buildModifyAuthenticationInfoTxLayer(remote , src , secret , id , authenticationInfo , showRes = true) {
 
     let tx = remote.buildModifyAuthenticationInfoTxLayer({
+        // account: role1.address,
+        // tokenId: 'A44B02EEB5DA7C0CA6A95921248949B88F34D1E6D23580B974CE309A048380D4'，
+        // authenticationInfo: {
+        //     authenticationInstitudeName: 'j3BS6rtKPmrD5WhMqWZuhmcwaH9f3Hdnh4', 
+        //     authenticationId: 'rightId_003', 
+        //     authenticatedDate:'2021-12-31'
         account: src,
         tokenId: id,
-        right: tokenInfos,
+        authenticationInfo: authenticationInfo,
     });
 
     tx.setSecret(secret);
-
-    if(seq) {
-        tx.setSequence(seq);
-    }
-
     return _returnPromise(tx,'buildModifyAuthenticationInfoTxLayer:', showRes);
 }
 
@@ -64,14 +68,14 @@ export function buildModifyAuthenticationInfoTxLayer(remote, src, secret, seq, i
 export function requestCopyrightTokenInfoLayer(remote, id, showRes = true) {
 
     let tx = remote.requestTokenInfo({
+        // tokenId: 'AA4B02EEB5DA7C0CA6A95921248949B88F34D1E6D23580B974CE309A048380D3'
         tokenId: id,
     });
 
-    return _returnPromise(tx,'requestTokenInfo:', showRes);
-
+    return _returnPromise(tx ,'requestTokenInfo:' , showRes);
 }
 
-function _returnPromise(tx,funName, showRes){
+function _returnPromise(tx, funName, showRes){
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
             if(err) {
