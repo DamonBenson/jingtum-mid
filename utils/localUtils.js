@@ -218,3 +218,23 @@ export function getFileHash(filePath) {
     return hash;
 
 }
+
+export async function getAddressRights(workId) {
+    let sql = sqlText.table('CopyrightToken').where({workId: body.object.workId}).select();
+    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+    let addrRights = {};
+    copyrightInfoArr.forEach((copyrightInfo) => {
+        JSON.parse(copyrightInfo.copyrightUnit).forEach((unit) => {
+            let right = {
+                rights_category: copyrightInfo.copyrightType.toString(),
+                rights_explain: unit.copyrightExplain,
+            };
+            if(!addrRights.hasOwnProperty(unit.address)) {
+                addrRights[unit.address] = [right];
+            } else {
+                addrRights[unit.address].push(right);
+            }
+        })
+    });
+    return addrRights;
+}
