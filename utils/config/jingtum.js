@@ -2,9 +2,10 @@
  * @description 服务器公网IP。
  */
 const publicServerAddr = [
-    '39.102.92.249',
-    '39.102.90.153',
-    '39.102.92.229',
+    '139.129.194.65'
+    // '39.102.92.249',
+    // '39.102.90.153',
+    // '39.102.92.229',
 ];
 
 /**
@@ -165,7 +166,7 @@ export const chains = [
     // chains[0]存证链
     {
         server: [
-            'ws://' + publicServerAddr[0] + ':5020',
+            'ws://' + publicServerAddr[0] + ':5040',
             'ws://' + publicServerAddr[1] + ':5020',
             'ws://' + publicServerAddr[2] + ':5020',
         ],
@@ -181,52 +182,6 @@ export const chains = [
             issuer: {
                 address: 'jaXFNVexGYnFALQzSHUkLakyVs1Lxs9ETJ',
                 secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn',
-            },
-        },
-    },
-
-    // chains[1]交易链
-    {
-        server: [
-            'ws://' + publicServerAddr[0] + ':6020',
-            'ws://' + publicServerAddr[1] + ':6060',
-            'ws://' + publicServerAddr[2] + ':6020',
-        ],
-        account: {
-            root: {
-                address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
-                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
-            },
-            charge: {
-                address: 'j7xQsY7aGJVoAaTGWYzyLoCLtGe9NwX7w',
-                secret: 'ss1nxL1FkJAZmVtHzHJKAw52He8fB',
-            },
-            issuer: {
-                address: 'jaXFNVexGYnFALQzSHUkLakyVs1Lxs9ETJ',
-                secret: 'spos4o8ghNw4FJgG3hCsNTfRn1TMn',
-            },
-        },
-    },
-
-    // chains[2]权益链
-    {
-        server: [
-            'ws://' + publicServerAddr[0] + ':9030',
-            'ws://' + publicServerAddr[1] + ':9030',
-            'ws://' + publicServerAddr[2] + ':9030',
-        ],
-        account: {
-            root: {
-                address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh',
-                secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
-            },
-            charge: {
-                address: 'jEx8qHwy2r5vMrVrbc7i4juWKmtsSm4DS9',
-                secret: 'snQfZGdaR9sMe7D3uCcEHMvs4ocjA',
-            },
-            issuer: {
-                address: 'jfCdDWueik3AsSjcfcaQsdpFjW8CyZYT76',
-                secret: 'snjQmeX9gdwuVNHqvypxn2d663jKL',
             },
         },
     },

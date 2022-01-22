@@ -1258,7 +1258,7 @@ async function queryAuthResult(tokenRemote, seqObj, workId, address, batchNo,ran
         }
         console.log('authResult:', authResult);
 
-        let body = authResult;
+        // let body = authResult;
         try {
             await authValidate.workAuthResSchema.validateAsync(body);
         } catch(e) {
