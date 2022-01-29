@@ -6,16 +6,16 @@ const tokenChain = chains[1];
 const issuerAddr = tokenChain.account.issuer.address;
 const issuerSecr = tokenChain.account.issuer.secret;
 /**
- * @description 发行通证（V2）。
- * @param {String}publisher 底层链连接对象
- * @param {String}receiver 待查询通证的标识
- * @param {String}token 是否显示结果
- * @param {Number}referenceFlag 是否显示结果
- * @param {Object}tokenObject 是否显示结果
+ * @description 修改发行信息（修改冻结标志或者roles列表）。
+ * @param {String}account 权限账号
+ * @param {String}publisher 发行账号
+ * @param {String}token 发行名称
+ * @param {Number}referenceFlag 流通标志位
+ * @param {Array}roles 控制token权限列表
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
  export function buildIssueInfoModifyTxLayer(remote, secret, account,  publisher, token, flag, roles, showRes = false) {
-    let tx = remote.buildPublishTokenTxLayer({
+    let tx = remote.buildIssueInfoModifyTx({
         account : account,
         publisher : publisher,
         token : token,
@@ -25,17 +25,19 @@ const issuerSecr = tokenChain.account.issuer.secret;
 
     tx.setSecret(secret);
    
-    return _returnPromise(tx,'buildPublishTokenTxLayer', showRes);
+    return _returnPromise(tx,'buildIssueInfoModifyTxLayer', showRes);
 
 }
 
 /**
  * @description 发行通证（V2）。
- * @param {String}publisher 底层链连接对象
- * @param {String}receiver 待查询通证的标识
- * @param {String}token 是否显示结果
- * @param {Number}referenceFlag 是否显示结果
- * @param {Object}tokenObject 是否显示结果
+ * @param {String}secret 发行主体的密钥
+ * @param {String}publisher 发行主体
+ * @param {String}receiver 通证接受者
+ * @param {String}token 通证名称
+ * @param {Number}referenceFlag 通证标识
+ * @param {Object}tokenObject 通证结构体
+ * @param {boolean}showRes 是否显示结果
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
  export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = false) {
@@ -53,29 +55,6 @@ const issuerSecr = tokenChain.account.issuer.secret;
 
 }
 
-/**
- * @description 发行通证（V2）。
- * @param {String}publisher 底层链连接对象
- * @param {String}receiver 待查询通证的标识
- * @param {String}token 是否显示结果
- * @param {Number}referenceFlag 是否显示结果
- * @param {Object}tokenObject 是否显示结果
- * @returns {Object} 查询结果，具体格式见jingtum-lib文档
- */
-export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = false) {
-    let tx = remote.buildPublishTokenTxLayer({
-        publisher: publisher,
-        receiver: receiver,
-        token: token,
-        referenceFlag: referenceFlag, 
-        tokenObject: tokenObject,
-    });
-
-    tx.setSecret(secret);
-   
-    return _returnPromise(tx,'buildPublishTokenTxLayer', showRes);
-
-}
 
 /**
  * @description 修改确权信息。
