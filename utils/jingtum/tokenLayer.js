@@ -5,6 +5,29 @@ import {chains} from '../config/jingtum.js';
 const tokenChain = chains[1];
 const issuerAddr = tokenChain.account.issuer.address;
 const issuerSecr = tokenChain.account.issuer.secret;
+/**
+ * @description 发行通证（V2）。
+ * @param {String}publisher 底层链连接对象
+ * @param {String}receiver 待查询通证的标识
+ * @param {String}token 是否显示结果
+ * @param {Number}referenceFlag 是否显示结果
+ * @param {Object}tokenObject 是否显示结果
+ * @returns {Object} 查询结果，具体格式见jingtum-lib文档
+ */
+ export function buildIssueInfoModifyTxLayer(remote, secret, account,  publisher, token, flag, roles, showRes = false) {
+    let tx = remote.buildPublishTokenTxLayer({
+        account : account,
+        publisher : publisher,
+        token : token,
+        flag : flag, 
+        roles : roles
+    });
+
+    tx.setSecret(secret);
+   
+    return _returnPromise(tx,'buildPublishTokenTxLayer', showRes);
+
+}
 
 /**
  * @description 发行通证（V2）。
@@ -15,7 +38,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {Object}tokenObject 是否显示结果
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
-export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = true) {
+ export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = false) {
     let tx = remote.buildPublishTokenTxLayer({
         publisher: publisher,
         receiver: receiver,
@@ -23,9 +46,34 @@ export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, to
         referenceFlag: referenceFlag, 
         tokenObject: tokenObject,
     });
+
     tx.setSecret(secret);
    
-    return _returnPromise(tx,'requestTokenInfo:', showRes);
+    return _returnPromise(tx,'buildPublishTokenTxLayer', showRes);
+
+}
+
+/**
+ * @description 发行通证（V2）。
+ * @param {String}publisher 底层链连接对象
+ * @param {String}receiver 待查询通证的标识
+ * @param {String}token 是否显示结果
+ * @param {Number}referenceFlag 是否显示结果
+ * @param {Object}tokenObject 是否显示结果
+ * @returns {Object} 查询结果，具体格式见jingtum-lib文档
+ */
+export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = false) {
+    let tx = remote.buildPublishTokenTxLayer({
+        publisher: publisher,
+        receiver: receiver,
+        token: token,
+        referenceFlag: referenceFlag, 
+        tokenObject: tokenObject,
+    });
+
+    tx.setSecret(secret);
+   
+    return _returnPromise(tx,'buildPublishTokenTxLayer', showRes);
 
 }
 
@@ -54,7 +102,7 @@ export function buildModifyAuthenticationInfoTxLayer(remote , src , secret , id 
     });
 
     tx.setSecret(secret);
-    return _returnPromise(tx,'buildModifyAuthenticationInfoTxLayer:', showRes);
+    return _returnPromise(tx,'buildModifyAuthenticationInfoTxLayer', showRes);
 }
 
 
@@ -72,22 +120,24 @@ export function requestCopyrightTokenInfoLayer(remote, id, showRes = true) {
         tokenId: id,
     });
 
-    return _returnPromise(tx ,'requestTokenInfo:' , showRes);
+    return _returnPromise(tx ,'requestCopyrightTokenInfoLayer' , showRes);
 }
 
 function _returnPromise(tx, funName, showRes){
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
             if(err) {
+                console.log(funName, 'tx:', tx);
                 console.log('err:',err);
                 reject(err);
             }
             else if(result){
                 if(showRes) {
-                    console.log('buildModifyAuthenticationInfoTxLayer:', result);
+                    console.log('tx:', tx);
+                    console.log('',funName,':', result);
                 }
                 else {
-                    console.log('buildModifyAuthenticationInfoTxLayer:', result.engine_result + "_" + result.tx_json.Sequence);
+                    console.log('',funName,':',result.engine_result + "_" + result.tx_json.Sequence);
                 }
                 resolve(result);
             }
