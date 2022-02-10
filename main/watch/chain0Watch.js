@@ -174,7 +174,7 @@ async function processUpload(uploadTxs, loopConter) {
         console.log("workInfo:", workInfo);
         localUtils.toMysqlObj(workInfo);
 
-        let sql = sqlText.table('work_info').data(workInfo).insert();
+        let sql = sqlText.table('Token').data(workInfo).insert();
         workInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
