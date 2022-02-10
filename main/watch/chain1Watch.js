@@ -191,7 +191,7 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
         localUtils.toMysqlObj(copyrightInfo);
         console.log('copyrightInfo:', copyrightInfo);
 
-        let sql = sqlText.table('right_token_info').data(copyrightInfo).insert();
+        let sql = sqlText.table('CopyrightToken').data(copyrightInfo).insert();
         copyrightInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
@@ -298,7 +298,7 @@ async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
         localUtils.toMysqlObj(authInfo);
         console.log('authenticationInfo:', authInfo);
 
-        let sql = sqlText.table('auth_info').data(authInfo).insert();
+        let sql = sqlText.table('AuthenticationInfo').data(authInfo).insert();
         authInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
