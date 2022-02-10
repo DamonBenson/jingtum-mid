@@ -59,14 +59,14 @@ const issuerSecr = tokenChain.account.issuer.secret;
 /**
  * @description 修改确权信息。
  * @param {Object}remote 底层链连接对象
- * @param {String}src 通证修改者的地址
  * @param {String}secret 通证修改者的私钥
+ * @param {String}src 通证修改者的地址
  * @param {String}id 待修改通证的标识
- * @param {Object}tokenInfos 添加的通证信息
+ * @param {Object}authenticationInfo 添加的通证信息
  * @param {boolean}showRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
-export function buildModifyAuthenticationInfoTxLayer(remote , src , secret , id , authenticationInfo , showRes = true) {
+export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id , authenticationInfo , showRes = true) {
 
     let tx = remote.buildModifyAuthenticationInfoTxLayer({
         // account: role1.address,
