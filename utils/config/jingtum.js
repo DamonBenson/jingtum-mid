@@ -155,7 +155,6 @@ export const chains = [
     // chains[0]存证链
     {
         server: [
-            'ws://' + publicServerAddr[1] + ':6020',
             'ws://' + publicServerAddr[2] + ':6020',
             'ws://' + publicServerAddr[3] + ':6020',
             'ws://' + publicServerAddr[4] + ':6020',
@@ -169,6 +168,10 @@ export const chains = [
                 address: 'jaW747YSNv8rYcFTr4R6Vd45E1ZhReTxcv',
                 secret: 'ssdHzCrubJrJSt2MdPdiwmZdNFvRA',
             },
+            admin:{
+                address: 'jaZ18NFrvzLuDS8vgFkYD5CoMgZQLXGet4',
+                secret: 'sprHsZERKkdm38o7vat8P4y3edMrP',    
+            },
             issuer: {
                 address: 'jM9ZWv152Zto3EiKfipZW4Gn7w5BcVjLte',
                 secret: 'sshdwShymUM38WMuN4RQ6cVHV7j89',
@@ -179,7 +182,6 @@ export const chains = [
     // chains[1]交易链
     {
         server: [
-            'ws://' + publicServerAddr[0] + ':5020',
             'ws://' + publicServerAddr[2] + ':5020',
             'ws://' + publicServerAddr[3] + ':5020',
             'ws://' + publicServerAddr[4] + ':5020',
@@ -192,6 +194,10 @@ export const chains = [
             charge: {
                 address: 'jM2QfXKE5FrjwpwLBrLbomwDd6QsLhLM7x',
                 secret: 'spzqGKwKSQuWH4vG5RoC9FERsYzaB',
+            },
+            admin:{
+                address: 'jN3dUM8cGqxjMPm6Z4dHuFXNpmT4hGXL53',
+                secret: 'snUmEqhh79PNLZw3oDYKaLy5xYUqw',    
             },
             issuer: {
                 address: 'jn3D6ThJFiyNDPvau3VmdTcjFaZApJVdJm',
