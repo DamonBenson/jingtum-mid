@@ -9,8 +9,8 @@ const tokenChain = chains[1];
 const issuerAddr = tokenChain.account.issuer.address;
 
 const token = tokenName.copyright;
-const addr = userAccount.fakeBaiduAuthorizeAccount.address; //百度智能授权系统
-// const addr = userAccount.baiduAuthorizeAccount.address; //百度智能授权系统
+// const addr = userAccount.fakeBaiduAuthorizeAccount.address; //百度智能授权系统
+const addr = userAccount.baiduAuthorizeAccount.address; //百度智能授权系统
 const authAddrs = userAccount.authenticateAccount.map(acc => acc.address);
 const monitorAddrs = userAccount.superviseAccount.map(acc => acc.address);
 
@@ -33,7 +33,7 @@ r.connect(async function(err, result) {
     let accountInfo = await requestInfo.requestAccountInfo(issuerAddr, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await tokenLayer.buildTokenIssueTx(r, addr, seq++, token, 100000000, 0, authAddrs, monitorAddrs, 1, true);
+    await erc721.buildTokenIssueTx(r, addr, seq++, token, 100000000, 0, authAddrs, monitorAddrs, 1, true);
     
     r.disconnect();
 
