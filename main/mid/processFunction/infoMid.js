@@ -289,6 +289,33 @@ export async function handleWorkInfoOfUser(req) {
 
     let address = body.address;
 
+    let workSql = "\
+        SELECT\
+            baseInfo_workId AS workId,\
+            baseInfo_workName AS workName,\
+            baseInfo_workType AS workType,\
+            0 as authentication_status,\
+            fileInfo_fileHash AS fileHash\
+        FROM\
+            Token\
+        WHERE\
+            baseInfo_workId NOT IN\
+                (\
+                    SELECT DISTINCT\
+                        workId\
+                    FROM\
+                        CopyrightToken\
+                )\
+        ORDER BY\
+            baseInfo_timestamp DESC\
+    ";
+
+    let workInfoArr =  await mysqlUtils.sql(c, workSql);
+    workInfoArr.forEach(workInfo => {
+        localUtils.fromMysqlObj(workInfo);
+        workInfo.ownershipType = 0;
+    });
+
     let copyrightWorkSql = "\
         SELECT\
             temp.workId,\
@@ -365,7 +392,7 @@ export async function handleWorkInfoOfUser(req) {
 
     // let userWorkInfoList = copyrightWorkInfoArr.concat(approveWorkInfoArr);
 
-    resInfo.data.userWorkInfoList = copyrightWorkInfoArr;
+    resInfo.data.userWorkInfoList = workInfoArr.concat(copyrightWorkInfoArr);
     console.log('/info/user/work:', resInfo.data);
 
     console.timeEnd('handleWorkInfoOfUser');
