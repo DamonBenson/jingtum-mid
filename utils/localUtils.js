@@ -1,6 +1,9 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import jlib from 'jingtum-lib';
+import qs from 'qs';
+import sqlText from 'node-transform-mysql';
+import { signSecret } from './config/auth.js';
 const u = jlib.utils;
 
 /*----------暂停----------*/
@@ -192,6 +195,8 @@ export function saveJson(json, path) {
 
     json = JSON.stringify(json);
 
+    // console.log(path);
+
     return new Promise((resolve, reject) => {
 
         fs.open(path, 'w', (err, fd) => {
@@ -219,22 +224,34 @@ export function getFileHash(filePath) {
 
 }
 
-export async function getAddressRights(workId) {
-    let sql = sqlText.table('CopyrightToken').where({workId: body.object.workId}).select();
-    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
-    let addrRights = {};
-    copyrightInfoArr.forEach((copyrightInfo) => {
-        JSON.parse(copyrightInfo.copyrightUnit).forEach((unit) => {
-            let right = {
-                rights_category: copyrightInfo.copyrightType.toString(),
-                rights_explain: unit.copyrightExplain,
-            };
-            if(!addrRights.hasOwnProperty(unit.address)) {
-                addrRights[unit.address] = [right];
-            } else {
-                addrRights[unit.address].push(right);
-            }
-        })
+export function getFileSign(filePath) {
+
+    let file = fs.readFileSync(filePath);
+    let md5 = crypto.createHash('md5');
+    let sign = md5.update(file).digest('hex');
+    return sign;
+
+}
+
+export function getObjSign(obj) {
+
+
+    let ordered = {};
+    Object.keys(obj).sort().forEach(function(key) {
+        ordered[key] = obj[key];
     });
-    return addrRights;
+    for(let key in ordered) {
+        if(ordered[key] == '') {
+            delete ordered[key];
+        }
+    }
+    ordered.cardFileList = JSON.stringify(ordered.cardFileList);
+    ordered.codeInfo = JSON.stringify(ordered.codeInfo);
+    let s = qs.stringify(ordered) + signSecret;
+    // s = decodeURI(encodeURI(s));
+    // console.log(s);
+    let md5 = crypto.createHash('md5');
+    let sign = md5.update(s).digest('hex');
+    return sign;
+
 }

@@ -9,8 +9,8 @@ const tokenChain = chains[1];
 const issuerAddr = tokenChain.account.issuer.address;
 
 const token = tokenName.copyright;
-// const addr = userAccount.fakeBaiduAuthorizeAccount.address; //百度智能授权系统
-const addr = userAccount.baiduAuthorizeAccount.address; //百度智能授权系统
+const addr = userAccount.fakeBaiduAuthorizeAccount.address; //百度智能授权系统
+// const addr = userAccount.baiduAuthorizeAccount.address; //百度智能授权系统
 const authAddrs = userAccount.authenticateAccount.map(acc => acc.address);
 const monitorAddrs = userAccount.superviseAccount.map(acc => acc.address);
 

@@ -16,7 +16,7 @@ import _ from 'lodash';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+setInterval(() => c.ping(), 60000);
 
 const matchSystemAddr = userAccount.matchSystemAccount.address; // 智能交易系统（签名由中间层代替）
 const matchSystemSecr = userAccount.matchSystemAccount.secret;

@@ -13,7 +13,7 @@ import {mysqlConf} from '../../../utils/config/mysql.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+setInterval(() => c.ping(), 60000);
 
 // 中间层账号
 const midAddr = userAccount.midAccount.address;
