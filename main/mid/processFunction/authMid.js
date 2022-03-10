@@ -1019,12 +1019,13 @@ async function queryAuthResult(tokenRemote, seqObj, workId, batchNo,randomNum) {
         let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
         let authenticationId = body.data.objectIdentityJson[0].works_hash;
         let authenticationInfo = {
-            authenticationInstitudeName: "北京版权保护中心",
+            authenticationInstitudeName: authenticateAddr,
             authenticationId: authenticationId,
+            authenticatedDate: moment().format('YYYY-MM-DD'),
         };
 
         let authenticatePromises = copyrightIds.map(copyrightId => {
-            return (tokenLayer.buildModifyAuthenticationInfoTxLayer(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
+            return (tokenLayer.buildModifyAuthenticationInfoTxLayer(tokenRemote, authenticateSecr, authenticateAddr, copyrightId, authenticationInfo, false));
         });
         let authenticateResArr = await Promise.all(authenticatePromises);
 
