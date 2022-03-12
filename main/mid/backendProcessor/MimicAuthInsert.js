@@ -52,7 +52,7 @@ function MimicAuthInsert(){
  * @return: null
  * @author: Bernard
  * @date: 2021/5/17 14:36
- * @description:生成一个合理的存证结果，该存折没有对应的作品
+ * @description:生成一个合理的存证结果，该存证没有对应的作品
  * @example:.
  *
  */
