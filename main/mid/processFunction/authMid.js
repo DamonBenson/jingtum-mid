@@ -19,11 +19,11 @@ import ipfsAPI from "ipfs-api";
 import {addFile} from "../../../utils/ipfsUtils.js";
 import {downloadToIPFS} from "../../../utils/httpUtils.js";
 import formData from "form-data";
-import { materialType2materialName, workType2Suffix } from '../../../utils/config/auth.js';
+import { materialType2materialName, workType2Suffix, idType2cardType } from '../../../utils/config/auth.js';
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 600000);
+setInterval(() => c.ping(), 600000);
 const ipfs = ipfsAPI(ipfsConf); // ipfs连接
 
 const authenticateAddr = userAccount.authenticateAccount[0].address;
@@ -344,9 +344,10 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     console.log('body:', body);
 
-
-
+    // 身份注册
     let batchName = sha256(JSON.stringify(body)).toString();
+    await userRegister(body, batchName);
+    await setUsn(body);
 
     // step1
 
@@ -362,7 +363,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     // let package1Res = await httpUtils.postFiles("http://39.102.93.47:9003/test", {files: [package1Path, express1Path]});
 
-    console.log(package1Res);
+    console.log("package1Res:", package1Res);
 
     let detSn1 = package1Res.data;
 
@@ -370,7 +371,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let check1Res = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn1});
 
-    console.log(check1Res);
+    console.log("check1Res:", check1Res);
 
     await uploadFiles(check1Res, detSn1, package1Hash);
 
@@ -383,7 +384,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let batchRes = await httpUtils.get("http://117.107.213.242:8124/cr/reg/query/batch_no", {packageToken: package1.params.package_token});
 -
-    console.log(batchRes);
+    console.log("batchRes:", batchRes);
 
     let batchNo = batchRes.data.batchNo;
 
@@ -399,7 +400,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let package2Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [express2Path, package2Path]});
 
-    console.log(package2Res);
+    console.log("package2Res:", package2Res);
 
     let detSn2 = package2Res.data;
 
@@ -407,7 +408,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let check2Res = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn2});
 
-    console.log(check2Res);
+    console.log("check2Res:", check2Res);
 
     await uploadFiles(check2Res, detSn2, package2Hash);
 
@@ -423,7 +424,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let package3Res = await httpUtils.postFiles("http://117.107.213.242:8888/spaceDET/uploadDET", {files: [express3Path, package3Path]});
 
-    console.log(package3Res);
+    console.log("package3Res:", package3Res);
 
     let detSn3 = package3Res.data;
 
@@ -431,7 +432,7 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let check3Res = await httpUtils.postFiles("http://117.107.213.242:8888/check/checkKeyTostorage", {det_sn: detSn3});
 
-    console.log(check3Res);
+    console.log("check3Res:", check3Res);
 
     await uploadFiles(check3Res, detSn3, package3Hash);
 
@@ -439,15 +440,17 @@ export async function handleWorkAuth(tokenRemote, seqObj, req) {
 
     let submitInfo = {
         batchNo: batchNo,
-        usn: body.submitUsn,
+        usn: body.submits,
     }
+    console.log(submitInfo);
     let submitRes = await httpUtils.postFiles("http://117.107.213.242:8124/examine/result/submit", submitInfo);
 
-    console.log(submitRes);
+    console.log("submitRes:", submitRes);
 
     let authInfo = {
         workId: body.object.workId,
-        authStatus: false
+        auditStatus: "",
+        auditResult: false,
     }
     let sql = sqlText.table('AuthenticationInfo').data(authInfo).insert();
     await mysqlUtils.sql(c, sql);
@@ -466,10 +469,9 @@ async function genPackage1(body, batchName) {
     let sql = sqlText.table('Token').where({baseInfo_workId: body.object.workId}).select();
     let workInfo = await mysqlUtils.sql(c, sql);
     workInfo = workInfo[0];
-    arg1.workInfo = workInfo[0];
 
     // 作品类型相关信息
-    let workType = workInfo.fileInfo_fileType.toString(); //注意上链的对应关系是不是正确
+    let workType = workInfo.baseInfo_workType.toString(); //注意上链的对应关系是不是正确
     let suffix = workType2Suffix[workType];
     let workName = workInfo.baseInfo_workName + suffix;
     let workPath = workInfo.fileInfo_fileHash + suffix;
@@ -493,13 +495,13 @@ async function genPackage1(body, batchName) {
     // 主体信息
     let subjectInfo = body.subject.map((element) => {
         return {
-            name: element.A1.name,
-            type: element.A1.type,
-            usn: element.A1.usn
+            name: element.a1.name,
+            type: element.a1.type,
+            usn: element.a1.usn
         };
     });
 
-    let packageToken = sha256(body.submitUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    let packageToken = sha256(body.submits + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package1 = {
         "name": batchName,
@@ -514,7 +516,7 @@ async function genPackage1(body, batchName) {
                 "works_path": localWorkPath,
                 "works_size": workSize,
                 "works_type": workType,
-                "file_type": "",
+                "file_type": workInfo.fileInfo_fileType.toString(),
                 "is_split": "0",
                 "isSelect": false,
                 "longSelect": false
@@ -525,10 +527,13 @@ async function genPackage1(body, batchName) {
             "det_business_code": "C001_01_01",
             "package_token": packageToken,
             "step": "1",
-            "submit_usn": body.submitUsn,
+            "submit_usn": body.submits,
             "works_count": "1"
         }
     }
+
+    console.log(package1);
+    // await localUtils.sleep(100000);
     
     return package1;
 
@@ -590,37 +595,57 @@ function genExpress1(package1, package1Hash, batchName) {
         ]
     }
 
+    // console.log(express1);
+    // await localUtils.sleep(100000);
+
     return express1;
 
 }
 
 async function genPackage2(body, batchNo) {
 
-    let addrRights = await localUtils.getAddressRights(body.object.workId);
+    let addrRights = await getAddressRights(body.object.workId);
+    body.subject.forEach((element) => {
+        element.rights.forEach((rightUnit) => {
+            localUtils.toMysqlObj(rightUnit);
+        })
+    })
     body.subject.filter((element) => {
         return element.hasOwnProperty("rights");
     }).forEach((element) => {
-        if(!addrRights.hasOwnProperty(element.A1.userAddress)) {
-            addrRights[element.A1.userAddress] = element.rights;
-        } else {
-            addrRights[element.A1.userAddress].concat(element.rights);
+        if(addrRights.hasOwnProperty(element.a1.userAddress)) {
+            addrRights[element.a1.userAddress] = addrRights[element.a1.userAddress].concat(element.rights);
         }
     });
     let rightsCategory = [];
     for(let addr in addrRights) {
         for(let i in body.subject) {
-            if(body.subject[i].A1.userAddress == addr) {
+            if(body.subject[i].a1.userAddress == addr) {
                 rightsCategory.push({
-                    "rights_owner_name": body.subject[i].A1.name,
-                    "rights_owner_type": body.subject[i].A1.type,
-                    "rights_owner_usn": body.subject[i].A1.usn,
+                    "rights_owner_name": body.subject[i].a1.name,
+                    "rights_owner_type": body.subject[i].a1.type,
+                    "rights_owner_usn": body.subject[i].a1.usn,
                     "rights": addrRights[addr],
                 })
             }
         }
     }
+    body.subject.filter((element) => {
+        return element.hasOwnProperty("rights");
+    }).forEach((element) => {
+        if(!addrRights.hasOwnProperty(element.a1.userAddress)) {
+            rightsCategory.push({
+                "rights_owner_name": element.a1.name,
+                "rights_owner_type": element.a1.type,
+                "rights_owner_usn": element.a1.usn,
+                "rights": element.rights,
+            })
+        }
+    });
     
-    let packageToken = sha256(body.submitUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    
+    
+    let packageToken = sha256(body.submits + moment().unix() + localUtils.randomNumber(0,9999)).toString();
 
     let package2 = {
         "copyright_produce_mode": "0",
@@ -628,11 +653,14 @@ async function genPackage2(body, batchNo) {
         "rights_category": rightsCategory,
         "params": {
             "det_business_code": "C001_01_02",
-            "submit_usn": body.submitUsn,
+            "submit_usn": body.submits,
             "package_token": packageToken,
             "step": "2"
         }
     }
+
+    console.log(package2);
+    // await localUtils.sleep(100000);
 
     return package2;
 
@@ -672,6 +700,10 @@ function genExpress2(package2, package2Hash, batchName) {
             }
         ]
     };
+
+    // console.log(express2);
+    // await localUtils.sleep(100000);
+
       
     return express2;
 
@@ -679,16 +711,17 @@ function genExpress2(package2, package2Hash, batchName) {
 
 async function genPackage3(body, package1, batchNo) {
 
-    let packageToken = sha256(body.submitUsn + moment().unix() + localUtils.randomNumber(0,9999)).toString();
+    let packageToken = sha256(body.submits + moment().unix() + localUtils.randomNumber(0,9999)).toString();
     
-    let subject = body.subject.map((element) => {
+    let subject = body.subject.map(async(element) => {
 
-        delete element.A1.userAddress;
-        localUtils.toMysqlObj(element.A1);
-        element.address = element.residence;
-        delete element.A1.residence;
+        delete element.a1.userAddress;
+        localUtils.toMysqlObj(element.a1);
+        element.a1.address = element.a1.residence;
+        delete element.a1.residence;
+        delete element.a1.mobile;
 
-        let idType = element.A1.id_type;
+        let idType = element.a1.id_type.toUpperCase();
         let nullSubjectInfo = {
             "id": "",
             "sex": "",
@@ -704,46 +737,65 @@ async function genPackage3(body, package1, batchNo) {
         let subjectCertificateType = ["A2", "A3", "A4", "A5", "A6"];
         for(let i in subjectCertificateType) {
             if(subjectCertificateType[i] != idType) {
-                element[subjectCertificateType[i]] = nullSubjectInfo;
+                if(element.a1.type == '1' && subjectCertificateType[i] != 'A6') element[subjectCertificateType[i]] = nullSubjectInfo;
+                if(element.a1.type == '100' && subjectCertificateType[i] == 'A6') element[subjectCertificateType[i]] = nullSubjectInfo;
             }
         }
-
-        element[idType].address = element.A1.address;
-        element[idType].idNumber = element.A1.id_number;
-        element[idType].usn = element.A1.usn;
-        element[idType].name = element.A1.name;
+        
+        element[idType] = element[element.a1.id_type];
+        delete element[element.a1.id_type];
+        element[idType].address = element.a1.address;
+        element[idType].idNumber = element.a1.id_number;
+        element[idType].usn = element.a1.usn;
+        element[idType].name = element.a1.name;
+        element[idType].id = await getCredentialsId(element.a1.usn);
         localUtils.toMysqlObj(element[idType]);
+
+        if(element.a1.type == '1') {
+            delete element[idType].legal_representative;
+            delete element[idType].ethnic;
+        }
 
         let files = element[idType].files.map(async(fileInfo) => {
             let suffix = '.' + fileInfo.filePath.split('.').pop();
-            let localFilePath = basePath + "/authFiles/subjectMaterials/" + packageToken + "/" + idType + fileInfo.fileType + suffix;
+            let localFilePath = basePath + "/authFiles/subjectMaterials/" + packageToken + "-" + idType + fileInfo.fileType + suffix;
             await httpUtils.downloadFile(fileInfo.filePath, localFilePath);
             fileInfo.filePath = localFilePath;
             fileInfo.cardType = "1";
             fileInfo.fileHash = localUtils.getFileHash(localFilePath);
             fileInfo.fileName = idType + fileInfo.fileType + suffix;
-            fileInfo.idCardNo = element.A1.id_number;
-            fileInfo.credentialsId = "";
+            fileInfo.idCardNo = element.a1.id_number;
+            fileInfo.credentialsId = await getCredentialsId(element.a1.usn);
+            localUtils.toMysqlObj(fileInfo);
             return fileInfo;
         });
 
+        files = await Promise.all(files);
+
         element[idType].files = files;
+        element.A1 = element.a1;
+        delete element.a1;
+        delete element.rights;
+
+        return element;
 
     });
 
+    subject = await Promise.all(subject);
+
     let materialInfo = [];
-    for(let type in material) {
-        let num = material[type].length;
+    for(let type in body.material) {
+        let num = body.material[type].length;
         let typeInfo = [];
-        for(let i in material[type]) {
-            let filePath = material[type][i];
+        for(let i in body.material[type]) {
+            let filePath = body.material[type][i];
             let suffix = '.' + filePath.split('.').pop();
-            let localFilePath = basePath + "/authFiles/certificateMaterials/" + packageToken + "/" + type + suffix;
+            let localFilePath = basePath + "/authFiles/certificateMaterials/" + packageToken + "-" + type + suffix;
             await httpUtils.downloadFile(filePath, localFilePath);
             let materialName = materialType2materialName[type];
             let temp = {
                 "material_type_name": materialName,
-                "material_type": type,
+                "material_type": type.toUpperCase(),
                 "material_list": [
                     {
                         "material_file_list": [
@@ -759,14 +811,18 @@ async function genPackage3(body, package1, batchNo) {
                 ],
                 "material_num": num,
             };
-            typeInfo.add(temp);
+            typeInfo.push(temp);
         }
-        materialInfo.concat(typeInfo);
+        materialInfo = materialInfo.concat(typeInfo);
     }
 
     let sql = sqlText.table('Token').where({baseInfo_workId: body.object.workId}).select();
     let workInfo = await mysqlUtils.sql(c, sql);
     workInfo = workInfo[0];
+
+    body.object.authors.forEach((author) => {
+        localUtils.toMysqlObj(author);
+    });
 
     let package3 = {
         "is_complete": "1",
@@ -784,9 +840,7 @@ async function genPackage3(body, package1, batchNo) {
                 "works_creation": "0",
                 "works_name": package1.object[0].works_name,
                 "works_hash": package1.object[0].works_hash,
-                "authors": body.object.authors.map((author) => {
-                    return localUtils.toMysqlObj(author);
-                }),
+                "authors": body.object.authors,
             }
         ],
         "material": materialInfo,
@@ -795,9 +849,12 @@ async function genPackage3(body, package1, batchNo) {
             "det_business_code": "C001_01_03",
             "step": "3",
             "package_token": packageToken,
-            "submit_usn": body.submitUsn
+            "submit_usn": body.submits
         }
     }
+
+    console.log(package3);
+    // await localUtils.sleep(100000);
     
     return package3;
 
@@ -863,6 +920,9 @@ function genExpress3(package3, package3Hash, batchName) {
             }
         ]
     }
+
+    // console.log(express3);
+    // await localUtils.sleep(100000);
 
     return express3;
 
@@ -948,9 +1008,9 @@ async function queryAuthResult(tokenRemote, seqObj, workId, batchNo,randomNum) {
             console.log('body.data:', body.data);
             return false;
         }
-        let ipfsUrl = "http://118.190.39.87:5001/api/v0/cat?arg=" + ipfsHash;
+        let ipfsUrl = "http://182.92.178.101:5001/api/v0/cat?arg=" + ipfsHash;
         // 通证信息上链
-        let sql = sqlText.table('CopyrightToken').field('TokenId').where({workId: body.object.workId}).select();
+        let sql = sqlText.table('CopyrightToken').field('TokenId').where({workId: workId}).select();
         let copyrightInfoArr = await mysqlUtils.sql(c, sql);
         if(copyrightInfoArr.length == 0) {
             console.log('no data.');
@@ -959,12 +1019,13 @@ async function queryAuthResult(tokenRemote, seqObj, workId, batchNo,randomNum) {
         let copyrightIds = copyrightInfoArr.map(copyrightInfo => copyrightInfo.copyright_id);
         let authenticationId = body.data.objectIdentityJson[0].works_hash;
         let authenticationInfo = {
-            authenticationInstitudeName: "北京版权保护中心",
+            authenticationInstitudeName: authenticateAddr,
             authenticationId: authenticationId,
+            authenticatedDate: moment().format('YYYY-MM-DD'),
         };
 
         let authenticatePromises = copyrightIds.map(copyrightId => {
-            return (tokenLayer.buildModifyAuthenticationInfoTxLayer(tokenRemote, authenticateAddr, authenticateSecr, undefined, copyrightId, authenticationInfo, false));
+            return (tokenLayer.buildModifyAuthenticationInfoTxLayer(tokenRemote, authenticateSecr, authenticateAddr, copyrightId, authenticationInfo, false));
         });
         let authenticateResArr = await Promise.all(authenticatePromises);
 
@@ -1019,14 +1080,205 @@ async function queryAuthResult(tokenRemote, seqObj, workId, batchNo,randomNum) {
             });
             return false;
         }
-        let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
-        if (debugMode) {
-            console.log('京东Res:', Res);
-        }
+        // let Res = await httpUtils.post("http://116.196.114.120:8080/bupt/register/receiveWorkAuthenticationResult", authResult);
+        // if (debugMode) {
+        //     console.log('京东Res:', Res);
+        // }
                 
         // 清除定时器
         console.log('Interval Clear');
         clearInterval(IntervalId_AuthResult[randomNum]);
 
     }
+}
+
+
+async function userRegister(body, batchName) {
+
+    let registParams = [];
+    for(let i in body.subject) {
+        let sql = sqlText.table('USN').where({Id: body.subject[i].a1.usn}).select();
+        let res = await mysqlUtils.sql(c, sql);
+        if(res.length == 0) registParams.push(body.subject[i])
+    }
+    
+    registParams = registParams.map(async(e) => {
+        let sql = sqlText.table('USN').data({Id: e.a1.usn}).insert();
+        await mysqlUtils.sql(c, sql);
+        if(e.a1.type == '1') {
+            let idType = e.a1.idType;
+            let files = e[idType].files.map(async(fileInfo) => {
+                let suffix = '.' + fileInfo.filePath.split('.').pop();
+                let localFilePath = basePath + "/authFiles/registerFile/" + e.a1.idNumber + "_" + idType + fileInfo.fileType + suffix;
+                await httpUtils.downloadFile(fileInfo.filePath, localFilePath);
+                let ret = {};
+                ret.fileName = idType + fileInfo.fileType + suffix;
+                ret.filePath = localFilePath;
+                ret.fileHash = localUtils.getFileHash(localFilePath);
+                ret.fileType = fileInfo.fileType;
+                return ret;
+            });
+            files = await Promise.all(files);
+            let registObj = {
+                channel: '',
+                mobile: e.a1.mobile,
+                name: e.a1.name,
+                idNumber: e.a1.idNumber,
+                postcode: '1',
+                cardType: idType2cardType[idType],
+                sex: e[idType].sex,
+                ethnic: e[idType].ethnic,
+                birthDate: e[idType].birthday,
+                nation: e[idType].nation,
+                province: '',
+                city: '',
+                district: '',
+                address: e.a1.residence,
+                issueDate: e[idType].dateStart,
+                expirationDate: e[idType].dateEnd,
+                cardFileList: files,
+                codeInfo: {
+                    fromDevice: '',
+                    fromOs: '',
+                    fromTimestamp: new Date().getTime(),
+                    fromMac: '',
+                    fromIp: '',
+                    hashSubject: '',
+                    fromId: e.a1.idNumber,
+                }
+            };
+            // let jsonPath = basePath + "/authFiles/registerJson/" + e.a1.idNumber + ".json";
+            let filesPath = files.map(e => e.filePath);
+            // await localUtils.saveJson(registObj, jsonPath);
+            let sign = localUtils.getObjSign(registObj);
+            return {
+                userId: e.a1.usn,
+                files: filesPath,
+                userInfoString: registObj,
+                sign: sign,
+            };
+        }
+        else if(e.a1.type == '100') {
+            let idType = e.a1.idType;
+            let files = e[idType].files.map(async(fileInfo) => {
+                let suffix = '.' + fileInfo.filePath.split('.').pop();
+                let localFilePath = basePath + "/authFiles/registerFile/" + e.a1.idNumber + "/" + idType + fileInfo.fileType + suffix;
+                await httpUtils.downloadFile(fileInfo.filePath, localFilePath);
+                let ret = {};
+                ret.fileName = idType + fileInfo.fileType + suffix;
+                ret.filePath = localFilePath;
+                ret.fileHash = localUtils.getFileHash(localFilePath);
+                ret.fileType = fileInfo.fileType;
+                return ret;
+            });
+            files = await Promise.all(files);
+            let registObj = {
+                channel: '',
+                mobile: e.a1.mobile,
+                name: e.a1.name,
+                idNumber: e.a1.idNumber,
+                postcode: '100',
+                cardType: idType2cardType[idType],
+                nation: e[idType].nation,
+                province: '',
+                city: '',
+                district: '',
+                address: e.a1.residence,
+                legalRepresentative: '',
+                enterpriseType: '',
+                establishmentDate: '',
+                registeredCapital: '',
+                businessScope: '',
+                issueDate: e[idType].dateStart,
+                expirationDate: e[idType].dateEnd,
+                cardFileList: files,
+                codeInfo: {
+                    fromDevice: '',
+                    fromOs: '',
+                    fromTimestamp: new Date().getTime(),
+                    fromMac: '',
+                    fromIp: '',
+                    hashSubject: '',
+                    fromId: e.a1.idNumber,
+                }
+            };
+            // let jsonPath = basePath + "/authFiles/registerJson/" + e.a1.idNumber + ".json";
+            let filesPath = files.map(e => e.filePath);
+            // await localUtils.saveJson(registObj, jsonPath);
+            let sign = localUtils.getObjSign(registObj);
+            return {
+                userId: e.a1.usn,
+                files: filesPath,
+                userInfoString: registObj,
+                sign: sign,
+            };
+        }
+    });
+    registParams = await Promise.all(registParams);
+    for(let i = 0; i < registParams.length; i++) {
+        let uploadRes = await httpUtils.postFiles("http://117.107.213.242:8181/register/user/real/reg", {
+            files: registParams[i].files,
+            userInfoString: JSON.stringify(registParams[i].userInfoString),
+            sign: registParams[i].sign
+        });
+        let usn = uploadRes.data.usn;
+        let sql = sqlText.table('USN').data({usn: usn}).where({Id: registParams[i].userId}).update();
+        await mysqlUtils.sql(c, sql);
+        registParams[i].usn = usn;
+    }
+    while(registParams.length != 0) {
+        for(let i = 0; i < registParams.length; i++) {
+            let res = await httpUtils.postFiles("http://117.107.213.242:8181//userIdentity/queryPersonalIdentityInfo", {usn: registParams[i].usn});
+            if(res.code == '200') {
+                let sql = sqlText.table('USN').data({credentialsId: res.data.identityCard[0].credentialsId}).where({Id: registParams[i].userId}).update();
+                await mysqlUtils.sql(c, sql);
+                registParams.splice(i, i + 1);
+                i--;
+            }
+        }
+        localUtils.sleep(10000);
+    }
+    return;
+}
+
+async function setUsn(body) {
+    body.submits = await getUsn(body.submits);
+    for(let i in body.subject) {
+        body.subject[i].a1.usn = await getUsn(body.subject[i].a1.usn);
+    }
+    for(let i in body.object.authors) {
+        body.object.authors[i].usn = await getUsn(body.object.authors[i].usn);
+    }
+}
+
+async function getUsn(userId) {
+    let sql = sqlText.table('USN').field('usn').where({Id: userId}).select();
+    let usnRes = await mysqlUtils.sql(c, sql);
+    return usnRes[0].usn;
+}
+
+async function getCredentialsId(usn) {
+    let sql = sqlText.table('USN').field('credentialsId').where({usn: usn}).select();
+    let credentialsIdRes = await mysqlUtils.sql(c, sql);
+    return credentialsIdRes[0].credentialsId;
+}
+
+async function getAddressRights(workId) {
+    let sql = sqlText.table('CopyrightToken').where({workId: workId}).select();
+    let copyrightInfoArr = await mysqlUtils.sql(c, sql);
+    let addrRights = {};
+    copyrightInfoArr.forEach((copyrightInfo) => {
+        JSON.parse(copyrightInfo.copyrightUnit).forEach((unit) => {
+            let right = {
+                rights_category: copyrightInfo.copyrightType.toString(),
+                rights_explain: unit.copyrightExplain,
+            };
+            if(!addrRights.hasOwnProperty(unit.address)) {
+                addrRights[unit.address] = [right];
+            } else {
+                addrRights[unit.address].push(right);
+            }
+        })
+    });
+    return addrRights;
 }

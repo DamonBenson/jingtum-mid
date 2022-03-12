@@ -192,16 +192,16 @@ export const chains = [
                 secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',
             },
             charge: {
-                address: 'jM2QfXKE5FrjwpwLBrLbomwDd6QsLhLM7x',
-                secret: 'spzqGKwKSQuWH4vG5RoC9FERsYzaB',
+                address: 'jhawUYDkdffERMFJvL5TmUtXUuU8NdY6t3',
+                secret: 'shzwobQJQGerCefaFR5dEC3vkcnTK',
             },
             admin:{
-                address: 'jN3dUM8cGqxjMPm6Z4dHuFXNpmT4hGXL53',
-                secret: 'snUmEqhh79PNLZw3oDYKaLy5xYUqw',    
+                address: 'jMqcqm5ENUfwAXv2uSnx4cBYS9DqKkxHEk',
+                secret: 'shnDXBA84eojCqipjCK8H3noRpe7F',    
             },
             issuer: {
-                address: 'jn3D6ThJFiyNDPvau3VmdTcjFaZApJVdJm',
-                secret: 'snaZENcAzQez3d5QGG621QXj6VVFm',
+                address: 'jUrheBTC7N3hCfzY4QJe1jMiqzQXTepwr4',
+                secret: 'sh8nBGKfX3bnU5Usc8d3gsyc5uUpB',
             },
         },
     },

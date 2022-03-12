@@ -68,6 +68,8 @@ const issuerSecr = tokenChain.account.issuer.secret;
  */
 export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id , authenticationInfo , IsShowRes = true) {
 
+    // console.log(authenticationInfo);
+    
     let tx = remote.buildModifyAuthenticationInfoTxLayer({
         // account: role1.address,
         // tokenId: 'A44B02EEB5DA7C0CA6A95921248949B88F34D1E6D23580B974CE309A048380D4'，

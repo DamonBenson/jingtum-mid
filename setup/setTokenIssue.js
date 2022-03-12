@@ -33,7 +33,7 @@ r.connect(async function(err, result) {
     let accountInfo = await requestInfo.requestAccountInfo(issuerAddr, r, true);
     let seq = accountInfo.account_data.Sequence;
 
-    await tokenLayer.buildTokenIssueTx(r, addr, seq++, token, 100000000, 0, authAddrs, monitorAddrs, 1, true);
+    await erc721.buildTokenIssueTx(r, addr, seq++, token, 100000000, 0, authAddrs, monitorAddrs, 1, true);
     
     r.disconnect();
 

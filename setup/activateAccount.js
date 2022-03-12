@@ -8,6 +8,16 @@ import {chains} from '../utils/config/jingtum.js';
 const Remote = jlib.Remote;
 
 const accounts = [
+    'jfSQTDDZoqVTMwEQwb5FffSyeZ2PDBdVDK',
+    'jhcSBJPB3T6UjiBWHf4riU8PSfxfDCnNsn',
+    'jpY9octvfwBXPNTRqLbYK3ALQBCZkwEFir',
+    'jniu3438U7HxGbghhtxEP5vLeiJZYQRfjX',
+    'jN1rtJiDV741WvbhPs2yTgpGXCBatiB569',
+    'jGs7gYsPX5W3ACBNPCHTxPdzqo7huJLmWs',
+    'jENEFBGLZjSaDzdFyoBvrZirvKrp9jvq1d',
+    'jspBKDq9qFi2LLeX9izpNoJDZdw6jaN7km',
+    'jfmpVMtkTGSm5GZWF7GXuVSdajxi5GsMHa',
+    'jHFA9BhCDFUvtgeCMi6r8RYf3QUr5bncgf'
 ];
 
 for(let i = chains.length - 1; i >= 0; i--) {
@@ -35,13 +45,13 @@ for(let i = chains.length - 1; i >= 0; i--) {
         let accountInfo = await requestInfo.requestAccountInfo(rootAddr, r, true);
         let seq = accountInfo.account_data.Sequence;
     
-        await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, chargeAddr, 100000000, 'setup', true);
-        await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, issuerAddr, 100000000, 'setup', true);
+        // await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, chargeAddr, 100000000, 'setup', true);
+        // await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, issuerAddr, 100000000, 'setup', true);
 
-        // for (let i = 0; i < accounts.length; i++) {
-        //     const addr = accounts[i];
-        //     await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, addr, 100000000, 'setup', true);
-        // }
+        for (let i = 0; i < accounts.length; i++) {
+            const addr = accounts[i];
+            await tx.buildPaymentTx(r, rootAddr, rootSecr, seq++, addr, 100000000, 'setup', true);
+        }
     
         r.disconnect();
     

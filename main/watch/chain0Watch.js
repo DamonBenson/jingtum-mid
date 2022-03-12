@@ -15,7 +15,7 @@ const u = jlib.utils;
 
 const c = mysql.createConnection(mysqlConf);
 c.connect(); // mysql连接
-setInterval(() => c.ping(err => console.log('MySQL ping err:', err)), 60000);
+setInterval(() => c.ping(), 60000);
 
 const uploadChain = chains[0]; // 存证链
 
@@ -173,7 +173,24 @@ async function processUpload(uploadTxs, loopConter) {
 
         console.log("workInfo:", workInfo);
         localUtils.toMysqlObj(workInfo);
+        // token.baseInfo_workId=workInfo.workId
+        // token.baseInfo_timestamp=workInfo.completionTime
+        // token.baseInfo_address=workInfo.address
+        // token.baseInfo_workName=workInfo.baseInfo.workName
+        // token.baseInfo_workType=workInfo.baseInfo.workType
+        // token.baseInfo_copyrightCreateType = workInfo.baseInfo.copyrightCreateType
+        // token.fileInfo_fileType=workInfo.baseInfo.fileInfo.fileType
+        // token.fileInfo_fileSize=workInfo.baseInfo.fileInfo.fileSize
+        // token.authorInfo_idHash=workInfo.authorInfo.idHash
+        // token.authorInfo_signName=workInfo.authorInfo.signName
+        // token.extraInfo_createType=workInfo.extraInfo.createType
+        // token.extraInfo_createCity=workInfo.extraInfo.createCity
+        // token.extraInfo_createCountry=workInfo.extraInfo.createCountry
+        // token.extraInfo_createDate=workInfo.extraInfo.createDate
+        // token.extraInfo_createDesc=workInfo.extraInfo.createDesc
+        
 
+       // let sql = sqlText.table('Token').data(token).insert();
         let sql = sqlText.table('Token').data(workInfo).insert();
         workInfoPromises.push(mysqlUtils.sql(c, sql));
 
