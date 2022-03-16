@@ -24,7 +24,7 @@ const midSecr = userAccount.midAccount.secret;
  * @param {int}amount 需要激活的区块链账户数量
  * @returns {Object[]} 账户信息列表，包括：账户地址address、账户私钥secret
  */
-export async function handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req) {
+export async function handleActivateAccount(uploadRemote, tokenRemote, seqObj, req) {
 
     console.time('handleActivateAccount');
 
@@ -64,7 +64,7 @@ export async function handleActivateAccount(uploadRemote, tokenRemote, contractR
         // 转账激活账号
         activatePromises.push(tx.buildPaymentTx(uploadRemote, midAddr, midSecr, seqObj.mid.upload++, a, 100, 'Activate account', true));
         activatePromises.push(tx.buildPaymentTx(tokenRemote, midAddr, midSecr, seqObj.mid.token++, a, 100, 'Activate account', true));
-        activatePromises.push(tx.buildPaymentTx(contractRemote, midAddr, midSecr, seqObj.mid.contract++, a, 100, 'Activate account', true));
+        // activatePromises.push(tx.buildPaymentTx(contractRemote, midAddr, midSecr, seqObj.mid.contract++, a, 100, 'Activate account', true));
     }
     await Promise.all(activatePromises);
 

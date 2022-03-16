@@ -16,7 +16,7 @@ import {userAccount, chains} from '../../utils/config/jingtum.js';
 
 const uploadChain = chains[0]; // 存证链
 const tokenChain = chains[1]; // 交易链
-const contractChain = chains[1]; // 权益链
+// const contractChain = chains[1]; // 权益链
 
 const authorizeAddr = userAccount.buptAuthorizeAccount.address; // 智能授权系统（中间层部分）
 const matchSystemAddr = userAccount.matchSystemAccount.address; // 智能交易系统
@@ -26,7 +26,7 @@ const monitorAddr = userAccount.buptMonitorAccount.address; // 中间层-监测
 const Remote = jlib.Remote;
 const uploadRemote = new Remote({server: uploadChain.server[2], local_sign: false});
 const tokenRemote = new Remote({server: tokenChain.server[2], local_sign: false});
-const contractRemote = new Remote({server: contractChain.server[2], local_sign: false});
+// const contractRemote = new Remote({server: contractChain.server[2], local_sign: false});
 
 // 连接到存证链
 uploadRemote.connect(async function(err, res) {
@@ -49,14 +49,14 @@ uploadRemote.connect(async function(err, res) {
         }
 
         // 连接到权益链
-        contractRemote.connect(async function(err, res) {
+        // contractRemote.connect(async function(err, res) {
 
-            if(err) {
-                return console.log('connect err: ', err);
-            }
-            else if(res) {
-                console.log('connect: ', res);
-            }
+        //     if(err) {
+        //         return console.log('connect err: ', err);
+        //     }
+        //     else if(res) {
+        //         console.log('connect: ', res);
+        //     }
 
             const app = express();
             const port = 9001;
@@ -78,13 +78,13 @@ uploadRemote.connect(async function(err, res) {
             };
             seqObj.authorize.upload = (await requestInfo.requestAccountInfo(authorizeAddr, uploadRemote, false)).account_data.Sequence;
             seqObj.authorize.token = (await requestInfo.requestAccountInfo(authorizeAddr, tokenRemote, false)).account_data.Sequence;
-            seqObj.authorize.contract = (await requestInfo.requestAccountInfo(authorizeAddr, contractRemote, false)).account_data.Sequence;
+            // seqObj.authorize.contract = (await requestInfo.requestAccountInfo(authorizeAddr, contractRemote, false)).account_data.Sequence;
             // seqObj.matchSystem.upload = (await requestInfo.requestAccountInfo(matchSystemAddr, uploadRemote, false)).account_data.Sequence;
             // seqObj.matchSystem.token = (await requestInfo.requestAccountInfo(matchSystemAddr, tokenRemote, false)).account_data.Sequence;
             // seqObj.matchSystem.contract = (await requestInfo.requestAccountInfo(matchSystemAddr, contractRemote, false)).account_data.Sequence;
             seqObj.mid.upload = (await requestInfo.requestAccountInfo(midAddr, uploadRemote, false)).account_data.Sequence;
             seqObj.mid.token = (await requestInfo.requestAccountInfo(midAddr, tokenRemote, false)).account_data.Sequence;
-            seqObj.mid.contract = (await requestInfo.requestAccountInfo(midAddr, contractRemote, false)).account_data.Sequence;
+            // seqObj.mid.contract = (await requestInfo.requestAccountInfo(midAddr, contractRemote, false)).account_data.Sequence;
             // seqObj.monitor.upload = (await requestInfo.requestAccountInfo(monitorAddr, uploadRemote, false)).account_data.Sequence;
             // seqObj.monitor.token = (await requestInfo.requestAccountInfo(monitorAddr, tokenRemote, false)).account_data.Sequence;
             // seqObj.monitor.contract = (await requestInfo.requestAccountInfo(monitorAddr, contractRemote, false)).account_data.Sequence;
@@ -112,7 +112,7 @@ uploadRemote.connect(async function(err, res) {
 
             // 激活账户
             infoRouter.post('/activateAccount', async function(req, res) {
-                let resInfo = await infoMid.handleActivateAccount(uploadRemote, tokenRemote, contractRemote, seqObj, req);
+                let resInfo = await infoMid.handleActivateAccount(uploadRemote, tokenRemote, seqObj, req);
                 res.send(resInfo);
             });
 
@@ -373,7 +373,7 @@ uploadRemote.connect(async function(err, res) {
 
             app.listen(port, () => console.log(`MainMid listening on port ${port}!`));
 
-        });
+        // });
 
     });
 
