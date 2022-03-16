@@ -14,7 +14,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {Array}roles 控制token权限列表
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
- export function buildIssueInfoModifyTxLayer(remote, secret, account,  publisher, token, flag, roles, showRes = false) {
+ export function buildIssueInfoModifyTxLayer(remote, secret, account,  publisher, token, flag, roles, IsShowRes = false) {
     let tx = remote.buildIssueInfoModifyTx({
         account : account,
         publisher : publisher,
@@ -25,7 +25,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
 
     tx.setSecret(secret);
    
-    return _returnPromise(tx,'buildIssueInfoModifyTxLayer', showRes);
+    return _returnPromise(tx,'buildIssueInfoModifyTxLayer', IsShowRes);
 
 }
 
@@ -37,10 +37,10 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {String}token 通证名称
  * @param {Number}referenceFlag 通证标识
  * @param {Object}tokenObject 通证结构体
- * @param {boolean}showRes 是否显示结果
+ * @param {boolean}IsShowRes 是否显示结果
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
- export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, showRes = false) {
+ export function buildPublishTokenTxLayer(remote, secret, publisher, receiver, token, referenceFlag, tokenObject, IsShowRes = false) {
     let tx = remote.buildPublishTokenTxLayer({
         publisher: publisher,
         receiver: receiver,
@@ -51,7 +51,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
 
     tx.setSecret(secret);
    
-    return _returnPromise(tx,'buildPublishTokenTxLayer', showRes);
+    return _returnPromise(tx,'buildPublishTokenTxLayer', IsShowRes);
 
 }
 
@@ -63,10 +63,10 @@ const issuerSecr = tokenChain.account.issuer.secret;
  * @param {String}src 通证修改者的地址
  * @param {String}id 待修改通证的标识
  * @param {Object}authenticationInfo 添加的通证信息
- * @param {boolean}showRes 是否显示结果
+ * @param {boolean}IsShowRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
-export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id , authenticationInfo , showRes = true) {
+export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id , authenticationInfo , IsShowRes = true) {
 
     // console.log(authenticationInfo);
     
@@ -83,7 +83,7 @@ export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id 
     });
 
     tx.setSecret(secret);
-    return _returnPromise(tx,'buildModifyAuthenticationInfoTxLayer', showRes);
+    return _returnPromise(tx,'buildModifyAuthenticationInfoTxLayer', IsShowRes);
 }
 
 
@@ -91,31 +91,33 @@ export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id 
  * @description 查看单个版权通证详情（V2）。
  * @param {Object}remote 底层链连接对象
  * @param {String}id 待查询通证的标识
- * @param {boolean}showRes 是否显示结果
+ * @param {boolean}IsShowRes 是否显示结果
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
-export function requestCopyrightTokenInfoLayer(remote, id, showRes = true) {
+export function requestCopyrightTokenInfoLayer(remote, id, IsShowRes = true) {
 
     let tx = remote.requestTokenInfo({
         // tokenId: 'AA4B02EEB5DA7C0CA6A95921248949B88F34D1E6D23580B974CE309A048380D3'
         tokenId: id,
     });
 
-    return _returnPromise(tx ,'requestCopyrightTokenInfoLayer' , showRes);
+    return _returnPromise(tx ,'requestCopyrightTokenInfoLayer' , IsShowRes);
 }
 
-function _returnPromise(tx, funName, showRes){
+function _returnPromise(tx, funName, IsShowRes){
     return new Promise((resolve, reject) => {
         tx.submit(function(err, result) {
             if(err) {
+                console.log('交易错误:');
                 console.log(funName, 'tx:', tx);
                 console.log('err:',err);
                 reject(err);
             }
             else if(result){
-                if(showRes) {
+                console.log('交易正确:');
+                if(IsShowRes) {
                     console.log('tx:', tx);
-                    console.log('',funName,':', result);
+                    console.log('',funName,':', result.tx_json);
                 }
                 else {
                     console.log('',funName,':',result.engine_result + "_" + result.tx_json.Sequence);

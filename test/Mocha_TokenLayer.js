@@ -1,17 +1,18 @@
-
-
+/**
+ * @file: Mocha_TokenLayer.js
+ * @Description: 测试TokenLayer功能（通证链）
+ * TODO 还无法投产
+ * TODO 还无法投产
+ * TODO 还无法投产
+ * TODO 还无法投产
+ * TODO 还无法投产
+ * @author Bernard
+ * @date 2022/2/21
+*/
 import assert from 'assert';
 import jlib from 'jingtum-lib';
-import * as tokenLayer from './utils/jingtum/tokenLayer.js';
-import {chains, userAccount} from './utils/config/jingtum.js';
-
-describe('Array', function() {
-  describe('#indexOf()', function() {
-    it('should return -1 when the value is not present', function() {
-      assert.equal([1, 2, 3].indexOf(4), -1);
-    });
-  });
-});
+import * as tokenLayer from '../utils/jingtum/tokenLayer.js';
+import {chains, userAccount} from '../utils/config/jingtum.js';
 
 const Remote = jlib.Remote;
 
@@ -20,8 +21,8 @@ const modeSet = {
     buildPublishTokenTxLayer:2,
 };
 const mode = modeSet.buildPublishTokenTxLayer;
-describe('Array', function() {
-  describe('#indexOf()', function() {
+describe('TokenLayer', function() {
+  describe('Function Test', function() {
     let chain = chains[1];
     
     let r = new Remote({server: chain.server[2], local_sign: true});// 连接通证链
@@ -41,7 +42,7 @@ describe('Array', function() {
         let Issuer = userAccount.baiduAuthorizeAccount;
         let a = {address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh', secret:'snoPBjXtMeMyMHUVTgbuqAfg1SUTb' };//动态发币账号
         let publisher = {address: 'jEzzqRrqggQ1ZsNVBLPKx2cETZfn6mRSez', secret:'spm23QkjWZVtQp6Q4yWAV16caBQxU' }//发行账号
-        await tokenLayer.buildIssueInfoModifyTxLayer(
+        let resInfo = tokenLayer.buildIssueInfoModifyTxLayer(
             r,
             a.secret,
             a.address,
@@ -50,6 +51,7 @@ describe('Array', function() {
             1,
             [{role: publisher.address, type: 2}]
         );  
+        console.log("resInfo:",resInfo);
       });//END#It
 
       /*----------发行通证（V2）----------*/
@@ -105,9 +107,17 @@ describe('Array', function() {
                 issueDate: '2021-12-31'
             }]
         };
-        console.log("tokenObject：",tokenObject)
+        console.log("tokenObject：",tokenObject);
 
-        await tokenLayer.buildPublishTokenTxLayer(r, publisherSecr, publisher, receiver, token, referenceFlag, tokenObject)
+        let resInfo = tokenLayer.buildPublishTokenTxLayer(r, 
+          publisherSecr, 
+          publisher, 
+          receiver, 
+          token, 
+          referenceFlag, 
+          tokenObject
+        );
+        console.log("resInfo:",resInfo);
       });//END#It
       
       /*----------修改确权信息----------*/
@@ -116,7 +126,7 @@ describe('Array', function() {
         let Issuer = userAccount.baiduAuthorizeAccount;
         let a = {address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh', secret:'snoPBjXtMeMyMHUVTgbuqAfg1SUTb' };//动态发币账号
         let publisher = {address: 'jEzzqRrqggQ1ZsNVBLPKx2cETZfn6mRSez', secret:'spm23QkjWZVtQp6Q4yWAV16caBQxU' }//发行账号
-        await tokenLayer.buildModifyAuthenticationInfoTxLayer(//remote , src , secret , id , authenticationInfo
+        let resInfo = tokenLayer.buildModifyAuthenticationInfoTxLayer(//remote , src , secret , id , authenticationInfo
             r,
             a.secret,
             a.address,
@@ -125,21 +135,26 @@ describe('Array', function() {
             1,
             [{role: publisher.address, type: 2}]
         );  
-
+        console.log("resInfo:",resInfo);
       });//END#It
 
       /*----------查看单个版权通证详情（V2）----------*/
       it('should return tokenInfo', function() {
-        let tokenInfo = await tokenLayer.requestCopyrightTokenInfoLayer(
+        console.log("查看单个版权通证详情:");
+
+        let resInfo = tokenLayer.requestCopyrightTokenInfoLayer(
             r,
             a.address,
         );
+        console.log("resInfo:",resInfo);
+
         assert.equal(tokenInfo.workId, undefined);//类型
       });//END#It
       
       r.disconnect();
     });//END#Remote
   });
+  describe('Exception Test', function() {});
 });
   
   
