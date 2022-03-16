@@ -47,8 +47,9 @@ uploadRemote.connect(async function(err, res) {
         while(true) {
             let recvAddr = userAccount.normalAccount[0].address;
             recvAddr = "jKD1vQRwHTLxZvMWvHRbfAsXecNHKQp8C8";
-
-
+            recvAddr = "jfSQTDDZoqVTMwEQwb5FffSyeZ2PDBdVDK";
+            recvAddr = "ja1Zt6ixoFuwLap2xx7sTD7sjEYqK3vwyz";
+            recvAddr = "jLTh5ddGwmvLxrqgPBWY4r1pbJCy9cNmJE";
             // ***作品存证    Mock***//
             // await PublishWork(uploadRemote, uploadSeq, recvAddr);
             // await localUtils.sleep(10000);
@@ -62,13 +63,18 @@ uploadRemote.connect(async function(err, res) {
             // await localUtils.sleep(1000);
 
             // ***版权通证发行 Mock***//
-            await PublishToken(tokenRemote, tokenSeq, recvAddr);
+            let tokenId = await PublishToken(tokenRemote, tokenSeq, recvAddr);
+            await localUtils.sleep(10000);
+
+            // ***版权通证确权 Mock***//
+            await ModifyAuthInfo(tokenRemote, tokenSeq, tokenId);
             await localUtils.sleep(10000);
         }
 
     });
 
 });
+
 /**
  * @description 作品存证。
  * @param {String}uploadRemote 存证链的连接对象
@@ -86,6 +92,7 @@ async function  PublishWork(uploadRemote, uploadSeq , recvAddr) {
     console.log("TXRes:", TXRes)
     await localUtils.sleep(1000);
 }
+
 /**
  * @description 版权通证发行。
  * @param {String}tokenRemote 存证链的连接对象
@@ -115,13 +122,10 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
     // console.log(JSON.parse(processedTx.memos[0].MemoData));
     // console.log("TXRes:", TXRes);
 
-    let root = {secret: 'snoPBjXtMeMyMHUVTgbuqAfg1SUTb',address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh'};
     let Issuer = userAccount.baiduAuthorizeAccount;
     let role1 = {secret: 'sntaa5cuniAWUSKgKTHZm4BVyZq1p',address: 'jwaygG953qSq4dc5mwoTWubWUFmpyvhAYN'};
-    let role2 = {secret: 'shepnxJaoR7xXjA8GfmS3A5e4UGUD',address: 'jLiDHBMyBQr2oSTQca887wsGjZ5PwfGqnJ' };
     let publisherSecr = Issuer.secret;
     let publisher = Issuer.address;
-    let receiver = role1.address;
     let token = tokenName.copyright;
     let referenceFlag = 1; //通证标识：1表示版权通证，2表示授权通证，3表示操作许可通证。
     let tokenObject = {
@@ -177,8 +181,36 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
       tokenObject
     );
     console.log("resInfo:",resInfo);
+
+    return tokenObject.tokenId;
 }
 
+/**
+ * @description 版权通证确权。
+ * @param {String}tokenRemote 存证链的连接对象
+ * @param {String}tokenSeq 存证链的交易序列号
+ * @param {String}tokenId 待修改通证的标识
+ */
+async function  ModifyAuthInfo(tokenRemote, tokenSeq, tokenId) {
+    let a = {address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh', secret:'snoPBjXtMeMyMHUVTgbuqAfg1SUTb' };//动态发币账号
+    let publisher = {address: 'jEzzqRrqggQ1ZsNVBLPKx2cETZfn6mRSez', secret:'spm23QkjWZVtQp6Q4yWAV16caBQxU' }//发行账号
+    let token = tokenName.copyright;
+    let authenticationInfo = {
+		authenticationInstitudeName: 'j3BS6rtKPmrD5WhMqWZuhmcwaH9f3Hdnh4', 
+		authenticationId: 'rightId_003', 
+		authenticatedDate:'2021-12-31'
+	};
+    let resInfo = tokenLayer.buildModifyAuthenticationInfoTxLayer(//remote , src , secret , id , authenticationInfo
+        tokenRemote,
+        a.secret,
+        a.address,
+        tokenId,
+        authenticationInfo
+    );  
+
+
+    console.log("resInfo:",resInfo);
+}
 
 async function generateWorkInfo() {
 
@@ -306,7 +338,10 @@ async function generatecopyrightTokenInfo() {
         copyrightType: 1,
         copyrightsGetType: 2,
         workId: '0xA5DE6EE35AB5C4B5E87BE58100058E6030C10ABBE2DAC300FDFBEF315B97546F',
-        authenticationInfos: [],
+        authenticationInfos: [{
+                authenticationInstitudeName: role1.address, 
+                authenticationId: 'rightId001', 
+                authenticatedDate:'2021-12-31 07:10:00' }],
         copyrightUnits: [
             {address: role1.address, proportion: '0.2', copyrightExplain:'20%' }
         ],

@@ -116,7 +116,7 @@ function _returnPromise(tx, funName, IsShowRes){
             else if(result){
                 console.log('交易正确:');
                 if(IsShowRes) {
-                    console.log('tx:', tx);
+                    console.log('tx:', tx.tx_json);
                     console.log('',funName,':', result.tx_json);
                 }
                 else {

@@ -119,32 +119,37 @@ r.connect(async function(err, result) {
             let dst = tx.Destination;
             let processedTx = u.processTx(tx, src);
             processedTx.account = src;
+            console.log("processedTx:",processedTx);
             let txTokenName;
             switch(txType) {
-                case 'TransferToken':
+                case 'PublishCopyrightToken':
                     txTokenName = processedTx.token;
                     switch(txTokenName) {
                         case tokenName.copyright:
                             if((src == userAccount.baiduAuthorizeAccount.address && dst != userAccount.baiduAuthorizeAccount.address) ||
                             (src == userAccount.fakeBaiduAuthorizeAccount.address && dst != userAccount.fakeBaiduAuthorizeAccount.address)) {
                                 issueRightTokenTxs.push(processedTx);
+                                console.log("PublishCopyrightToken Pushed");
                             }
                             break;
                         case tokenName.approve:
                             if(src == userAccount.buptAuthorizeAccount.address && dst != userAccount.buptAuthorizeAccount.address) {
                                 issueApproveTokenTxs.push(processedTx);
+                                console.log("PublishCopyrightToken Pushed");
                             }
                             break;
                         default:
                             break;
                     }
                     break;
-                case 'TokenInfoChange':
+                case 'ModifyAuthenticationInfo':
                     if(tokenInfosAddrs.includes(src)) {
                         tokenInfoChangeTxs.push(processedTx);
+                        console.log("ModifyAuthenticationInfo Pushed");
                     }
                     else if(flagAddrs.includes(src)) {
                         tokenFlagChangeTxs.push(processedTx);
+                        console.log("ModifyAuthenticationInfo Pushed");
                     }
                     break;
                 default:
@@ -175,6 +180,7 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     let copyrightInfoPromises = [];
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
+        console.log('issueRightTokenTx:', issueRightTokenTx);
 
         let tokenInfos = issueRightTokenTx.tokenInfos;
         let copyrightInfo = localUtils.tokenInfos2obj(tokenInfos);
@@ -279,6 +285,12 @@ async function processIssueApproveToken(tokenRemote, issueApproveTokenTxs, loopC
 // }
 
 async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
+
+    // authenticationInfo: {
+	// 	authenticationInstitudeName: 'j3BS6rtKPmrD5WhMqWZuhmcwaH9f3Hdnh4', 
+	// 	authenticationId: 'rightId_003', 
+	// 	authenticatedDate:'2021-12-31'
+	// }
 
     if(debugMode == true && loopConter != 0) {
         console.log('tokenInfoChangeTxs:', tokenInfoChangeTxs);
