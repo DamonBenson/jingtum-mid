@@ -65,6 +65,10 @@ export const userAccount = {
             address: 'jN1rtJiDV741WvbhPs2yTgpGXCBatiB569',
             secret: 'sneqmMbpYGfK9qxSeNUjPKZeRibZR',
         },
+        {
+            address: 'jN1rtJiDV741WvbhPs2yTgpGXCBatiB569',
+            secret: 'sneqmMbpYGfK9qxSeNUjPKZeRibZR',
+        },//TODO 通证层
         // {
         //     address: '',
         //     secret: '',

@@ -91,14 +91,16 @@ export function buildModifyAuthenticationInfoTxLayer(remote , secret , src , id 
  * @description 查看单个版权通证详情（V2）。
  * @param {Object}remote 底层链连接对象
  * @param {String}id 待查询通证的标识
+ * @param {String}version 待查询通证的标识
  * @param {boolean}IsShowRes 是否显示结果
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
-export function requestCopyrightTokenInfoLayer(remote, id, IsShowRes = true) {
+export function requestCopyrightTokenInfoLayer(remote, id, version = "v2", IsShowRes = true) {
 
     let tx = remote.requestTokenInfo({
         // tokenId: 'AA4B02EEB5DA7C0CA6A95921248949B88F34D1E6D23580B974CE309A048380D3'
         tokenId: id,
+        version: version
     });
 
     return _returnPromise(tx ,'requestCopyrightTokenInfoLayer' , IsShowRes);
@@ -120,7 +122,7 @@ function _returnPromise(tx, funName, IsShowRes){
                     console.log('',funName,':', result.tx_json);
                 }
                 else {
-                    console.log('',funName,':',result.engine_result + "_" + result.tx_json.Sequence);
+                    console.log('',funName,':',result.engine_result);
                 }
                 resolve(result);
             }

@@ -5,3 +5,6 @@
 /*.zip
 refacotring_UML/
 /authFiles
+/TODO
+/*.bat
+.gitignore

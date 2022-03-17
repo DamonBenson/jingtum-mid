@@ -50,20 +50,23 @@ uploadRemote.connect(async function(err, res) {
             recvAddr = "jfSQTDDZoqVTMwEQwb5FffSyeZ2PDBdVDK";
             recvAddr = "ja1Zt6ixoFuwLap2xx7sTD7sjEYqK3vwyz";
             recvAddr = "jLTh5ddGwmvLxrqgPBWY4r1pbJCy9cNmJE";
+            recvAddr = userAccount.authenticateAccount.address;// 测试地址是否合法
+
             // ***作品存证    Mock***//
             // await PublishWork(uploadRemote, uploadSeq, recvAddr);
             // await localUtils.sleep(10000);
             // let workInfo = JSON.stringify(await generateWorkInfo());
             // let TXRes = await tx.buildPaymentTx(uploadRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, uploadSeq++, recvAddr, 0.000001, workInfo, false);
+            // console.log("TXRes:", TXRes)
             // let workId = TXRes.tx_json.hash;
             // let txInfo = await requestInfo.requestTx(uploadRemote, workId, false);
             // let processedTx = u.processTx(txInfo, userAccount.fakeBaiduAuthorizeAccount.address);
             // console.log(JSON.parse(processedTx.memos[0].MemoData));
-            // console.log("TXRes:", TXRes)
             // await localUtils.sleep(1000);
 
             // ***版权通证发行 Mock***//
             let tokenId = await PublishToken(tokenRemote, tokenSeq, recvAddr);
+            tokenSeq++;
             await localUtils.sleep(10000);
 
             // ***版权通证确权 Mock***//
@@ -181,7 +184,8 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
       tokenObject
     );
     console.log("resInfo:",resInfo);
-
+    let txHash = resInfo.tx_json.hash;
+    console.log("txHash:", txHash)
     return tokenObject.tokenId;
 }
 
@@ -192,23 +196,21 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
  * @param {String}tokenId 待修改通证的标识
  */
 async function  ModifyAuthInfo(tokenRemote, tokenSeq, tokenId) {
-    let a = {address: 'jHb9CJAWyB4jr91VRWn96DkukG4bwdtyTh', secret:'snoPBjXtMeMyMHUVTgbuqAfg1SUTb' };//动态发币账号
-    let publisher = {address: 'jEzzqRrqggQ1ZsNVBLPKx2cETZfn6mRSez', secret:'spm23QkjWZVtQp6Q4yWAV16caBQxU' }//发行账号
-    let token = tokenName.copyright;
+    let authenticateAccount = userAccount.authenticateAccount;//版权通证确权的确权账号
     let authenticationInfo = {
 		authenticationInstitudeName: 'j3BS6rtKPmrD5WhMqWZuhmcwaH9f3Hdnh4', 
 		authenticationId: 'rightId_003', 
 		authenticatedDate:'2021-12-31'
 	};
-    let resInfo = tokenLayer.buildModifyAuthenticationInfoTxLayer(//remote , src , secret , id , authenticationInfo
+    let resInfo = await tokenLayer.buildModifyAuthenticationInfoTxLayer(//remote , secret , src , id , authenticationInfo
         tokenRemote,
-        a.secret,
-        a.address,
+        authenticateAccount.secret,
+        authenticateAccount.address,
         tokenId,
         authenticationInfo
     );  
-
-
+    // let txHash = resInfo.tx_json.hash;
+    // console.log("txHash:", txHash)
     console.log("resInfo:",resInfo);
 }
 

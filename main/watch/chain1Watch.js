@@ -143,25 +143,28 @@ r.connect(async function(err, result) {
                     }
                     break;
                 case 'ModifyAuthenticationInfo':
-                    if(tokenInfosAddrs.includes(src)) {
-                        tokenInfoChangeTxs.push(processedTx);
-                        console.log("ModifyAuthenticationInfo Pushed");
-                    }
-                    else if(flagAddrs.includes(src)) {
-                        tokenFlagChangeTxs.push(processedTx);
-                        console.log("ModifyAuthenticationInfo Pushed");
-                    }
+                    tokenInfoChangeTxs.push(processedTx);
+                    console.log("ModifyAuthenticationInfo Pushed");
+                    // TODO 检验通证层合法发布
+                    // if(tokenInfosAddrs.includes(src)) {
+                    //     tokenInfoChangeTxs.push(processedTx);
+                    //     console.log("ModifyAuthenticationInfo Pushed");
+                    // }
+                    // else if(flagAddrs.includes(src)) {
+                    //     tokenFlagChangeTxs.push(processedTx);
+                    //     console.log("ModifyAuthenticationInfo Pushed");
+                    // }
                     break;
                 default:
                     break;
             }
         }
 
-        await processIssueRightToken(issueRightTokenTxs, issueRightTokenTxs.length);
+        await processIssueRightToken(issueRightTokenTxs, issueRightTokenTxs.length);// 版权通证发行
         await processIssueApproveToken(r, issueApproveTokenTxs, issueApproveTokenTxs.length);
         // await processTransferRightToken(transferRightTokenTxs, transferRightTokenTxs.length);
         // await processTransferApproveToken(transferApproveTokenTxs, transferApproveTokenTxs.length);
-        await processTokenInfoChange(tokenInfoChangeTxs, tokenInfoChangeTxs.length);
+        await processTokenInfoChange(tokenInfoChangeTxs, tokenInfoChangeTxs.length);// 版权通证确权
 
         // 结束计时
         console.timeEnd('chain1Watch');
@@ -182,20 +185,59 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
         console.log('issueRightTokenTx:', issueRightTokenTx);
 
-        let tokenInfos = issueRightTokenTx.tokenInfos;
-        let copyrightInfo = localUtils.tokenInfos2obj(tokenInfos);
+        let tokenInfos = issueRightTokenTx;
+        console.log('tokenInfosTokenTx...............');
+        console.log('tokenInfosTokenTx:', tokenInfos);
+        // let tokenInfosObj = localUtils.tokenInfos2obj(tokenInfos);
+        let tokenInfosObj = tokenInfos;
+        let copyrightInfo = Object();
+        // *** CopyrightToken *** //
+        copyrightInfo.TokenId                               = tokenInfosObj.tokenId;
+        copyrightInfo.adminAddress                          = tokenInfosObj.receiver
+        copyrightInfo.timestamp                             = tokenInfosObj.Timestamp;
+        copyrightInfo.authenticationInfo                    = JSON.stringify({"authenticationInstitudeName":"","authenticationId":"","authenticatedDate":""});                   
+        copyrightInfo.copyrightType                         = tokenInfosObj.copyrightType;
+        copyrightInfo.copyrightGetType                      = tokenInfosObj.copyrightTypeGetType;
+        copyrightInfo.copyrightUnit                         = JSON.stringify(tokenInfosObj.copyrightUnits);
+        let copyrightConstraint = tokenInfosObj.copyrightConstraint[0];
+        copyrightInfo.copyrightConstraint_copyrightLimit=copyrightConstraint.copyrightLimit;
+        let apprConstraint = tokenInfosObj.apprConstraint[0];
+        copyrightInfo.apprConstraint_channel=tokenInfosObj.apprConstraint[0].area;
+        copyrightInfo.apprConstraint_area=apprConstraint.channel;
+        copyrightInfo.apprConstraint_time=apprConstraint.time;
+        copyrightInfo.apprConstraint_transferType=apprConstraint.reapproveType;
+        copyrightInfo.apprConstraint_reapproveType=apprConstraint.transferType;
+        let licenseConstraint = tokenInfosObj.licenseConstraint[0];
+        copyrightInfo.licenseConstraint_type=licenseConstraint.type;
+        copyrightInfo.licenseConstraint_area=licenseConstraint.area;
+        copyrightInfo.licenseConstraint_time=licenseConstraint.time;
+        copyrightInfo.constraintExplain=tokenInfosObj.constraintExplain;
+        copyrightInfo.constraintExpand=tokenInfosObj.constraintExpand;
+        copyrightInfo.workId=tokenInfosObj.workId;
+        let copyrightStatus = tokenInfosObj.copyrightStatus[0];
+        copyrightInfo.publishStatus = copyrightStatus.publishStatus;
+        copyrightInfo.publishCity = copyrightStatus.publishCity;
+        copyrightInfo.publishCountry = copyrightStatus.publishCountry;
+        copyrightInfo.publishDate = copyrightStatus.publishDate;
+        copyrightInfo.comeoutStatus = copyrightStatus.comeoutStatus;
+        copyrightInfo.comeoutCity = copyrightStatus.domeoutCity;//TODO comeoutCity
+        copyrightInfo.comeoutCountry = copyrightStatus.domeoutCountry;//TODO comeoutCountry
+        copyrightInfo.comeoutDate = copyrightStatus.domeoutDate;//TODO  comeoutDate
+        copyrightInfo.issueStatus = copyrightStatus.issueStatus;
+        copyrightInfo.issueCity = copyrightStatus.issueCity;
+        copyrightInfo.issueCountry = copyrightStatus.issueCountry;
+        copyrightInfo.issueDate = copyrightStatus.issueDate;
+        copyrightInfo.flag = tokenInfosObj.flag;
+        //"flag"	"TokenId"	"adminAddress"	"timestamp"	"authenticationInfo"	"copyrightType"	"copyrightGetType"	"copyrightUnit"	"copyrightConstraint_copyrightLimit"	"apprConstraint_channel"	"apprConstraint_area"	"apprConstraint_time"	"apprConstraint_transferType"	"apprConstraint_reapproveType"	"licenseConstraint_type"	"licenseConstraint_area"	"licenseConstraint_time"	"constraintExplain"	"constraintExpand"	"workId"	"publishStatus"	"publishCity"	"publishCountry"	"publishDate"	"comeoutStatus"	"comeoutCity"	"comeoutCountry"	"comeoutDate"	"issueStatus"	"issueCity"	"issueCountry"	"issueDate"
+        
 
-        copyrightInfo.copyrightId = issueRightTokenTx.tokenId;
-        copyrightInfo.timestamp = issueRightTokenTx.date;
-        copyrightInfo.address = issueRightTokenTx.receiver;
-
-        let copyrightHolderHash = copyrightInfo.copyrightHolderHash;
-        let copyrightHolder = await ipfsUtils.get(copyrightHolderHash);
-        Object.assign(copyrightInfo, copyrightHolder);
-        delete copyrightInfo.copyrightHolderHash;
-
-        localUtils.toMysqlObj(copyrightInfo);
+        // let copyrightHolderHash = copyrightInfo.copyrightHolderHash;
+        // let copyrightHolder = await ipfsUtils.get(copyrightHolderHash);
+        // Object.assign(copyrightInfo, copyrightHolder);
+        // delete copyrightInfo.copyrightHolderHash;
         console.log('copyrightInfo:', copyrightInfo);
+        // localUtils.toMysqlObj(copyrightInfo);
+        // console.log('toMysqlObj:', copyrightInfo);
 
         let sql = sqlText.table('CopyrightToken').data(copyrightInfo).insert();
         copyrightInfoPromises.push(mysqlUtils.sql(c, sql));
@@ -309,8 +351,8 @@ async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
 
         localUtils.toMysqlObj(authInfo);
         console.log('authenticationInfo:', authInfo);
-
-        let sql = sqlText.table('AuthenticationInfo').data(authInfo).insert();
+        JSON.stringify(authInfo);
+        let sql = sqlText.table('CopyrightToken').data(authInfo).update();
         authInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
