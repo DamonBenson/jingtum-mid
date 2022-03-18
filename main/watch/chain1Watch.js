@@ -1,10 +1,12 @@
 import jlib from 'jingtum-lib';
+import sha256 from 'crypto-js/sha256.js';
 import mysql from 'mysql';
 import sqlText from 'node-transform-mysql';
 
 import * as requestInfo from '../../utils/jingtum/requestInfo.js';
 import * as erc721 from '../../utils/jingtum/erc721.js';
 import * as ipfsUtils from '../../utils/ipfsUtils.js';
+import * as tokenLayer from '../../utils/jingtum/tokenLayer.js';
 import * as mysqlUtils from '../../utils/mysqlUtils.js';
 import * as localUtils from '../../utils/localUtils.js';
 
@@ -175,7 +177,8 @@ r.connect(async function(err, result) {
 });
 
 async function processIssueRightToken(issueRightTokenTxs, loopConter) {
-    
+    console.time('processIssueRightToken');
+
     if(debugMode == true && loopConter != 0) {
         console.log('issueRightTokenTxs:', issueRightTokenTxs);
     }
@@ -183,69 +186,78 @@ async function processIssueRightToken(issueRightTokenTxs, loopConter) {
     let copyrightInfoPromises = [];
 
     issueRightTokenTxs.forEach(async(issueRightTokenTx) => {
-        console.log('issueRightTokenTx:', issueRightTokenTx);
+        // console.log('issueRightTokenTx:', issueRightTokenTx);//接受的交易
 
         let tokenInfos = issueRightTokenTx;
-        console.log('tokenInfosTokenTx...............');
-        console.log('tokenInfosTokenTx:', tokenInfos);
+        // console.log('tokenInfosTokenTx...............');
+        // console.log('tokenInfosTokenTx:', tokenInfos);//接受的tokenObj
         // let tokenInfosObj = localUtils.tokenInfos2obj(tokenInfos);
         let tokenInfosObj = tokenInfos;
         let copyrightInfo = Object();
-        // *** CopyrightToken *** //
-        copyrightInfo.TokenId                               = tokenInfosObj.tokenId;
-        copyrightInfo.adminAddress                          = tokenInfosObj.receiver
-        copyrightInfo.timestamp                             = tokenInfosObj.Timestamp;
-        copyrightInfo.authenticationInfo                    = JSON.stringify({"authenticationInstitudeName":"","authenticationId":"","authenticatedDate":""});                   
-        copyrightInfo.copyrightType                         = tokenInfosObj.copyrightType;
-        copyrightInfo.copyrightGetType                      = tokenInfosObj.copyrightTypeGetType;
-        copyrightInfo.copyrightUnit                         = JSON.stringify(tokenInfosObj.copyrightUnits);
-        let copyrightConstraint = tokenInfosObj.copyrightConstraint[0];
-        copyrightInfo.copyrightConstraint_copyrightLimit=copyrightConstraint.copyrightLimit;
-        let apprConstraint = tokenInfosObj.apprConstraint[0];
-        copyrightInfo.apprConstraint_channel=tokenInfosObj.apprConstraint[0].area;
-        copyrightInfo.apprConstraint_area=apprConstraint.channel;
-        copyrightInfo.apprConstraint_time=apprConstraint.time;
-        copyrightInfo.apprConstraint_transferType=apprConstraint.reapproveType;
-        copyrightInfo.apprConstraint_reapproveType=apprConstraint.transferType;
-        let licenseConstraint = tokenInfosObj.licenseConstraint[0];
-        copyrightInfo.licenseConstraint_type=licenseConstraint.type;
-        copyrightInfo.licenseConstraint_area=licenseConstraint.area;
-        copyrightInfo.licenseConstraint_time=licenseConstraint.time;
-        copyrightInfo.constraintExplain=tokenInfosObj.constraintExplain;
-        copyrightInfo.constraintExpand=tokenInfosObj.constraintExpand;
-        copyrightInfo.workId=tokenInfosObj.workId;
-        let copyrightStatus = tokenInfosObj.copyrightStatus[0];
-        copyrightInfo.publishStatus = copyrightStatus.publishStatus;
-        copyrightInfo.publishCity = copyrightStatus.publishCity;
-        copyrightInfo.publishCountry = copyrightStatus.publishCountry;
-        copyrightInfo.publishDate = copyrightStatus.publishDate;
-        copyrightInfo.comeoutStatus = copyrightStatus.comeoutStatus;
-        copyrightInfo.comeoutCity = copyrightStatus.domeoutCity;//TODO comeoutCity
-        copyrightInfo.comeoutCountry = copyrightStatus.domeoutCountry;//TODO comeoutCountry
-        copyrightInfo.comeoutDate = copyrightStatus.domeoutDate;//TODO  comeoutDate
-        copyrightInfo.issueStatus = copyrightStatus.issueStatus;
-        copyrightInfo.issueCity = copyrightStatus.issueCity;
-        copyrightInfo.issueCountry = copyrightStatus.issueCountry;
-        copyrightInfo.issueDate = copyrightStatus.issueDate;
-        copyrightInfo.flag = tokenInfosObj.flag;
-        //"flag"	"TokenId"	"adminAddress"	"timestamp"	"authenticationInfo"	"copyrightType"	"copyrightGetType"	"copyrightUnit"	"copyrightConstraint_copyrightLimit"	"apprConstraint_channel"	"apprConstraint_area"	"apprConstraint_time"	"apprConstraint_transferType"	"apprConstraint_reapproveType"	"licenseConstraint_type"	"licenseConstraint_area"	"licenseConstraint_time"	"constraintExplain"	"constraintExpand"	"workId"	"publishStatus"	"publishCity"	"publishCountry"	"publishDate"	"comeoutStatus"	"comeoutCity"	"comeoutCountry"	"comeoutDate"	"issueStatus"	"issueCity"	"issueCountry"	"issueDate"
-        
-
-        // let copyrightHolderHash = copyrightInfo.copyrightHolderHash;
-        // let copyrightHolder = await ipfsUtils.get(copyrightHolderHash);
-        // Object.assign(copyrightInfo, copyrightHolder);
-        // delete copyrightInfo.copyrightHolderHash;
-        console.log('copyrightInfo:', copyrightInfo);
-        // localUtils.toMysqlObj(copyrightInfo);
-        // console.log('toMysqlObj:', copyrightInfo);
-
+        copyrightInfo = praseCopyrightToken(tokenInfosObj);
+        // console.log('copyrightInfo:', copyrightInfo);//入库信息
         let sql = sqlText.table('CopyrightToken').data(copyrightInfo).insert();
         copyrightInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
 
+    console.timeEnd('processIssueRightToken');
+
     await Promise.all(copyrightInfoPromises);
 
+}
+
+function praseCopyrightToken(tokenInfosObj){
+    let copyrightInfo = Object();
+    // *** CopyrightToken *** //
+    copyrightInfo.TokenId                               = tokenInfosObj.tokenId;
+    if(tokenInfosObj.adminAddress){
+        copyrightInfo.adminAddress                      = tokenInfosObj.adminAddress;
+    }
+    else{
+        copyrightInfo.adminAddress                      = tokenInfosObj.receiver;
+    }
+    
+    copyrightInfo.timestamp                             = tokenInfosObj.Timestamp;
+    if(tokenInfosObj.authenticationInfos){
+        copyrightInfo.authenticationInfo                = JSON.stringify(tokenInfosObj.authenticationInfos);                   
+    }else{
+        copyrightInfo.authenticationInfo                = JSON.stringify({"authenticationInstitudeName":"","authenticationId":"","authenticatedDate":""});                   
+    }
+    copyrightInfo.copyrightType                         = tokenInfosObj.copyrightType;
+    copyrightInfo.copyrightGetType                      = tokenInfosObj.copyrightTypeGetType;
+    copyrightInfo.copyrightUnit                         = JSON.stringify(tokenInfosObj.copyrightUnits);
+    let copyrightConstraint = tokenInfosObj.copyrightConstraint[0];
+    copyrightInfo.copyrightConstraint_copyrightLimit=copyrightConstraint.copyrightLimit;
+    let apprConstraint = tokenInfosObj.apprConstraint[0];
+    copyrightInfo.apprConstraint_channel=tokenInfosObj.apprConstraint[0].area;
+    copyrightInfo.apprConstraint_area=apprConstraint.channel;
+    copyrightInfo.apprConstraint_time=apprConstraint.time;
+    copyrightInfo.apprConstraint_transferType=apprConstraint.reapproveType;
+    copyrightInfo.apprConstraint_reapproveType=apprConstraint.transferType;
+    let licenseConstraint = tokenInfosObj.licenseConstraint[0];
+    copyrightInfo.licenseConstraint_type=licenseConstraint.type;
+    copyrightInfo.licenseConstraint_area=licenseConstraint.area;
+    copyrightInfo.licenseConstraint_time=licenseConstraint.time;
+    copyrightInfo.constraintExplain=tokenInfosObj.constraintExplain;
+    copyrightInfo.constraintExpand=tokenInfosObj.constraintExpand;
+    copyrightInfo.workId=tokenInfosObj.workId;
+    let copyrightStatus = tokenInfosObj.copyrightStatus[0];
+    copyrightInfo.publishStatus = copyrightStatus.publishStatus;
+    copyrightInfo.publishCity = copyrightStatus.publishCity;
+    copyrightInfo.publishCountry = copyrightStatus.publishCountry;
+    copyrightInfo.publishDate = copyrightStatus.publishDate;
+    copyrightInfo.comeoutStatus = copyrightStatus.comeoutStatus;
+    copyrightInfo.comeoutCity = copyrightStatus.domeoutCity;//TODO comeoutCity
+    copyrightInfo.comeoutCountry = copyrightStatus.domeoutCountry;//TODO comeoutCountry
+    copyrightInfo.comeoutDate = copyrightStatus.domeoutDate;//TODO  comeoutDate
+    copyrightInfo.issueStatus = copyrightStatus.issueStatus;
+    copyrightInfo.issueCity = copyrightStatus.issueCity;
+    copyrightInfo.issueCountry = copyrightStatus.issueCountry;
+    copyrightInfo.issueDate = copyrightStatus.issueDate;
+    copyrightInfo.flag = tokenInfosObj.flag;
+
+    return copyrightInfo;
 }
 
 async function processIssueApproveToken(tokenRemote, issueApproveTokenTxs, loopConter) {
@@ -327,12 +339,7 @@ async function processIssueApproveToken(tokenRemote, issueApproveTokenTxs, loopC
 // }
 
 async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
-
-    // authenticationInfo: {
-	// 	authenticationInstitudeName: 'j3BS6rtKPmrD5WhMqWZuhmcwaH9f3Hdnh4', 
-	// 	authenticationId: 'rightId_003', 
-	// 	authenticatedDate:'2021-12-31'
-	// }
+    console.time("processTokenInfoChange");
 
     if(debugMode == true && loopConter != 0) {
         console.log('tokenInfoChangeTxs:', tokenInfoChangeTxs);
@@ -341,22 +348,27 @@ async function processTokenInfoChange(tokenInfoChangeTxs, loopConter) {
     let authInfoPromises = [];
 
     tokenInfoChangeTxs.forEach(async(tokenInfoChangeTx) => {
+        // 获取copyrightId
+        let copyrightId = tokenInfoChangeTx.tokenId;
+        console.log('authenticationInfos:', tokenInfoChangeTx.authenticationInfos);
 
-        let memos = tokenInfoChangeTx.memos;
-        let authInfo = localUtils.memos2obj(memos);
+        // 按照copyrightId请求CopyrightToken
+        let txInfo = await tokenLayer.requestCopyrightTokenInfoLayer(r, copyrightId);
+                           
+        let tokenInfos = txInfo.TokenInfo;
+        let tokenInfosObj = tokenInfos;
+        let copyrightInfo = Object();
+        copyrightInfo = praseCopyrightToken(tokenInfosObj);
+        // copyrightInfo.TokenId = sha256(localUtils.randomNumber(100, 2000000000).toString()).toString();
 
-        authInfo.contractAddress = tokenInfoChangeTx.account;
-        authInfo.copyrightId = tokenInfoChangeTx.tokenId;
-        authInfo.timestamp = tokenInfoChangeTx.date;
-
-        localUtils.toMysqlObj(authInfo);
-        console.log('authenticationInfo:', authInfo);
-        JSON.stringify(authInfo);
-        let sql = sqlText.table('CopyrightToken').data(authInfo).update();
+        console.log('copyrightInfo:', copyrightInfo);//入库信息
+        let sql = sqlText.table('CopyrightToken').data(copyrightInfo).update();
+        // let sql = sqlText.table('CopyrightToken').data(copyrightInfo).insert();
         authInfoPromises.push(mysqlUtils.sql(c, sql));
 
     });
-
+    console.timeEnd("processTokenInfoChange");
+    
     await Promise.all(authInfoPromises);
 
 }

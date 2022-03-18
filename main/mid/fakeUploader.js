@@ -50,27 +50,29 @@ uploadRemote.connect(async function(err, res) {
             recvAddr = "jfSQTDDZoqVTMwEQwb5FffSyeZ2PDBdVDK";
             recvAddr = "ja1Zt6ixoFuwLap2xx7sTD7sjEYqK3vwyz";
             recvAddr = "jLTh5ddGwmvLxrqgPBWY4r1pbJCy9cNmJE";
-            recvAddr = userAccount.authenticateAccount.address;// 测试地址是否合法
+            // recvAddr = userAccount.authenticateAccount.address;// 测试地址是否合法
 
             // ***作品存证    Mock***//
-            // await PublishWork(uploadRemote, uploadSeq, recvAddr);
-            // await localUtils.sleep(10000);
-            // let workInfo = JSON.stringify(await generateWorkInfo());
-            // let TXRes = await tx.buildPaymentTx(uploadRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, uploadSeq++, recvAddr, 0.000001, workInfo, false);
-            // console.log("TXRes:", TXRes)
-            // let workId = TXRes.tx_json.hash;
+            await PublishWork(uploadRemote, uploadSeq, recvAddr);
+            await localUtils.sleep(10000);
+            let workInfo = JSON.stringify(await generateWorkInfo());
+            let TXRes = await tx.buildPaymentTx(uploadRemote, fakeBaiduAuthorizeAddr, fakeBaiduAuthorizeSecr, uploadSeq++, recvAddr, 0.000001, workInfo, false);
+            console.log("TXRes:", TXRes)
+            let workId = TXRes.tx_json.hash;
             // let txInfo = await requestInfo.requestTx(uploadRemote, workId, false);
             // let processedTx = u.processTx(txInfo, userAccount.fakeBaiduAuthorizeAccount.address);
             // console.log(JSON.parse(processedTx.memos[0].MemoData));
-            // await localUtils.sleep(1000);
+            uploadSeq++;
+            await localUtils.sleep(1000);
 
             // ***版权通证发行 Mock***//
-            let tokenId = await PublishToken(tokenRemote, tokenSeq, recvAddr);
+            let tokenId = await PublishToken(tokenRemote, workId, tokenSeq, recvAddr);
             tokenSeq++;
             await localUtils.sleep(10000);
 
             // ***版权通证确权 Mock***//
             await ModifyAuthInfo(tokenRemote, tokenSeq, tokenId);
+            tokenSeq++;
             await localUtils.sleep(10000);
         }
 
@@ -102,7 +104,7 @@ async function  PublishWork(uploadRemote, uploadSeq , recvAddr) {
  * @param {String}tokenSeq 存证链的交易序列号
  * @param {String}recvAddr 通证接受者
  */
-async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
+async function  PublishToken(tokenRemote, workId, tokenSeq, recvAddr) {
 
     // let recvAddr = userAccount.normalAccount[0].address;
     // // ***版权通证发行 Mock***//
@@ -133,10 +135,10 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
     let referenceFlag = 1; //通证标识：1表示版权通证，2表示授权通证，3表示操作许可通证。
     let tokenObject = {
         flag: 0,
-        tokenId: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString(),
+        tokenId: sha256( localUtils.randomNumber(100, 2000000000).toString() + workId ).toString(),
         copyrightType: 1,
         copyrightGetType: 2,
-        workId: sha256(localUtils.randomNumber(100, 2000000000).toString()).toString(),
+        workId: workId,
         authenticationInfos: [],
         copyrightUnits: [
             {address: role1.address, proportion: '1', copyrightExplain:'20%' }
@@ -183,7 +185,7 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
       referenceFlag, 
       tokenObject
     );
-    console.log("resInfo:",resInfo);
+    // console.log("resInfo:",resInfo);
     let txHash = resInfo.tx_json.hash;
     console.log("txHash:", txHash)
     return tokenObject.tokenId;
@@ -194,9 +196,10 @@ async function  PublishToken(tokenRemote, tokenSeq, recvAddr) {
  * @param {String}tokenRemote 存证链的连接对象
  * @param {String}tokenSeq 存证链的交易序列号
  * @param {String}tokenId 待修改通证的标识
+ * @todo  invalid receiver address  authenticateAccount.address
  */
 async function  ModifyAuthInfo(tokenRemote, tokenSeq, tokenId) {
-    let authenticateAccount = userAccount.authenticateAccount;//版权通证确权的确权账号
+    let authenticateAccount = userAccount.authenticateAccount[0];//版权通证确权的确权账号
     let authenticationInfo = {
 		authenticationInstitudeName: 'j3BS6rtKPmrD5WhMqWZuhmcwaH9f3Hdnh4', 
 		authenticationId: 'rightId_003', 
@@ -208,7 +211,7 @@ async function  ModifyAuthInfo(tokenRemote, tokenSeq, tokenId) {
         authenticateAccount.address,
         tokenId,
         authenticationInfo
-    );  
+    );
     // let txHash = resInfo.tx_json.hash;
     // console.log("txHash:", txHash)
     console.log("resInfo:",resInfo);

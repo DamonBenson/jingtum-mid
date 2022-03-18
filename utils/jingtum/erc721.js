@@ -27,6 +27,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
         publisher: publisher,
         token: name,
         number: num,
+        version: 'v2',
         flag: flag,
         roles: localUtils.toRolesArr(flagAddrs, tokenInfosAddrs),
         referenceFlag: refFlag,

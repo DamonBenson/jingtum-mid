@@ -3,27 +3,27 @@ import * as localUtils from '../localUtils.js';
 import {chains} from '../config/jingtum.js';
 
 const tokenChain = chains[1];
-const issuerAddr = tokenChain.account.issuer.address;
-const issuerSecr = tokenChain.account.issuer.secret;
+const issuerAddr = tokenChain.account.issuer.address;//动态发币账号
+const issuerSecr = tokenChain.account.issuer.secret;//动态发币账号密钥
 /**
  * @description 修改发行信息（修改冻结标志或者roles列表）。
- * @param {String}account 权限账号
+ * @param {Object}remote 底层链连接对象
  * @param {String}publisher 发行账号
  * @param {String}token 发行名称
  * @param {Number}referenceFlag 流通标志位
  * @param {Array}roles 控制token权限列表
  * @returns {Object} 查询结果，具体格式见jingtum-lib文档
  */
- export function buildIssueInfoModifyTxLayer(remote, secret, account,  publisher, token, flag, roles, IsShowRes = false) {
+ export function buildIssueInfoModifyTxLayer(remote, publisher, token, flag, roles, IsShowRes = false) {
     let tx = remote.buildIssueInfoModifyTx({
-        account : account,
+        account : issuerAddr,
         publisher : publisher,
         token : token,
         flag : flag, 
         roles : roles
     });
 
-    tx.setSecret(secret);
+    tx.setSecret(issuerSecr);
    
     return _returnPromise(tx,'buildIssueInfoModifyTxLayer', IsShowRes);
 
@@ -31,6 +31,7 @@ const issuerSecr = tokenChain.account.issuer.secret;
 
 /**
  * @description 发行通证（V2）。
+ * @param {Object}remote 底层链连接对象
  * @param {String}secret 发行主体的密钥
  * @param {String}publisher 发行主体
  * @param {String}receiver 通证接受者
@@ -59,10 +60,10 @@ const issuerSecr = tokenChain.account.issuer.secret;
 /**
  * @description 修改确权信息。
  * @param {Object}remote 底层链连接对象
- * @param {String}secret 通证修改者的私钥
- * @param {String}src 通证修改者的地址
- * @param {String}id 待修改通证的标识
- * @param {Object}authenticationInfo 添加的通证信息
+ * @param {String}secret 修改通证权限的账号的私钥
+ * @param {String}src 有修改通证权限的账号， 确权白名单
+ * @param {String}id token的唯一标识，hash256格式
+ * @param {Object}authenticationInfo 确权信息(一次只能上传一个)
  * @param {boolean}IsShowRes 是否显示结果
  * @returns {Object} 交易处理结果，具体格式见jingtum-lib文档
  */
@@ -118,8 +119,8 @@ function _returnPromise(tx, funName, IsShowRes){
             else if(result){
                 console.log('交易正确:');
                 if(IsShowRes) {
-                    console.log('tx:', tx.tx_json);
-                    console.log('',funName,':', result.tx_json);
+                    console.log('tx:', tx);
+                    console.log('',funName,':', result);
                 }
                 else {
                     console.log('',funName,':',result.engine_result);
